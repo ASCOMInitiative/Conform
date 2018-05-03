@@ -1,0 +1,504 @@
+<!DOCTYPE HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <title>Version History</title>
+  <link rel="StyleSheet" href="Conform.css">
+</head>
+
+<body>
+<h1>Detailed Version History</h1>
+
+<h2>Version 6.0.0.38</h2>
+
+<p class="VersionIndent">All - Added tests for Platform 5 and Platform 6
+interfaces</p>
+
+<p class="VersionIndent">All - Now usesClient Toolkit to access devices</p>
+
+<p class="VersionIndent">All - Can now configure Conform to run as 32bit on a
+64bit OS</p>
+
+<p class="VersionIndent">All - Moved the Debug option to the "General" options
+tab</p>
+
+<p class="VersionIndent">All - Will now report non-string types returned in the
+SupportedActions ArrayList as errors</p>
+
+<p class="VersionIndent">All - Places Conform version number in the Profile
+store Platform key</p>
+
+<p class="VersionIndent">All - The "first time" safety warning message has been
+updated to encompass all device types not just telescope</p>
+
+<p class="VersionIndent">All - Conform no longer attempts to interpret state
+from the returned error message. The original behaviour can be enabled through
+a configuration option</p>
+
+<p class="VersionIndent">Camera - Fixed bug that could fail LastExposure tests
+for in-process camera drivers</p>
+
+<p class="VersionIndent">Camera - Widened tolerance on LastExposure check;
+within 2% of expected is now OK</p>
+
+<p class="VersionIndent">Camera - The ASCOM Camera StopExposure specification
+has been revised to say that an exception should <strong>not</strong> be thrown
+if no exposure is underway. Conform has been updated to make it consistent with
+the revised specification.</p>
+
+<p class="VersionIndent">Camera - SetCCDTemperature now reports the ability to
+set temperature outside the range -280C to +100C as Issues rather than
+Errors</p>
+
+<p class="VersionIndent">Camera - Added test for description &gt; 68 characters
+to ensure compatibility with FITS headersFilterWheel Added pre-run check to
+ensure the filter wheel is stationary before tests start</p>
+
+<p class="VersionIndent">Telescope - Added InvalidOperation exception as OK
+when target declination and target right ascension are read without first
+having been set</p>
+
+<p class="VersionIndent">Telescope - Improved diagnostic messages when
+TrackingRates is not correctly implemented.</p>
+
+<p class="VersionIndent">Telescope - Fixed incorrect Conform message when
+returned RA is out of valid range</p>
+
+<p class="VersionIndent">Telescope - Added extra test to check whether commands
+can unpark the scope when they should not.</p>
+
+<p class="VersionIndent">Telescope - Added test for IsPulseGuiding stuck on</p>
+
+<p class="VersionIndent">Telescope - Fixed issue in SiderealTime test when PC
+and scope clocks are close to 00:00:00</p>
+
+<p class="VersionIndent">Telescope - Moved time check to pre-run checks
+section</p>
+
+<p class="VersionIndent">Telescope - Added support for testing Telescope
+Interface V1 drivers</p>
+
+<p class="VersionIndent">Telescope - Fixed SyncToAltAz so that it won't try to
+use Azimuth and Altitude properties if these are not implemented</p>
+
+<p class="VersionIndent">Telescope - Added better reporting if a driver returns
+a null object for AxisRates(Axis)</p>
+
+<p class="VersionIndent">Telescope - Failure to retain tracking state after
+MoveAxis was shown as OK, now shows as an Issue</p>
+
+<p></p>
+
+<h2>Version 3.0.0.17 - Public Release on ASCOM Web Site</h2>
+
+<p class="VersionIndent">Dome - Fixed exception when making dome safe after
+tests and CanPark or CanSetShutter were False</p>
+
+<p class="VersionIndent">Installer - Moved to 5.3.7 Unicode</p>
+
+<p></p>
+
+<h2>Version 3.0.0.16</h2>
+
+<p class="VersionIndent">Camera - Fixed bug that flagged all attampts at early
+binding as errors</p>
+
+<p class="VersionIndent">Focuser - Added ASCOM.InvalidOperationException as OK
+if attempt to move focuser when temperature compensation is active</p>
+
+<p class="VersionIndent">Installer - migrated to Inno 5.3.7 Unicode</p>
+
+<p class="VersionIndent">Update - Corrected download location URL in "A new
+version is available" message</p>
+
+<p></p>
+
+<h2>Version 3.0.0.15</h2>
+
+<p class="VersionIndent">Focuser - Will now accept .NET InvalidValueException
+thrown by Move when TempComp is true</p>
+
+<p></p>
+
+<h2>Version 3.0.0.14</h2>
+
+<p class="VersionIndent">Telescope - Added test to skip SideOfPier tests if
+SideOfPier Read is not supported</p>
+
+<p></p>
+
+<h2>Version 3.0.0.12</h2>
+
+<p class="VersionIndent">Exceptions - Exceptions that use words like "not
+supported" are accepted as "not implemented" exceptions</p>
+
+<p class="VersionIndent">Focuser - Now restores the original TempComp value</p>
+
+<p class="VersionIndent">Focuser - Added delay between successive create
+attempts to allow previous instances to clean up properly</p>
+
+<p class="VersionIndent">Focuser - Added missing test that Move should throw an
+exception when TempComp is set to True</p>
+
+<p class="VersionIndent">Telescope - Added test for ablility to set tracking
+before setting it in three places</p>
+
+<p class="VersionIndent">Startup - Fixed internationalisation issue when
+testing for platform version. Decimal separator of "," caused an exception</p>
+
+<p></p>
+
+<h2>Version 3.0.0.11</h2>
+
+<p class="VersionIndent">FilterWheel - Removed parameter tests from Names() and
+Offsets() as the interface does not support these</p>
+
+<p class="VersionIndent">Help - Updated SideOfPier test description to correct
+swapping of captions on figures 4 and 5 </p>
+
+<p></p>
+
+<h2>Version 3.0.0.10 - Public Release on ASCOM Web Site</h2>
+
+<p class="VersionIndent">Help file updates</p>
+
+<p></p>
+
+<h2>Version 3.0.0.9</h2>
+
+<p class="VersionIndent">Made mes<span class="VersionIndent"></span>sages on
+starting device configuration debug level rather than info level</p>
+
+<p class="VersionIndent">Converted to Utilities 5.5.0.0</p>
+
+<p></p>
+
+<h2>Version 3.0.0.8 - Released</h2>
+
+<p class="VersionIndent">Moved back to MSIL</p>
+
+<p></p>
+
+<h2>Version 3.0.0.7</h2>
+
+<p class="VersionIndent">Moved to ASCOM exceptions v1.1</p>
+
+<p></p>
+
+<h2>Version 3.0.0.6</h2>
+
+<p class="VersionIndent">Reverted to MasterInterfaces v1.0.0.0</p>
+
+<p class="VersionIndent">Removed SafetyMonitor support</p>
+
+<p class="VersionIndent">Changed Camera CheckAccessibility to use Camera rather
+than ICamera to allow access to Dispose</p>
+
+<p></p>
+
+<h2>Version 3.0.0.5</h2>
+
+<p class="VersionIndent">Enhanced SideOfPier tests to allow for optional
+DestinationSideOfPier being not implemented</p>
+
+<p class="VersionIndent">'Restored performance tests that were not running when
+requested</p>
+
+<p></p>
+
+<h2>Version 3.0.0.4</h2>
+
+<p class="VersionIndent">'Further improved granularity of move axis status
+messages</p>
+
+<p class="VersionIndent">'Moved to IConform from ASCOM.Utilities to
+ASCOM.IConform</p>
+
+<p></p>
+
+<h2>Version 3.0.0.3</h2>
+
+<p class="VersionIndent">Provided more move test status information</p>
+
+<p class="VersionIndent">Made telescope method tests individually selectable
+through setup screen</p>
+
+<p></p>
+
+<h2>Version 3.0.0.2</h2>
+
+<p class="VersionIndent">Removed built in IConform interface and moved this to
+ASCOM.Utilities</p>
+
+<p class="VersionIndent">Copied command strings to a local object instead of
+relying on an object that was discarded</p>
+
+<p class="VersionIndent">Added support for new not implemented error codes</p>
+
+<p class="VersionIndent">Improved error reporting in commandstring tests</p>
+
+<p></p>
+
+<h2>Version 3.0.0.1</h2>
+
+<p class="VersionIndent">Added extra check to ensure that dispose is called if
+an error occurs in the top level test controller</p>
+
+<p class="VersionIndent">Moved log files to My Documents\ASCOM folder</p>
+
+<p class="VersionIndent">Added support for new ASCOM.InvalidValueException</p>
+
+<p class="VersionIndent">Added support for new ASCOM.ValueNotSetException</p>
+
+<p class="VersionIndent">Removed an extraneous info message from
+RightAscensionRate Read when we receive a not implemented exception</p>
+
+<p class="VersionIndent">Removed an extraneous info message from
+DeclinationRate Read when we receive a not implemented exception</p>
+
+<p></p>
+
+<h2>Version 3.0.0.0</h2>
+
+<p class="VersionIndent">Updated to useASCOM.Utilities</p>
+
+<p class="VersionIndent">Removed references to COM VB6 helpers and replaced
+with ASCOM.Utilities reference</p>
+
+<p></p>
+
+<h2>Version 2.1.8.0</h2>
+
+<p class="VersionIndent">Set safety monitor default to
+ASCOM.Simulator.SafetyMonitor</p>
+
+<p class="VersionIndent">Moved to new master interface definitionin preparation
+for Platform 6</p>
+
+<p></p>
+
+<h2>Version 2.1.7.0</h2>
+
+<p class="VersionIndent">Made DriverAccess testing more robust through use of
+reflection to in assembly version number checking</p>
+
+<p class="VersionIndent">Made Form load error checking more granular to aid
+debugging</p>
+
+<p></p>
+
+<h2>Version 2.1.6.0</h2>
+
+<p class="VersionIndent">Added extra debug to DriverAccess version checking and
+changed version algorithm to fix internationalisation issue</p>
+
+<p class="VersionIndent">Added Marshal.Release for Util and Util2 objects</p>
+
+<p></p>
+
+<h2>Version 2.1.5.0</h2>
+
+<p class="VersionIndent">Fixed issues in Dome shutter open and close tests when
+driver flags no support for these commands</p>
+
+<p></p>
+
+<h2>Version 2.1.4.0</h2>
+
+<p class="VersionIndent">Moved SideOfPier write tests to methods test section
+as it relies on other methods to effect the test and improved its robustness</p>
+
+<p class="VersionIndent">Improved DestinationSideOfPier test so that it is more
+reliable</p>
+
+<p></p>
+
+<h2>Version 2.1.2.0</h2>
+
+<p class="VersionIndent">Refactored device tests in object oriented style to
+improve maintainability and behavioural consistency</p>
+
+<p class="VersionIndent">Globailised directory names for Client Access Toolkit
+searchp&gt; </p>
+
+<p class="VersionIndent">Migrated settings from My.Settings to user registry
+hive</p>
+
+<p class="VersionIndent">Increased resilience to driver creation failures</p>
+
+<p></p>
+
+<h2>Version 2.1.0.0</h2>
+
+<p class="VersionIndent">Added safety monitor device tests</p>
+
+<p></p>
+
+<h2>Version 2.0.0.0</h2>
+
+<p class="VersionIndent">New production release with driver validation</p>
+
+<p></p>
+
+<h2>Version 1.0.11.19</h2>
+
+<p class="VersionIndent">Created versions bound to client toolkit 1.0.5 to test
+policy redirection</p>
+
+<p></p>
+
+<h2>Version 1.0.11.18</h2>
+
+<p class="VersionIndent">Created versions bound to client toolkit 1.0.4 to test
+policy redirection</p>
+
+<p></p>
+
+<h2>Version 1.0.11.17</h2>
+
+<p class="VersionIndent">Added check to warn user that the required level of
+client access toolkit is 1.0.5</p>
+
+<p></p>
+
+<h2>Version 1.0.11.16</h2>
+
+<p class="VersionIndent">Fixed platform version test to disable action buttons
+if not running on ASCOM Platform 5</p>
+
+<p class="VersionIndent">Refactored conformance checks to create consistency
+between device types and remove duplicate code</p>
+
+<p class="VersionIndent">Added performance tests for filter wheel</p>
+
+<p></p>
+
+<h2>Version 1.0.11.15</h2>
+
+<p class="VersionIndent">Added ability in Conform setup UI to skip command
+tests</p>
+
+<p class="VersionIndent">For Camera, added tests for accessing driver through
+late binding, early binding and client toolkit</p>
+
+<p class="VersionIndent">Moved to VS2008 SP1</p>
+
+<p></p>
+
+<h2>Version 1.0.11.14</h2>
+
+<p class="VersionIndent">Signed Conform.exe and IConform.dll</p>
+
+<p></p>
+
+<h2>Version 1.0.11.13</h2>
+
+<p class="VersionIndent">IConform interface added plus checks in Conform to use
+values returned</p>
+
+<p></p>
+
+<h2>Version 1.0.11.12</h2>
+
+<p class="VersionIndent">SideOfPier behaviour updated to match revised woding
+in latest telescope programmers reference</p>
+
+<p></p>
+
+<h2>Version 1.0.11.11</h2>
+
+<p class="VersionIndent">Added Switch conformance checks</p>
+
+<p class="VersionIndent">Added Focuser performance tests</p>
+
+<p class="VersionIndent">Added Rotator conformance checks</p>
+
+<p class="VersionIndent">Added Dome conformance checks</p>
+
+<p class="VersionIndent">Restored camera BinX and BinY bad values tests removed
+in 1.0.11.10</p>
+
+<p class="VersionIndent">Fixed camera negative duration test to use negative
+duration not negative BinX!</p>
+
+<p class="VersionIndent">Fixed camera description to properly display
+description</p>
+
+<p></p>
+
+<h2>Version 1.0.11.10</h2>
+
+<p class="VersionIndent">Fixed error in synchronous pulseguide test when
+IsPulseGuiding property is not supported</p>
+
+<p class="VersionIndent">Changed Bin exception tests to check for errors on
+StartExposure</p>
+
+<p class="VersionIndent"></p>
+
+<h2>Version 1.0.11.9</h2>
+
+<p class="VersionIndent">Fixed StopExposure and AbortExposure so that
+exceptions are OK if relevant Can properties are false</p>
+
+<p></p>
+
+<h2>Version 1.0.11.8</h2>
+
+<p class="VersionIndent">Added camera conformance tests</p>
+
+<p class="VersionIndent">Added AxisRate checks for overlaps, negative values,
+duplicate rates and rate maximum &lt; minimum</p>
+
+<p class="VersionIndent">Added missing movement stop commands in two places in
+MoveAxis tests. Issue only showed when CansetTracking was false</p>
+
+<p class="VersionIndent">Added MountSafety message about enabling scope
+tracking</p>
+
+<p class="VersionIndent">Added test to confirm that UnPark generates a not
+implemented exception when CanUnPark is false</p>
+
+<p class="VersionIndent">Added missing test for UnPark when CanPark is false</p>
+
+<p class="VersionIndent">Added MoveAxis test to confirm that a zero rate is
+valid even if it isnt presented in AxisRates</p>
+
+<p class="VersionIndent">Fixed Vista issue by setting CPU flag from Any to X86
+to force 32 bit operation on Vista</p>
+
+<p class="VersionIndent">Fixed the version update check so that it will work
+through an authenticating proxy server</p>
+
+<p class="VersionIndent">Fixed Slew and Sync tests so that they do not try and
+change the tracking state if CanSetTracking is false</p>
+
+<p class="VersionIndent">Fixed UTCDate Write so that it is permissible to throw
+a property not implemented exception</p>
+
+<p class="VersionIndent">Fixed IsPulseGuiding where PropertyNotFound exception
+was incorrectly accepted as valid when CanPulseGuide was true</p>
+
+<p class="VersionIndent">Fixed RightAscensionRate and DeclinationRate where
+PropertyNotFound exceptions were incorrectly accepted as valid - property
+should always return a number</p>
+
+<p class="VersionIndent">Fixed Azimuth test that didnt accept PropertyNotFound
+as valid</p>
+
+<p class="VersionIndent">Fixed CanReadSideOfPier test to ensure a value of
+false is used internally if an exception is generated on read</p>
+
+<p class="VersionIndent">Fixed SideOfPier to suppress performance test if
+SideOfPier cannot be read</p>
+
+<p class="VersionIndent">Fixed value reporting issue in MoveAxis tests when
+attempting to move at greater than the maximum rate</p>
+
+<p class="VersionIndent">Fixed SideOfPier write test to esnure that slewing is
+false before continuing with other tests</p>
+
+<p class="VersionIndent">Changed ScopeSafety references to MountSafety for
+consistency</p>
+</body>
+</html>

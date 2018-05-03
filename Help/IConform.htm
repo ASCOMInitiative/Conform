@@ -1,0 +1,111 @@
+<!DOCTYPE HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <title>IConform</title>
+  <link rel="StyleSheet" href="Conform.css">
+</head>
+
+<body>
+<h1>IConform</h1>
+
+<p>IConform is a mechanic that allows a telescope driver to:</p>
+<ul>
+  <li>Tell Conform which error numbers it uses for "Not implemented", "Invalid
+    value 1", "Invalid value2" and "Value not set" errors</li>
+  <li>Tell Conform the test values to use and expected results from the
+    CommandString, CommandBlind and CoomandBool commands (normal and raw
+    versions)</li>
+</ul>
+
+<p>This approach allows Conform to:</p>
+<ul>
+  <li>Iinterpret returned exception errors from the telescope driver to ensure
+    that appropriate errorsare generated for each test that Conform performs.
+    It is an aid to driver developers to show them that they are actually
+    implementing the type of errors that are appropriate to each situation.
+    e.g. A "Not implemented" error number would be an inappropriate response if
+    an "Invalid value" is passed to the driver.</li>
+  <li>Send meaningful commands to a driver and confirm that the expected
+    responses are returned. This allows the driver author to configure Conform
+    with data appropriate to their particular hardware.</li>
+</ul>
+
+<p>The IConform mechanic has been selected as it is wholly contained within the
+driver and consequently, there are no configuration files involved; the driver
+essentially carries its own test values within it.</p>
+
+<p>I would like to record my sincere thanks to Tim Long for suggesting this
+approach and for helping to get it working.</p>
+
+<h1>IConform Interface</h1>
+
+<h2>Properties</h2>
+<ul>
+  <li>Property ConformErrors as ConformErrorNumbers - Sets values for specified
+    types of error number</li>
+  <li>Property ConformCommands as ConformCommandStrings - Sets commands and
+    responses for normal CommandString tests</li>
+  <li>Property ConformCommandsRaw as ConformCommandStrings - Sets commands and
+    responses for CommandString tests using the raw option</li>
+</ul>
+
+<h1>IConform Types</h1>
+
+<h2>ConformErrorNumbers Signature</h2>
+
+<p style="margin-left:4em">Sub New(ByVal NotImplemented As Integer, ByVal
+InvalidValue1 As Integer, ByVal InvalidValue2 As Integer, ByVal ValueNotSet As
+Integer)</p>
+<ul style="margin-left:2em;">
+  <li>NotImplemented: Mandatory integer value of not implemented error number
+    (mandated to be 0x80040400 by ASCOM interface specifications)</li>
+  <li>InvalidValue1: Mandatory integer value of the first invalid value error
+    number</li>
+  <li>InvalidValue2: Mandatory integer value of the second invalid value error
+    number (Use the same value as InvalidValue1 if you do not have two
+    different error numbers for invalid value)</li>
+  <li>ValueNotSet: Mandatory integer value of the value not set error
+  number</li>
+</ul>
+
+<p style="margin-left:4em">Error numbers - the following is reproduced from the
+Telescope specification for convenience:</p>
+
+<p style="margin-left:4em"><em>Error codes are Automation/ActiveX compatible
+32-bit values, based on FACILITY_ITF (a.k.a. vbObjectError for VBA) with an
+offset of 400 hex, and are thus compatible with all ActiveX scripting
+languages, Visual Basic, Visual Basic for Applications (VBA), etc. it is
+imperative that drivers raise Automation errors with values equal to 80040400
+hex and higher.</em></p>
+
+<p style="margin-left:4em"><em>Drivers are free to choose their error codes and
+messages, except for one: All drivers must implement the error "xxx is not
+implemented in this driver" with error code 80040400 hex. Drivers must report
+the specific property or method not implemented in the description part of the
+error object.</em></p>
+
+<h2>ConformCommandStrings Signature</h2>
+
+<p style="margin-left:4em">Sub New(ByVal CommandString As String, ByVal
+ReturnString As String, ByVal CommandBlind As String, ByVal CommandBool As
+String, ByVal ReturnBool As Boolean)</p>
+<ul>
+  <li style="margin-left:2em;">CommandString: String value to send to the
+    device to test CommandString operation (use the .NET value Nothing (not the
+    string "Nothing") to suppress the CommandString test</li>
+  <li style="margin-left:2em;">ReturnValue: Expected string to be returned by
+    the device (use the .NET value Nothing (not the string "Nothing") to
+    indicate that any response is acceptable)</li>
+  <li style="margin-left:2em;">CommandBlind: String value to be send to the
+    device to test CommandBlind operation (use the .NET value Nothing (not the
+    string "Nothing") to suppress the CommandBlind test</li>
+  <li style="margin-left:2em;">CommandBool: String value to be send to the
+    device to test CommandBool operation (use the .NET value Nothing (not the
+    string "Nothing") to suppress the CommandBool test</li>
+  <li style="margin-left:2em;">ReturnBool: Boolean value expected back (use the
+    .NET values True/False not the strings ("True" / "False"), the .NET value
+    Nothing indicates that any response is acceptable)</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,27 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=Conform.chm
+Contents file=Table of Contents.hhc
+Default topic=Introduction.htm
+Display compile progress=Yes
+Full-text search=Yes
+Index file=Index.hhk
+Language=0x809 English (United Kingdom)
+Title=Conform Help
+
+
+[FILES]
+Camera.htm
+Dome.htm
+Filter Wheel.htm
+Focuser.htm
+Introduction.htm
+Swtich.htm
+Telescope.htm
+Version History.htm
+Device Notes.htm
+Safety Monitor.htm
+ConformanceStatuses.htm
+
+[INFOTYPES]
+

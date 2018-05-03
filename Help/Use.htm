@@ -1,0 +1,60 @@
+<!DOCTYPE HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <title>Using IConform</title>
+  <link rel="StyleSheet" href="Conform.css">
+</head>
+
+<body>
+<h1>.NET Language Drivers</h1>
+
+<p>The following lists how to use IConform in a VB project, if you use another
+language, hopefully you will be able to translate these instructions :)</p>
+<ul>
+  <li>add the IConform reference to you project, it's in the .NET tab in Visual
+    Studio.</li>
+  <li>add a line to your telescope driver class file: 
+    <p class="FixedPara" style="margin-left:2em">Imports Conform</p>
+  </li>
+  <li>add a line after the Implements ITelescope line: 
+    <p class="FixedPara" style="margin-left:2em">Implements IConform</p>
+  </li>
+  <li>add the following lines to you Telescope class: 
+    <p class="Fixed" style="margin-left:2em;">Public ReadOnly Property
+    ConformErrors() As ConformErrorNumbers Implements IConform.ConformErrors</p>
+    <p class="Fixed" style="margin-left:4em">Get</p>
+    <p class="Fixed" style="margin-left:6em">ConformErrors = New
+    ConformErrorNumbers(&amp;H80040400, &amp;H80040401, &amp;H80040402,
+    &amp;H80040403)</p>
+    <p class="Fixed" style="margin-left:4em">End Get</p>
+    <p class="Fixed" style="margin-left:2em">End Property</p>
+    <p class="Fixed" style="margin-left:2em;">Public ReadOnly Property
+    ConformCommands() As ConformCommandStrings Implements
+    IConform.ConformCommands</p>
+    <p class="Fixed" style="margin-left:4em">Get</p>
+    <p class="Fixed" style="margin-left:6em">ConformCommands = New
+    ConformCommandStrings("GVN", "4.10", "", "", True)</p>
+    <p class="Fixed" style="margin-left:4em">End Get</p>
+    <p class="Fixed" style="margin-left:2em;">End Property</p>
+    <p class="Fixed" style="margin-left:2em;">Public ReadOnly Property
+    ConformCommandsRaw() As ConformCommandStrings Implements
+    IConform.ConformCommandsRaw</p>
+    <p class="Fixed" style="margin-left:4em">Get</p>
+    <p class="Fixed" style="margin-left:6em">ConformCommandsRaw = New
+    ConformCommandStrings(":GVN#", "4.10#", "", "", True)</p>
+    <p class="Fixed" style="margin-left:4em">End Get</p>
+    <p class="Fixed FixedPara" style="margin-left:2em;">End Property</p>
+  </li>
+  <li>Customise the string and integer values to your needs</li>
+</ul>
+
+<h1>Other languages through COM </h1>
+
+<p>In addition to the .NET assembly, an IConform type library is registered by
+the installer to enable exploitation of IConform by non .NET languages through
+Microsoft's component object model. Late binding is also supported, but, as
+ever with this approach, you will need to get the parameter values right based
+only on the documentation provided. </p>
+</body>
+</html>

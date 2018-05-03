@@ -1,0 +1,77 @@
+<!DOCTYPE HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  <title>Validation</title>
+  <link rel="StyleSheet" href="Conform.css">
+</head>
+
+<body>
+<h1>Introduction</h1>
+
+<p>Conform provides the capability for driver authors to create a validation
+file that others can use to confirm that the supplied driver does achieve a
+specified level of conformance to the relevant ASCOM specification. </p>
+
+<h1>Creating a validation file</h1>
+
+<p>Creation of a validation file is effected by clicking on the "Create
+Validation File" entry in the "Validation" menu. This does not of itself create
+the validation file, it just flags that you want a validation file created each
+time you do a conformance check.</p>
+
+<p>Assuming the flag is now set, a conformance check will run completely as
+normal except for some extra steps at the end that:</p>
+<ul>
+  <li>Create a hash checksum for the driver executable that you are testing</li>
+  <li>Create the validation file that contains the conformance output including
+    the executable checksum</li>
+  <li>Creates a checksum for the whole validation file, including the
+    executable checksum</li>
+  <li>Prepends the validation file checksum to the validation file</li>
+  <li>Reports where the validation file has been created</li>
+</ul>
+
+<p>The executable can now be packaged into an installer, if this has not
+already been done, and sent together with the validation text file to Bob for
+inclusion on the driver download page.</p>
+
+<h1>Confirming Validation</h1>
+
+<p>To confirm validation:</p>
+<ul>
+  <li>Obtain the driver installer and the validation text file from the ASCOM
+    site</li>
+  <li>Install the driver</li>
+  <li>Start Conform and select the driver as if you were going to check its
+    conformance (you do not need to actually run a conformance check)</li>
+  <li>Select "Confirm Current Driver Validation" from the "Validate" menu</li>
+  <li>Select the validation text file through the open file dialogue and press
+    the "Open" button</li>
+</ul>
+
+<p>Conform will then confirm that: </p>
+<ul>
+  <li>the contents of the validation file have not changed from the point at
+    which the driver author created it</li>
+  <li>the installed driver name is the same as in the validation file</li>
+  <li>the installed executable has the same hash checksum as in the validation
+    file</li>
+</ul>
+
+<p>and report accordingly.</p>
+
+<h1>Notes</h1>
+<ol>
+  <li>The validation approach validates the executable not the installer</li>
+  <li>Validation does not force any level of compliance on the driver author.
+    Conform will create a validation file for a driver regarless of how many
+    errors, warnings or issues it generates.</li>
+  <li>By validating the driver executable rather than an installer, the
+    validation text file only needs to be updated when a driver code change is
+    made.</li>
+</ol>
+
+<p></p>
+</body>
+</html>

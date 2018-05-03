@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="lblWarnAlert.Text" xml:space="preserve">
+    <value>Conform will excercise your Switches over their full range!
+
+During these tests your devices will be set to both their minimum and maximum settings as well as to a range of intermediate settings. 
+
+E.g. if you are controlling a 0-30V programmable power supply, it will be set to 30V in some tests regardless of whether this will exceed the rating of equipment connected to it.
+
+Do not run Conform unless you are confident that you can do so safely and without damaging your equipment.</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAABAAEAICAAAAAACACoCAAAFgAAACgAAAAgAAAAQAAAAAEACAAAAAAAgAQAAAAAAAAAAAAAAAEAAAAA
+        AABXIQAA////ACFwagApZFoAUSoMAFUkBADp4d0A8+/tAMCrnwDVx78A3tPNAOrj3wDp4t4AWCIBAFci
+        AQBYIwIAWSQDAFYjAwBWJAQAWiUFAFsmBgBcJwcAXCgIAF4qCgBgLA0AYC0OAGEuDwBiLxAAYjARAGMx
+        EgBkMhMAZTMVAGU0FgBnNxkAajodAGg6HQBrPB8AbD0gAG4/IwBxRCgAckUpAHRHLAB1SC0Ad0swAHdM
+        MQB5TTMAek81AHtRNwB9UzkAf1Y9AIFZQACEXUUAhl9HAIZgSACIYksAjGdQAI5qVACSblkAlXNeAJZ1
+        YACYdmIAnX1qAJ5/bACfgG0AoYNwAKSHdQCmiXgAqo9+AKuQfwCwl4cAs5qLALWdjwC5opQAuKGTALqk
+        lwC7pZgAvaibALynmgDDsKQAwq+jAMq5rwDMu7EA28/IAOHX0QDf1c8A2tDKAPDr6ABVJwcAWCkKAF0z
+        FgC6ppkAxLKmAMm4rQDYzMQA49rUAPXy8AD08e8A8O3rAFUpCQBTKgsAUikLAFMrDABRKg0Af15GAMS0
+        qABQKw4AUi0PAE8sDwDXzscAUS8RAFEyFQCahXMATDAVAJOAbgDz8e8A+vn4APj39gBQNhkATjUZAE43
+        GwC0qp4Azce/AE05HQBMOh8Af3ViAH11YwBKPyUASkAmAElDKgBIRi0AR0cuAPr6+QBHSC8ARkkxAEZK
+        MgC8vrUARUw1AObn5ABMVD4ARU84AO/w7gBEUDkAQ1E7AENSPABEUz0AQlU/AERWQQBOalgAPl5LAD1g
+        TQBohXYAPGNQALjHwAA7Y1EAO2VTADxmVAA5alkAOGtaAPDz8gA3bV0AOGxcADZzYwCWta0AVYp+ADN4
+        agAzd2kA3eflAPf8+wDu8/IAMH5yACllWwAuhXoAL4J2AEyRhwAth30Aqc7KACqNhAAjbWcAqNDMANDo
+        5gAnlY0AKZGJACBxbAAhcGsAMpmSAMzp5wAjoZwAI5+aACOdlwAlmpQAHnVyANvy8QAdrqwAHqqnABp6
+        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
+        AAAAAAAAAAAAAAAAAAAAAAAA
+</value>
+  </data>
+</root>
