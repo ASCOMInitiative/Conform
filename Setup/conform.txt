@@ -1,15 +1,27 @@
-6.2.59.0
-Version 6.2.59 - This version requires Platform 6.2
+6.4.61.0
+Version 6.4.61.0 - This version requires Platform 6.4
+Camera - New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
+Camera - Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
+Camera - Revised exception handling for some properties and improved messaging
+ObservingConditions - Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
+Telescope - New configuration setting that will log a message before every driver call to aid debuging
+Telescope - TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
+Telescope - Add check that no exception is thrown when calling AxisRates.Dispose
+Telescope - Add check that no exception is thrown when calling Rate.Dispose
+Telescope - Add check that no exception is thrown when calling TrackingRates.Dispose
+Switch - The range of switch numbers that wil be searched for valid switches is now configurable through the Options/Conformance Options menu
+Switch - New configuration setting that will log a message before every driver call to aid debuging
 
-All          Improved error handling for common methods
-All          Extended function name width to 34 characters to accommodate longer names
-Focuser      Removed incorrect error message in StepSize test that was introduced when refactoring exception handling.
-Focuser      Corrected reported test name when reading TempComp if temperature compensation write is not implemented.
-Focuser      Corrected reported test name when moving the focuser during the TempComp write test
-Rotator      Added extra debug logging to facilitate issue resolution
-Telescope    Sync - Added separate test enable flags for SyncToCoordinates and SyncToTarget
-Telescope    Sync - Improved, comprehensive test sequence to confirm that sync fully works
-Telescope    Sync - Telescope now slews to a known test position before commencing tests
+Version 6.2.59 - This version requires Platform 6.2
+All - Improved error handling for common methods
+All - Extended function name width to 34 characters to accommodate longer names
+Focuser - Removed incorrect error message in StepSize test that was introduced when refactoring exception handling.
+Focuser - Corrected reported test name when reading TempComp if temperature compensation write is not implemented.
+Focuser - Corrected reported test name when moving the focuser during the TempComp write test
+Rotator - Added extra debug logging to facilitate issue resolution
+Telescope - Sync - Added separate test enable flags for SyncToCoordinates and SyncToTarget
+Telescope - Sync - Improved, comprehensive test sequence to confirm that sync fully works
+Telescope - Sync - Telescope now slews to a known test position before commencing tests
 
 Version 6.2.58.0 - This version requires Platform 6.2
 All - Up leveled numbering for platform 6.2
