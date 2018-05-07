@@ -423,7 +423,7 @@ Public Class FrmConformMain
 
 #Region "Variables and constants"
     ' Constants
-    Const MINIMUM_PLATFORM_VERSION As Double = 6.2 ' Must be running under at least this version of the Platform. Currently 6.2 because of addition of ObservingConditions Devices
+    Const MINIMUM_PLATFORM_VERSION As Double = 6.4 ' Must be running under at least this version of the Platform. Currently 6.4 because of move to IFocuserV3
     Const FORCE_DEBUG As Boolean = False
     Const UPDATE_CHECK_FILE_DEBUG As String = "http://www.thesimpsons.nildram.co.uk/conform.txt"
     Const UPDATE_CHECK_FILE_RELEASE As String = "http://download.ascom-standards.org/devtools/conform.txt"
@@ -1149,10 +1149,10 @@ Public Class FrmConformMain
         End Try
 
         Try
-            'Force operation only on version 5.5 or greater platforms
+            'Force Ensure operation only on supported Platform versions
             If Double.Parse(g_Util.PlatformVersion, CultureInfo.InvariantCulture) < MINIMUM_PLATFORM_VERSION Then
                 LogMsg("", MessageLevel.msgAlways, "")
-                LogMsg("Conform", MessageLevel.msgAlways, "requires at least ASCOM Platform 6, you appear to have platform version " & g_Util.PlatformVersion)
+                LogMsg("This", MessageLevel.msgAlways, String.Format("version of Conform requires at least ASCOM Platform {0}, you appear to have platform version {1}", MINIMUM_PLATFORM_VERSION, g_Util.PlatformVersion))
                 BtnClearAndCheckConformance.Enabled = False
                 BtnCheckConformance.Enabled = False
                 BtnClear.Enabled = False
