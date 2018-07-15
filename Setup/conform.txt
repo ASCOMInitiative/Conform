@@ -3,6 +3,7 @@ Version 6.4.61.0 - This version requires Platform 6.4
 Camera - New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
 Camera - Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
 Camera - Revised exception handling for some properties and improved messaging
+Focuser - Move tests revised to match new IFocuserV3 behaviour introduced in Platform 6.4
 ObservingConditions - Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
 Telescope - New configuration setting that will log a message before every driver call to aid debugging
 Telescope - TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
