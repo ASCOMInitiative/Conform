@@ -203,10 +203,12 @@ Friend Class ObservingConditionsTester
                 l_DriverAccessObservingConditions.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting To driver Using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgDebug, "Exception: " & ex.ToString())
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
             LogMsg("AccessChecks", MessageLevel.msgError, "Error creating driver using driver access toolkit: " & ex.Message)
+            LogMsg("AccessChecks", MessageLevel.msgDebug, "Exception: " & ex.ToString())
             LogMsg("", MessageLevel.msgAlways, "")
         Finally
             'Clean up

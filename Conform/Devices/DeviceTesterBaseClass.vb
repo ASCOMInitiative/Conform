@@ -250,14 +250,29 @@ Friend Class DeviceTesterBaseClass
                 For Each Action As Object In SA
                     i += 1
                     If Action.GetType.Name = "String" Then
-                        Select Case CType(Action, String)
+                        Dim ActionString As String = CType(Action, String)
+
+                        Select Case ActionString
                             Case Is = ""
                                 LogMsg("SupportedActions", MessageLevel.msgError, "Supported action " & i & " is an empty string")
-                            Case Else
-                                LogMsg("SupportedActions", MessageLevel.msgOK, Action.ToString())
+                            Case Else ' List the action that was found
+                                LogMsg("SupportedActions", MessageLevel.msgOK, "Found action: " & ActionString)
+
+                                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
+                                    If ((ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:")) Or (ActionString.ToUpperInvariant.StartsWith("//SWITCHSIMULATOR:"))) Then
+                                        Dim result As String
+                                        Try
+                                            result = Device.Action(ActionString, "")
+                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("{0} action gave result: {1}", ActionString, result))
+                                        Catch ex1 As Exception
+                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling action {0}: {1}", ActionString, ex1.Message))
+                                        End Try
+                                    End If
+                                End If
                         End Select
                     Else
-                        LogMsg("SupportedActions", MessageLevel.msgError, "Actions must be strings. The type of action " & i & " " & Action.ToString & " is: " & Action.GetType.Name)
+                        LogMsg("SupportedActions", MessageLevel.msgError, "Actions must be strings. The type of action " & i & " " & Action.ToString() & " is: " & Action.GetType.Name)
                     End If
                 Next
             End If
@@ -418,7 +433,12 @@ Friend Class DeviceTesterBaseClass
                             If g_Settings.DisplayMethodCalls Then LogMsg("AccessChecks", MessageLevel.msgComment, "About to set Connected property true")
                             l_DeviceObject.Connected = True
                             If g_Settings.DisplayMethodCalls Then LogMsg("AccessChecks", MessageLevel.msgComment, "About to set Connected property false")
-                            l_DeviceObject.Connected = False
+                            Try
+                                l_DeviceObject.Connected = False
+                            Catch ex As Exception
+                                LogMsg("AccessChecks", MessageLevel.msgError, "Error disconnecting from late bound driver: " & ex.Message)
+                                LogMsg("AccessChecks", MessageLevel.msgDebug, "Exception: " & ex.ToString)
+                            End Try
                     End Select
                     LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using late binding")
 
