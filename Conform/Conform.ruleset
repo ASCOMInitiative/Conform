@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Conform Correctness Rules" Description="These rules focus on logic errors and common mistakes made in the usage of framework APIs. Include this rule set to expand on the list of warnings reported by the minimum recommended rules." ToolsVersion="12.0">
+<RuleSet Name="Conform Correctness Rules" Description="These rules focus on logic errors and common mistakes made in the usage of framework APIs. Include this rule set to expand on the list of warnings reported by the minimum recommended rules." ToolsVersion="15.0">
   <Include Path="minimumrecommendedrules.ruleset" Action="Default" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1008" Action="Warning" />
@@ -31,5 +31,9 @@
     <Rule Id="CA2227" Action="Warning" />
     <Rule Id="CA2231" Action="Warning" />
     <Rule Id="CA2239" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.VisualBasic.Features" RuleNamespace="Microsoft.CodeAnalysis.VisualBasic.Features">
+    <Rule Id="IDE0044" Action="None" />
+    <Rule Id="IDE0044WithoutSuggestion" Action="None" />
   </Rules>
 </RuleSet>

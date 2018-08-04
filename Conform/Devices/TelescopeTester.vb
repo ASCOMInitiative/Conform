@@ -648,13 +648,12 @@ Friend Class TelescopeTester
         'DeclinationRate Write - Optional
         If g_InterfaceVersion > 1 Then
             If canSetDeclinationRate Then 'Any value is acceptable
-                Try
-                    If g_Settings.DisplayMethodCalls Then LogMsg("DeclinationRate Write", MessageLevel.msgComment, "About to set DeclinationRate property to 0.0")
-                    telescopeDevice.DeclinationRate = 0.0 'Set to a harmless value
-                    LogMsg("DeclinationRate Write", MessageLevel.msgOK, Format(m_DeclinationRate, "0.00"))
-                Catch ex As Exception
-                    HandleException("DeclinationRate Write", MemberType.Property, Required.MustBeImplemented, ex, "CanSetDeclinationRate is True")
-                End Try
+                If TestRADecRate("DeclinationRate Write", "Set rate to 0.0", Axis.Dec, 0.0, False) Then
+                    TestRADecRate("DeclinationRate Write", "Set rate to 0.1", Axis.Dec, 0.1, False)
+                    TestRADecRate("DeclinationRate Write", "Set rate to 1.0", Axis.Dec, 1.0, False)
+                    TestRADecRate("DeclinationRate Write", "Reset rate to 0.0", Axis.Dec, 0.0, True) ' Reset the rate to zero, skipping the slewing test
+                End If
+
             Else 'Should generate an error
                 Try
                     If g_Settings.DisplayMethodCalls Then LogMsg("DeclinationRate Write", MessageLevel.msgComment, "About to set DeclinationRate property to 0.0")
@@ -909,15 +908,13 @@ Friend Class TelescopeTester
 
         'RightAscensionRate Write - Optional
         If g_InterfaceVersion > 1 Then
-            If canSetRightAscensionRate Then 'Any value is acceptable and should not generate an error
-                Try
-                    If g_Settings.DisplayMethodCalls Then LogMsg("RightAscensionRate Write", MessageLevel.msgComment, "About to set RightAscensionRate property to 0.00")
-                    telescopeDevice.RightAscensionRate = 0.0 'Set to a harmless value
-                    LogMsg("RightAscensionRate Write", MessageLevel.msgOK, Format(m_RightAscensionRate, "0.00"))
-                Catch ex As Exception
-                    LogMsg("RightAscensionRate Write", MessageLevel.msgError, "CanSetRightAscensionRate is True but: " & EX_NET & ex.Message)
-                    HandleException("RightAscensionRate Write", MemberType.Property, Required.MustBeImplemented, ex, "CanSetRightAscensionRate is True")
-                End Try
+            If canSetRightAscensionRate Then 'Perform several tests starting with proving we can set a rate of 0.0
+                If TestRADecRate("RightAscensionRate Write", "Set rate to 0.0", Axis.RA, 0.0, False) Then
+                    TestRADecRate("RightAscensionRate Write", "Set rate to 0.1", Axis.RA, 0.1, False)
+                    TestRADecRate("RightAscensionRate Write", "Set rate to 1.0", Axis.RA, 1.0, False)
+                    TestRADecRate("RightAscensionRate Write", "Reset rate to 0.0", Axis.RA, 0.0, True) ' Reset the rate to zero, skipping the slewing test
+                End If
+
             Else 'Should generate an error
                 Try
                     If g_Settings.DisplayMethodCalls Then LogMsg("RightAscensionRate Write", MessageLevel.msgComment, "About to set RightAscensionRate property to 0.00")
@@ -4275,6 +4272,85 @@ Friend Class TelescopeTester
                 End If
         End Select
         Return l_PierSide
+    End Function
+
+    Private Enum Axis
+        RA
+        Dec
+    End Enum
+
+    Private Function TestRADecRate(TestName As String, Description As String, Axis As Axis, Rate As Double, SkipSlewiingTest As Boolean) As Boolean
+        Dim success As Boolean = False
+
+        Try
+            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to get Slewing property", Description))
+            m_Slewing = telescopeDevice.Slewing
+            If (Not m_Slewing) Or SkipSlewiingTest Then ' Slewing should be false at this point or we are ignoring the test!
+                'Check that we can set the rate to a non-zero value
+                Try
+                    Select Case Axis
+                        Case Axis.RA
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to set RightAscensionRate property to {1}", Description, Rate))
+                            telescopeDevice.RightAscensionRate = Rate
+                            SetStatus(String.Format("Wating for mount to settle after setting RightAcensionRate to {0}", Rate), "", "")
+                            WaitFor(2000) ' Give a short wait to allow the mount to settle
+
+                            ' Value set OK, now check that the new rate is returned by RightAscensionRate Get and that Slewing is false
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to get RightAscensionRate property", Description))
+                            m_RightAscensionRate = telescopeDevice.RightAscensionRate
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to get Slewing property", Description))
+                            m_Slewing = telescopeDevice.Slewing
+
+                            If (m_RightAscensionRate = Rate) And Not m_Slewing Then
+                                LogMsg(TestName, MessageLevel.msgOK, String.Format("{0} - successfully set rate to {1}", Description, m_RightAscensionRate))
+                                success = True
+                            Else
+                                If m_Slewing And (m_RightAscensionRate = Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("RightAscensionRate was successfully set to {0} but Slewing is returning True, it should return False.", Rate, m_RightAscensionRate))
+                                If m_Slewing And (m_RightAscensionRate <> Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("RightAscensionRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_RightAscensionRate))
+                                If Not m_Slewing And (m_RightAscensionRate <> Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("RightAscensionRate Read does not return {0} as set, instead it returns {1}.", Rate, m_RightAscensionRate))
+                            End If
+
+                        Case Axis.Dec
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to set DeclinationRate property to {1}", Description, Rate))
+                            telescopeDevice.DeclinationRate = Rate
+                            SetStatus(String.Format("Wating for mount to settle after setting DeclinationRate to {0}", Rate), "", "")
+                            WaitFor(2000) ' Give a short wait to allow the mount to settle
+
+                            ' Value set OK, now check that the new rate is returned by DeclinationRate Get and that Slewing is false
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to get DeclinationRate property", Description))
+                            m_DeclinationRate = telescopeDevice.DeclinationRate
+                            If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to get Slewing property", Description))
+                            m_Slewing = telescopeDevice.Slewing
+
+                            If (m_DeclinationRate = Rate) And Not m_Slewing Then
+                                LogMsg(TestName, MessageLevel.msgOK, String.Format("{0} - successfully set rate to {1}", Description, m_DeclinationRate))
+                                success = True
+                            Else
+                                If m_Slewing And (m_DeclinationRate = Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("DeclinationRate was successfully set to {0} but Slewing is returning True, it should return False.", Rate, m_DeclinationRate))
+                                If m_Slewing And (m_DeclinationRate <> Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}. Slewing is also returning True, it should return False.", Rate, m_DeclinationRate))
+                                If Not m_Slewing And (m_DeclinationRate <> Rate) Then LogMsg(TestName, MessageLevel.msgError, String.Format("DeclinationRate Read does not return {0} as set, instead it returns {1}.", Rate, m_DeclinationRate))
+                            End If
+
+                        Case Else
+                            MessageBox.Show(String.Format("Conform internal error - Unknown Axis value: {0}", Axis.ToString()))
+                    End Select
+
+                Catch ex As Exception
+                    If IsInvalidOperationException(TestName, ex) Then ' We can't knwo what the valid range for this telescope is in advance so its possible that our test value will be rejected, if so just report this.
+                        LogMsg(TestName, MessageLevel.msgInfo, String.Format("Unable to set test rate {0}, it was rejected as an invalid value.", Rate))
+                    Else
+                        HandleException(TestName, MemberType.Property, Required.MustBeImplemented, ex, "CanSetRightAscensionRate is True")
+                    End If
+                End Try
+            Else
+                LogMsg(TestName, MessageLevel.msgError, String.Format("{0} - Telescope.Slewing should be False at the start of this test but is returning True, test abandoned", Description))
+            End If
+        Catch ex As Exception
+            HandleException(TestName, MemberType.Property, Required.MustBeImplemented, ex, "Tried to read Slewing property")
+        End Try
+        SetStatus("", "", "")
+
+        Return success
     End Function
 
 #End Region
