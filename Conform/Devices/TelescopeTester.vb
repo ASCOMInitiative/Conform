@@ -1213,50 +1213,7 @@ Friend Class TelescopeTester
         If TestStop() Then Exit Sub
 
         'TargetDeclination Write - Optional
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to -91.0")
-            telescopeDevice.TargetDeclination = -91.0
-            LogMsg("TargetDeclination Write", MessageLevel.msgIssue, "No error generated on set TargetDeclination < -90 degrees")
-        Catch ex As Exception
-            HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees")
-        End Try
-
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to 91.0")
-            telescopeDevice.TargetDeclination = 91.0
-            LogMsg("TargetDeclination Write", MessageLevel.msgIssue, "No error generated on set TargetDeclination > 90 degrees")
-        Catch ex As Exception
-            HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees")
-        End Try
-
-        Try
-            m_TargetDeclination = 1.0
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to " & m_TargetDeclination)
-            telescopeDevice.TargetDeclination = m_TargetDeclination 'Set a valid value
-            Try
-                If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to get TargetDeclination property")
-                Select Case System.Math.Abs(telescopeDevice.TargetDeclination - m_TargetDeclination)
-                    Case 0.0
-                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Legal value " & FormatDec(m_TargetDeclination) & " DD:MM:SS written successfully")
-                    Case Is <= (1.0 / 3600.0) '1 seconds
-                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 1 second of the value set: " & FormatDec(m_TargetDeclination))
-                        Exit Select
-                    Case Is <= (2.0 / 3600.0) '2 seconds
-                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 2 seconds of the value set: " & FormatDec(m_TargetDeclination))
-                        Exit Select
-                    Case Is <= (5.0 / 3600.0) '5 seconds
-                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 5 seconds of the value set: " & FormatDec(m_TargetDeclination))
-                        Exit Select
-                    Case Else
-                        LogMsg("TargetDeclination Write", MessageLevel.msgInfo, "Target Declination: " & FormatDec(m_TargetDeclination))
-                End Select
-            Catch ex As Exception
-                HandleException("TargetDeclination Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetDeclination before writing to it.")
-            End Try
-        Catch ex As Exception
-            HandleException("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "")
-        End Try
-        If TestStop() Then Exit Sub
+        LogMsg("TargetDeclination Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coorindates.")
 
         'TargetRightAscension Read - Optional
         Try 'First read should fail!
@@ -1277,50 +1234,7 @@ Friend Class TelescopeTester
         If TestStop() Then Exit Sub
 
         'TargetRightAscension Write - Optional
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to -1.0")
-            telescopeDevice.TargetRightAscension = -1.0
-            LogMsg("TargetRightAscension Write", MessageLevel.msgIssue, "No error generated on set TargetRightAscension < 0 hours")
-        Catch ex As Exception
-            HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours")
-        End Try
-
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to 25.0")
-            telescopeDevice.TargetRightAscension = 25.0
-            LogMsg("TargetRightAscension Write", MessageLevel.msgIssue, "No error generated on set TargetRightAscension > 24 hours")
-        Catch ex As Exception
-            HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours")
-        End Try
-
-        Try
-            m_TargetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0)
-            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to " & m_TargetRightAscension)
-            telescopeDevice.TargetRightAscension = m_TargetRightAscension 'Set a valid value
-            Try
-                If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to get TargetRightAscension property")
-                Select Case System.Math.Abs(telescopeDevice.TargetRightAscension - m_TargetRightAscension)
-                    Case 0.0
-                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Legal value " & FormatRA(m_TargetRightAscension) & " HH:MM:SS written successfully")
-                    Case Is <= (1.0 / 3600.0) '1 seconds
-                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 1 second of the value set: " & FormatRA(m_TargetRightAscension))
-                        Exit Select
-                    Case Is <= (2.0 / 3600.0) '2 seconds
-                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 2 seconds of the value set: " & FormatRA(m_TargetRightAscension))
-                        Exit Select
-                    Case Is <= (5.0 / 3600.0) '5 seconds
-                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 5 seconds of the value set: " & FormatRA(m_TargetRightAscension))
-                        Exit Select
-                    Case Else
-                        LogMsg("TargetRightAscension Write", MessageLevel.msgInfo, "Target RightAscension: " & FormatRA(telescopeDevice.TargetRightAscension))
-                End Select
-            Catch ex As Exception
-                HandleException("TargetRightAscension Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetRightAscension before writing to it.")
-            End Try
-        Catch ex As Exception
-            HandleException("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "")
-        End Try
-        If TestStop() Then Exit Sub
+        LogMsg("TargetRightAscension Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coorindates.")
 
         'Tracking Read - Required
         Try
@@ -1804,6 +1718,109 @@ Friend Class TelescopeTester
             LogMsg(TELTEST_SLEW_TO_COORDINATES_ASYNC, MessageLevel.msgInfo, "Tests skipped")
         End If
 
+        'Equatorial Sync to Coordinates - Optional - Moved here so that it can be tested before any target coordinates are set - Peter 4th August 2018
+        If g_TelescopeTests.Item(TELTEST_SYNC_TO_COORDINATES) = CheckState.Checked Then
+            TelescopeSyncTest(SlewSyncType.SyncToCoordinates, "SyncToCoordinates", canSync, "CanSync") : If TestStop() Then Exit Sub
+            If canSync Then ' Test syncing to bad co-ordinates
+                TelescopeBadCoordinateTest("SyncToCoordinates (Bad L)", SlewSyncType.SyncToCoordinates, BAD_RA_LOW, BAD_DEC_LOW) : If TestStop() Then Exit Sub
+                TelescopeBadCoordinateTest("SyncToCoordinates (Bad H)", SlewSyncType.SyncToCoordinates, BAD_RA_HIGH, BAD_DEC_HIGH) : If TestStop() Then Exit Sub
+            End If
+        Else
+            LogMsg(TELTEST_SYNC_TO_COORDINATES, MessageLevel.msgInfo, "Tests skipped")
+        End If
+
+        'TargetRightAscension Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coorindates.")
+        Try
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to -1.0")
+            telescopeDevice.TargetRightAscension = -1.0
+            LogMsg("TargetRightAscension Write", MessageLevel.msgIssue, "No error generated on set TargetRightAscension < 0 hours")
+        Catch ex As Exception
+            HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension < 0 hours")
+        End Try
+
+        Try
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to 25.0")
+            telescopeDevice.TargetRightAscension = 25.0
+            LogMsg("TargetRightAscension Write", MessageLevel.msgIssue, "No error generated on set TargetRightAscension > 24 hours")
+        Catch ex As Exception
+            HandleInvalidValueExceptionAsOK("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetRightAscension > 24 hours")
+        End Try
+
+        Try
+            m_TargetRightAscension = TelescopeRAFromSiderealTime("TargetRightAscension Write", -4.0)
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to " & m_TargetRightAscension)
+            telescopeDevice.TargetRightAscension = m_TargetRightAscension 'Set a valid value
+            Try
+                If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to get TargetRightAscension property")
+                Select Case System.Math.Abs(telescopeDevice.TargetRightAscension - m_TargetRightAscension)
+                    Case 0.0
+                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Legal value " & FormatRA(m_TargetRightAscension) & " HH:MM:SS written successfully")
+                    Case Is <= (1.0 / 3600.0) '1 seconds
+                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 1 second of the value set: " & FormatRA(m_TargetRightAscension))
+                        Exit Select
+                    Case Is <= (2.0 / 3600.0) '2 seconds
+                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 2 seconds of the value set: " & FormatRA(m_TargetRightAscension))
+                        Exit Select
+                    Case Is <= (5.0 / 3600.0) '5 seconds
+                        LogMsg("TargetRightAscension Write", MessageLevel.msgOK, "Target RightAscension is within 5 seconds of the value set: " & FormatRA(m_TargetRightAscension))
+                        Exit Select
+                    Case Else
+                        LogMsg("TargetRightAscension Write", MessageLevel.msgInfo, "Target RightAscension: " & FormatRA(telescopeDevice.TargetRightAscension))
+                End Select
+            Catch ex As Exception
+                HandleException("TargetRightAscension Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetRightAscension before writing to it.")
+            End Try
+        Catch ex As Exception
+            HandleException("TargetRightAscension Write", MemberType.Property, Required.Optional, ex, "")
+        End Try
+        If TestStop() Then Exit Sub
+
+        'TargetDeclination Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coorindates.")
+        Try
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to -91.0")
+            telescopeDevice.TargetDeclination = -91.0
+            LogMsg("TargetDeclination Write", MessageLevel.msgIssue, "No error generated on set TargetDeclination < -90 degrees")
+        Catch ex As Exception
+            HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees")
+        End Try
+
+        Try
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to 91.0")
+            telescopeDevice.TargetDeclination = 91.0
+            LogMsg("TargetDeclination Write", MessageLevel.msgIssue, "No error generated on set TargetDeclination > 90 degrees")
+        Catch ex As Exception
+            HandleInvalidValueExceptionAsOK("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected on set TargetDeclination < -90 degrees")
+        End Try
+
+        Try
+            m_TargetDeclination = 1.0
+            If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to " & m_TargetDeclination)
+            telescopeDevice.TargetDeclination = m_TargetDeclination 'Set a valid value
+            Try
+                If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to get TargetDeclination property")
+                Select Case System.Math.Abs(telescopeDevice.TargetDeclination - m_TargetDeclination)
+                    Case 0.0
+                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Legal value " & FormatDec(m_TargetDeclination) & " DD:MM:SS written successfully")
+                    Case Is <= (1.0 / 3600.0) '1 seconds
+                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 1 second of the value set: " & FormatDec(m_TargetDeclination))
+                        Exit Select
+                    Case Is <= (2.0 / 3600.0) '2 seconds
+                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 2 seconds of the value set: " & FormatDec(m_TargetDeclination))
+                        Exit Select
+                    Case Is <= (5.0 / 3600.0) '5 seconds
+                        LogMsg("TargetDeclination Write", MessageLevel.msgOK, "Target Declination is within 5 seconds of the value set: " & FormatDec(m_TargetDeclination))
+                        Exit Select
+                    Case Else
+                        LogMsg("TargetDeclination Write", MessageLevel.msgInfo, "Target Declination: " & FormatDec(m_TargetDeclination))
+                End Select
+            Catch ex As Exception
+                HandleException("TargetDeclination Write", MemberType.Property, Required.MustBeImplemented, ex, "Unable to read TargetDeclination before writing to it.")
+            End Try
+        Catch ex As Exception
+            HandleException("TargetDeclination Write", MemberType.Property, Required.Optional, ex, "")
+        End Try
+        If TestStop() Then Exit Sub
+
         'Test Equatorial target slewing - Optional
         If g_TelescopeTests.Item(TELTEST_SLEW_TO_TARGET) = CheckState.Checked Then
             TelescopeSlewTest(SlewSyncType.SlewToTarget, "SlewToTarget", canSlew, "CanSlew") : If TestStop() Then Exit Sub
@@ -1869,17 +1886,6 @@ Friend Class TelescopeTester
             End If
         Else
             LogMsg("SlewToAltAzAsync", MessageLevel.msgInfo, "Skipping test as this method is not supported in interface V" & g_InterfaceVersion)
-        End If
-
-        'Equatorial Sync to Coordinates - Optional
-        If g_TelescopeTests.Item(TELTEST_SYNC_TO_COORDINATES) = CheckState.Checked Then
-            TelescopeSyncTest(SlewSyncType.SyncToCoordinates, "SyncToCoordinates", canSync, "CanSync") : If TestStop() Then Exit Sub
-            If canSync Then ' Test syncing to bad co-ordinates
-                TelescopeBadCoordinateTest("SyncToCoordinates (Bad L)", SlewSyncType.SyncToCoordinates, BAD_RA_LOW, BAD_DEC_LOW) : If TestStop() Then Exit Sub
-                TelescopeBadCoordinateTest("SyncToCoordinates (Bad H)", SlewSyncType.SyncToCoordinates, BAD_RA_HIGH, BAD_DEC_HIGH) : If TestStop() Then Exit Sub
-            End If
-        Else
-            LogMsg(TELTEST_SYNC_TO_COORDINATES, MessageLevel.msgInfo, "Tests skipped")
         End If
 
         'Equatorial Sync to Target - Optional
@@ -2016,7 +2022,7 @@ Friend Class TelescopeTester
 
     Private Sub TelescopeSyncTest(ByVal testType As SlewSyncType, ByVal testName As String, ByVal driverSupportsMethod As Boolean, ByVal canDoItName As String)
         Dim showOutcome As Boolean = False
-        Dim difference, syncRA, syncDEC, syncAlt, syncAz, newAlt, newAz, currentAz, currentAlt, startRA, startDec As Double
+        Dim difference, syncRA, syncDEC, syncAlt, syncAz, newAlt, newAz, currentAz, currentAlt, startRA, startDec, currentRA, currentDec As Double
 
         ' Basic test to make sure the method is either eimplemented Ok or fails as expected if it is not supported in this driver.
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get RightAscension property")
@@ -2123,6 +2129,44 @@ Friend Class TelescopeTester
                         ' Check that the scope's synchronised position is as expected
                         CheckScopePosition(testName, "Synced to sync position", syncRA, syncDEC)
 
+                        ' Check that the TargetRA and TargetDec were 
+                        If testType = SlewSyncType.SyncToCoordinates Then
+                            ' Check that target coordinates are present and set correctly per the ASCOM Telescope specification
+                            Try
+                                currentRA = telescopeDevice.TargetRightAscension
+                                If currentRA = syncRA Then
+                                    LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(syncRA)))
+                                Else
+                                    LogMsg(testName, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(currentRA), FormatRA(syncRA)))
+                                End If
+                            Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
+                            Catch ex As ASCOM.InvalidOperationException
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.")
+                            Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.")
+                            Catch ex As Exception
+                                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "")
+                            End Try
+
+                            Try
+                                currentDec = telescopeDevice.TargetDeclination
+                                If currentDec = syncDEC Then
+                                    LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches expected Declination OK. ", FormatDec(currentDec)))
+                                Else
+                                    LogMsg(testName, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(currentDec), FormatDec(syncDEC)))
+                                End If
+                            Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
+                            Catch ex As ASCOM.InvalidOperationException
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.")
+                            Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
+                                LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.")
+                            Catch ex As Exception
+                                HandleException(testName, MemberType.Property, Required.Mandatory, ex, "")
+                            End Try
+                        End If
+
                         ' Now slew to the scope's original position
                         SlewScope(startRA, startDec, String.Format("Slewing back to start position - RA: {0}, Dec: {1}", FormatRA(startRA), FormatDec(startDec)))
 
@@ -2217,11 +2261,12 @@ Friend Class TelescopeTester
             Catch ex As Exception
                 HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, canDoItName & " is True")
             End Try
+
         End If
     End Sub
 
     Private Sub TelescopeSlewTest(ByVal p_Test As SlewSyncType, ByVal p_Name As String, ByVal p_CanDoIt As Boolean, ByVal p_CanDoItName As String)
-        Dim l_Difference, l_ActualAltitude, l_ActualAzimuth As Double
+        Dim l_Difference, l_ActualAltitude, l_ActualAzimuth, actualRA, actualDec As Double
 
         Status(StatusType.staTest, p_Name)
         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
@@ -2365,6 +2410,41 @@ Friend Class TelescopeTester
                         Status(StatusType.staAction, "Slew completed")
                         'Test how close the slew was to the required coordinates
                         CheckScopePosition(p_Name, "Slewed", m_TargetRightAscension, m_TargetDeclination)
+
+                        ' Check that the slews and syncs set the target coordinates correctly per the ASCOM Telescope specification
+                        Try
+                            actualRA = telescopeDevice.TargetRightAscension
+                            If actualRA = m_TargetRightAscension Then
+                                LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(m_TargetRightAscension)))
+                            Else
+                                LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)))
+                            End If
+                        Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
+                            LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
+                        Catch ex As ASCOM.InvalidOperationException
+                            LogMsg(p_Name, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, An InvalidOperationException was thrown instead.")
+                        Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
+                            LogMsg(p_Name, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.")
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "")
+                        End Try
+
+                        Try
+                            actualDec = telescopeDevice.TargetDeclination
+                            If actualDec = m_TargetDeclination Then
+                                LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches the expected Declination OK. ", FormatDec(m_TargetDeclination)))
+                            Else
+                                LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)))
+                            End If
+                        Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
+                            LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
+                        Catch ex As ASCOM.InvalidOperationException
+                            LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetDeclination property as required by the Telescope specification, An InvalidOperationException was thrown instead.")
+                        Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
+                            LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet DriverException was thrown instead.")
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Property, Required.Mandatory, ex, "")
+                        End Try
 
                     Case SlewSyncType.SlewToAltAz, SlewSyncType.SlewToAltAzAsync
                         Status(StatusType.staAction, "Slew completed")
