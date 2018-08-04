@@ -118,7 +118,7 @@ Module GlobalVarsAndCode
     Friend g_DomeProgID As String
     Friend g_CurrentProgID As String
     Friend g_TelescopeProgID As String
-    Friend g_ObservingConditionsProgID As String
+    Friend g_ObservingConditionsProgID As String = ""
 
     'Status update class
     Friend g_Status As Stat = New Stat
