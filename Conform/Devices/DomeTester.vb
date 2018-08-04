@@ -257,7 +257,7 @@ Friend Class DomeTester
                                 l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3
                                 If l_V1 < 5000007 Then 'We are using a version earlier that 5.0.7 so issue a message
                                     LogMsg("Version Check", MessageLevel.msgIssue, "*** This version of the dome simulator has known conformance issues, ***")
-                                    LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site http://ascom-standards.org/Downloads/Index.htm ***")
+                                    LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***")
                                     LogMsg("", MessageLevel.msgAlways, "")
                                 Else
                                     LogMsg("Version Check", MessageLevel.msgDebug, "Version check OK")

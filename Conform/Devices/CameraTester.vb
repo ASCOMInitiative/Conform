@@ -336,14 +336,14 @@ Friend Class CameraTester
                             l_V1 = l_V1 * 1000000 + l_V2 * 1000 + l_V3
                             If l_V1 < 5000008 Then 'We are using a version earlier that 5.0.6 so issue a message
                                 LogMsg("Version Check", MessageLevel.msgIssue, "*** This version of the camera simulator has known conformance issues, ***")
-                                LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site http://ascom-standards.org/Downloads/Index.htm ***")
+                                LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***")
                                 LogMsg("", MessageLevel.msgAlways, "")
                             End If
                         End If
                     End If
                 Else 'Must be an early version 5.0.1 or earlier
                     LogMsg("Version Check", MessageLevel.msgIssue, "*** This version of the camera simulator has known conformance issues, ***")
-                    LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site http://ascom-standards.org/Downloads/Index.htm ***")
+                    LogMsg("Version Check", MessageLevel.msgIssue, "*** please update it from the ASCOM site https://ascom-standards.org/Downloads/Index.htm ***")
                     LogMsg("", MessageLevel.msgAlways, "")
                 End If
             Catch ex As Exception
