@@ -188,10 +188,10 @@
     <Compile Include="Devices\ObservingConditionsTester.vb" />
     <Compile Include="Devices\SideOfPierResults.vb" />
     <Compile Include="Devices\VideoTester.vb" />
-    <Compile Include="frmSwitchWarning.designer.vb">
-      <DependentUpon>frmSwitchWarning.vb</DependentUpon>
+    <Compile Include="FrmSwitchWarning.designer.vb">
+      <DependentUpon>FrmSwitchWarning.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmSwitchWarning.vb">
+    <Compile Include="FrmSwitchWarning.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Devices\CameraTester.vb" />
@@ -201,23 +201,23 @@
     <Compile Include="Devices\FocuserTester.vb" />
     <Compile Include="Devices\SafetyMonitorTester.vb" />
     <Compile Include="Devices\SwitchTester.vb" />
-    <Compile Include="frmAboutBox.Designer.vb">
-      <DependentUpon>frmAboutBox.vb</DependentUpon>
+    <Compile Include="FrmAboutBox.Designer.vb">
+      <DependentUpon>FrmAboutBox.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmAboutBox.vb">
+    <Compile Include="FrmAboutBox.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmConformMain.vb">
+    <Compile Include="FrmConformMain.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmConformMain.Designer.vb">
-      <DependentUpon>frmConformMain.vb</DependentUpon>
+    <Compile Include="FrmConformMain.Designer.vb">
+      <DependentUpon>FrmConformMain.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmSetup.Designer.vb">
-      <DependentUpon>frmSetup.vb</DependentUpon>
+    <Compile Include="FrmSetup.Designer.vb">
+      <DependentUpon>FrmSetup.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmSetup.vb">
+    <Compile Include="FrmSetup.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmWarning.designer.vb">
@@ -249,21 +249,21 @@
     <Compile Include="Stat.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="frmSwitchWarning.resx">
-      <DependentUpon>frmSwitchWarning.vb</DependentUpon>
+    <EmbeddedResource Include="FrmSwitchWarning.resx">
+      <DependentUpon>FrmSwitchWarning.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmAboutBox.resx">
+    <EmbeddedResource Include="FrmAboutBox.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>frmAboutBox.vb</DependentUpon>
+      <DependentUpon>FrmAboutBox.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmConformMain.resx">
+    <EmbeddedResource Include="FrmConformMain.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>frmConformMain.vb</DependentUpon>
+      <DependentUpon>FrmConformMain.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmSetup.resx">
+    <EmbeddedResource Include="FrmSetup.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>frmSetup.vb</DependentUpon>
+      <DependentUpon>FrmSetup.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmWarning.resx">
       <SubType>Designer</SubType>
