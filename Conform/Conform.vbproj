@@ -220,10 +220,10 @@
     <Compile Include="frmSetup.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmWarning.designer.vb">
-      <DependentUpon>frmWarning.vb</DependentUpon>
+    <Compile Include="FrmWarning.designer.vb">
+      <DependentUpon>FrmWarning.vb</DependentUpon>
     </Compile>
-    <Compile Include="frmWarning.vb">
+    <Compile Include="FrmWarning.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GlobalVarsAndCode.vb" />
@@ -265,9 +265,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>frmSetup.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmWarning.resx">
+    <EmbeddedResource Include="FrmWarning.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>frmWarning.vb</DependentUpon>
+      <DependentUpon>FrmWarning.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
