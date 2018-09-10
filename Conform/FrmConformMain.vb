@@ -71,7 +71,7 @@
 'Added Filter Wheel conformance tests
 
 'Version 1.0.11.0
-'Fixed Un-parking of mount before telescope test
+'Fixed Unparking of mount before telescope test
 'Added Automatic periodic update check by Internet (can be turned off)
 'Added Manual update check option to menu
 'Added Tracking turned off at end of telescope test for mount safety
@@ -285,7 +285,7 @@
 'Telescope   Added InvalidOperation exception as OK when target declination and target right ascension are read without first having been set
 'Telescope   Improved diagnostics if TrackingRates is not correctly implemented.
 'Telescope   Fixed incorrect message when returned RA is out of valid range
-'Telescope   Added extra test to check whether commands can un-park the scope when they should not.
+'Telescope   Added extra test to check whether commands can unpark the scope when they should not.
 'Telescope   Added test for IsPulseGuiding stuck on
 'Telescope   Fixed issue in SiderealTime test when PC and scope clocks are close to 00:00:00
 'Telescope   Moved time check to pre-run checks section
@@ -331,7 +331,7 @@
 'Telescope   Revised DestinationSideOfPier test to just check that returned values are different for both sides of the meridian
 
 'Version 6.0.0.49
-'Telescope   Added test for whether interface V1 drivers can un-park the scope, fixes issue in MountSafety when mounts do not support un-parking
+'Telescope   Added test for whether interface V1 drivers can unpark the scope, fixes issue in MountSafety when mounts do not support unparking
 'Telescope   Made SideOfPier Write test more realistic by tracking through the Meridian before attempting to flip the scope
 'Focuser     Added better status messaging during asynchronous focuser moves
 
@@ -1527,7 +1527,7 @@ Public Class FrmConformMain
                             LogMsg("Validation", MessageLevel.msgError, "Unable to find driver hash code in a line starting with: " & VALIDATION_HASH_DRIVER)
                         Else
                             l_ExeHashFile = Mid(l_ExeHashFile, Len(VALIDATION_HASH_DRIVER) + 2)
-                            LogMsg("Report Hash Value", MessageLevel.msgDebug, l_ExeHashFile)
+                            LogMsg("ReportHashValue", MessageLevel.msgDebug, l_ExeHashFile)
                             If l_ExeHashCalc = l_ExeHashFile Then 'Matches OK
                                 LogMsg("Validation", MessageLevel.msgOK, "Executable code integrity is confirmed!")
                             Else
@@ -1543,7 +1543,7 @@ Public Class FrmConformMain
                                     .Position = Len(VALIDATION_HASH_REPORTV1) + 1 + Len(l_ReportHashFile) + 4
                                 }
                                 l_ReportHashCalc = CreateHashCode(m_SecKey, l_InStream)
-                                LogMsg("Report Hash Calc", MessageLevel.msgDebug, l_ReportHashCalc)
+                                LogMsg("ReportHashCalc", MessageLevel.msgDebug, l_ReportHashCalc)
                                 If l_ReportHashCalc = l_ReportHashFile Then 'Matches OK
                                     LogMsg("Validation", MessageLevel.msgOK, "Conformance report integrity is confirmed!")
                                 Else

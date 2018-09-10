@@ -561,7 +561,7 @@ Friend Class DomeTester
                     Else 'Slaved write should generate an exception
                         m_Dome.Slaved = True
                         LogMsg(p_Name, MessageLevel.msgError, "CanSlave is false but setting Slaved true did not raise an exception")
-                        m_Dome.Slaved = False 'Un-slave to continue tests
+                        m_Dome.Slaved = False 'Unslave to continue tests
                     End If
                     'Methods
                 Case DomePropertyMethod.CloseShutter

@@ -406,7 +406,7 @@ Friend Class TelescopeTester
                 If canUnpark Then
                     If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
                     telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been un-parked for testing")
+                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been unparked for testing")
                 Else
                     LogMsg("Mount Safety", MessageLevel.msgError, "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope")
                     g_Stop = True
@@ -420,12 +420,12 @@ Friend Class TelescopeTester
                 If canUnpark Then
                     If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
                     telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been un-parked for testing")
+                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been unparked for testing")
                 Else
-                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope reports that it cannot unpark, un-parking skipped")
+                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope reports that it cannot unpark, unparking skipped")
                 End If
             Catch ex As Exception
-                LogMsg("Mount Safety", MessageLevel.msgError, "Driver threw an exception while un-parking: " & ex.Message)
+                LogMsg("Mount Safety", MessageLevel.msgError, "Driver threw an exception while unparking: " & ex.Message)
             End Try
         End If
 
@@ -1503,7 +1503,7 @@ Friend Class TelescopeTester
                 If canPark Then 'Can Park
                     Try
                         If g_Settings.DisplayMethodCalls Then LogMsg("Park", MessageLevel.msgComment, "About to get AtPark property")
-                        If Not telescopeDevice.AtPark Then ' OK We are un-parked so check that no error is generated
+                        If Not telescopeDevice.AtPark Then ' OK We are unparked so check that no error is generated
                             Status(StatusType.staTest, "Park")
                             Try
                                 Status(StatusType.staAction, "Park scope")
@@ -1564,11 +1564,11 @@ Friend Class TelescopeTester
                                         Status(StatusType.staStatus, "Scope UnParked")
                                         LogMsg("UnPark", MessageLevel.msgOK, "Success")
 
-                                        'Scope Un-parked
-                                        Try 'Confirm UnPark is harmless if already un-parked
+                                        'Scope unparked
+                                        Try 'Confirm UnPark is harmless if already unparked
                                             If g_Settings.DisplayMethodCalls Then LogMsg("UnPark", MessageLevel.msgComment, "About to call UnPark method")
                                             telescopeDevice.Unpark()
-                                            LogMsg("UnPark", MessageLevel.msgOK, "Success if already un-parked")
+                                            LogMsg("UnPark", MessageLevel.msgOK, "Success if already unparked")
                                         Catch ex As COMException
                                             LogMsg("UnPark", MessageLevel.msgIssue, "Exception when calling UnPark two times in succession: " & ex.Message & " " & Hex(ex.ErrorCode))
                                         Catch ex As Exception
@@ -1598,7 +1598,7 @@ Friend Class TelescopeTester
                                     End Try
                                     'Create user interface message asking for manual scope UnPark
                                     LogMsg("UnPark", MessageLevel.msgComment, "CanUnPark is false so you need to unpark manually")
-                                    MsgBox("This scope cannot be un-parked automatically, please unpark it now", MsgBoxStyle.Critical, "UnPark")
+                                    MsgBox("This scope cannot be unparked automatically, please unpark it now", MsgBoxStyle.Critical, "UnPark")
                                 End If
                             Catch ex As COMException
                                 LogMsg("Park", MessageLevel.msgError, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
@@ -1621,7 +1621,7 @@ Friend Class TelescopeTester
                     End Try
                     'v1.0.12.0 Added test for unpark if CanPark is false
                     'Now test unpark
-                    If canUnpark Then ' We should already be un-parked so confirm that unpark works fine
+                    If canUnpark Then ' We should already be unparked so confirm that unpark works fine
                         Try
                             If g_Settings.DisplayMethodCalls Then LogMsg("UnPark", MessageLevel.msgComment, "About to call UnPark method")
                             telescopeDevice.Unpark()
@@ -2920,7 +2920,7 @@ Friend Class TelescopeTester
             End Try
             'Check that Telescope is still parked after issuing the command!
             If g_Settings.DisplayMethodCalls Then LogMsg("Parked:" & p_Name, MessageLevel.msgComment, "About to get AtPark property")
-            If Not telescopeDevice.AtPark Then LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Telescope was un-parked by the " & p_Name & " command. This should not happen!")
+            If Not telescopeDevice.AtPark Then LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Telescope was unparked by the " & p_Name & " command. This should not happen!")
 
         Else
             LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Not parked after Telescope.Park command, " & p_Name & " when parked test skipped")
@@ -3320,7 +3320,7 @@ Friend Class TelescopeTester
                             g_Status.Clear()
                             LogMsg(p_Name, MessageLevel.msgOK, "Found home OK.")
                             If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call Unpark method")
-                            telescopeDevice.Unpark() ' Make sure we are still un parked!
+                            telescopeDevice.Unpark() ' Make sure we are still  unparked!
                         End If
 
                     Case OptionalMethodType.MoveAxisPrimary
