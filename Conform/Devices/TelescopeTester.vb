@@ -11,12 +11,12 @@ Friend Class TelescopeTester
     Private Const NUM_AXIS_RATES As Integer = 1000
     Private Const AXIS_RATE_MINIMUM As Integer = 0 ' Mnemonics for the axis rate array second dimension
     Private Const AXIS_RATE_MAXIMUM As Integer = 1
-    Private Const WAIT_FOR_SLEW_MINIMUM_DURATION As Integer = 5 ' Minimum number of seconds to wait before declaring an async slew is finished (allows for mounts that dopn't set IsSlewing straight away!)
-    Private Const SIDEOFPIER_MERIDIAN_TRACKING_PERIOD As Integer = 7 * 60 * 1000 ' 7 minutes in milliseocnds
+    Private Const WAIT_FOR_SLEW_MINIMUM_DURATION As Integer = 5 ' Minimum number of seconds to wait before declaring an asynchronous slew is finished (allows for mounts that don't set IsSlewing straight away!)
+    Private Const SIDEOFPIER_MERIDIAN_TRACKING_PERIOD As Integer = 7 * 60 * 1000 ' 7 minutes in milliseconds
     Private Const DISPLAY_DECIMAL_DIGITS As Integer = 2
 
     Private Const PULSEGUIDE_MOVEMENT_TIME As Integer = 2 ' Initialise a pulse guide movement for this number of seconds
-    Private Const PULSEGUIDE_TIMEOUT_TIME As Integer = 6 ' Wait up to this number of seconds before timing out a pulseguide command
+    Private Const PULSEGUIDE_TIMEOUT_TIME As Integer = 6 ' Wait up to this number of seconds before timing out a pulse guide command
 
     Private Const BAD_RA_LOW As Double = -1.0 ' Good range is 0.0 to 23.99999
     Private Const BAD_RA_HIGH As Double = 25.0
@@ -24,7 +24,7 @@ Friend Class TelescopeTester
     Private Const BAD_DEC_HIGH As Double = 100.0
     Private Const BAD_AZIMUTH_LOW As Double = -10.0 ' Good range is 0.0 to 360.0
     Private Const BAD_AZIMUTH_HIGH As Double = 370.0
-    Private Const BAD_ALTITUDE_LOW As Double = -100.0 ' Good range is -90.0 to +90.0 (-90.0 to allow the scope tube to be parked pointing vertcially dowmwards)
+    Private Const BAD_ALTITUDE_LOW As Double = -100.0 ' Good range is -90.0 to +90.0 (-90.0 to allow the scope tube to be parked pointing vertically downwards)
     Private Const BAD_ALTITUDE_HIGH As Double = 100.0
 
     Private Const SIDE_OF_PIER_INVALID_LATITUDE As Double = 10.0 ' +- this value is the range of latitudes where side of pier tests will not be conducted
@@ -60,7 +60,7 @@ Friend Class TelescopeTester
 #End If
 
     Private DriverAsObject As Object
-    'Axisrate checks
+    'Axis rate checks
     Private m_AxisRatePrimaryOverlap, m_AxisRateSecondaryOverlap, m_AxisRateTertiaryOverlap As Boolean
     Private m_AxisRatesPrimaryArray(NUM_AXIS_RATES, 1), m_AxisRatesArray(NUM_AXIS_RATES, 1) As Double
 #End Region
@@ -169,7 +169,7 @@ Friend Class TelescopeTester
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
                 Try : telescopeDevice.Connected = False : Catch : End Try
 #If DEBUG Then
                 Try : telescopeDevice.Dispose() : Catch : End Try
@@ -197,8 +197,8 @@ Friend Class TelescopeTester
         MyBase.CheckCommonMethods(telescopeDevice, DeviceType.Telescope)
     End Sub
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
         Select Case g_TelescopeProgID
             Case "Hub.Telescope"
@@ -301,7 +301,7 @@ Friend Class TelescopeTester
                                 l_DriverAccessTelescope.Connected = False
                                 LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully disconnected using driver access toolkit")
                             Catch ex As Exception
-                                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.ToString)
+                                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.ToString)
                                 LogMsg("", MessageLevel.msgAlways, "")
                             End Try
                         Catch ex As Exception
@@ -362,7 +362,7 @@ Friend Class TelescopeTester
 
             Catch ex As Exception
                 LogMsg("", MessageLevel.msgDebug, "Attempt " & l_TryCount & " - exception thrown: " & ex.Message)
-                If l_TryCount = 3 Then Throw 'Rethrow exception if on our third attempt
+                If l_TryCount = 3 Then Throw 'Re throw exception if on our third attempt
             End Try
             If g_Stop Then WaitFor(200)
         Loop Until (Not g_Stop) 'Exit if created OK
@@ -406,7 +406,7 @@ Friend Class TelescopeTester
                 If canUnpark Then
                     If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
                     telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been unparked for testing")
+                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been un-parked for testing")
                 Else
                     LogMsg("Mount Safety", MessageLevel.msgError, "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope")
                     g_Stop = True
@@ -420,12 +420,12 @@ Friend Class TelescopeTester
                 If canUnpark Then
                     If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
                     telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been unparked for testing")
+                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been un-parked for testing")
                 Else
-                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope reports that it cannot unpark, unparking skipped")
+                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope reports that it cannot unpark, un-parking skipped")
                 End If
             Catch ex As Exception
-                LogMsg("Mount Safety", MessageLevel.msgError, "Driver threw an exception while unparking: " & ex.Message)
+                LogMsg("Mount Safety", MessageLevel.msgError, "Driver threw an exception while un-parking: " & ex.Message)
             End Try
         End If
 
@@ -843,7 +843,7 @@ Friend Class TelescopeTester
 
         'IsPulseGuiding - Optional
         If g_InterfaceVersion > 1 Then
-            If canPulseGuide Then 'Can pulseguide so test if we can successfully read ispulseguiding
+            If canPulseGuide Then 'Can pulse guide so test if we can successfully read IsPulseGuiding
                 Try
                     If g_Settings.DisplayMethodCalls Then LogMsg("IsPulseGuiding", MessageLevel.msgComment, "About to get IsPulseGuiding property")
                     m_IsPulseGuiding = telescopeDevice.IsPulseGuiding
@@ -851,7 +851,7 @@ Friend Class TelescopeTester
                 Catch ex As Exception 'Read failed
                     HandleException("IsPulseGuiding", MemberType.Property, Required.MustBeImplemented, ex, "CanPulseGuide is True")
                 End Try
-            Else 'Can't pulseguide so confirm that an error is raised
+            Else 'Can't pulse guide so confirm that an error is raised
                 Try
                     If g_Settings.DisplayMethodCalls Then LogMsg("IsPulseGuiding", MessageLevel.msgComment, "About to get IsPulseGuiding property")
                     m_IsPulseGuiding = telescopeDevice.IsPulseGuiding
@@ -1129,7 +1129,7 @@ Friend Class TelescopeTester
                 If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPier Read", MessageLevel.msgComment, "About to get SideOfPier property")
                 m_SideOfPier = telescopeDevice.SideOfPier
                 LogMsg("SideOfPier Read", MessageLevel.msgOK, m_SideOfPier.ToString)
-                m_CanReadSideOfPier = True 'Flag that it is OK to read sideofpier
+                m_CanReadSideOfPier = True 'Flag that it is OK to read SideOfPier
             Catch ex As Exception
                 HandleException("SideOfPier Read", MemberType.Property, Required.Optional, ex, "")
             End Try
@@ -1213,7 +1213,7 @@ Friend Class TelescopeTester
         If TestStop() Then Exit Sub
 
         'TargetDeclination Write - Optional
-        LogMsg("TargetDeclination Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coorindates.")
+        LogMsg("TargetDeclination Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coordinates.")
 
         'TargetRightAscension Read - Optional
         Try 'First read should fail!
@@ -1234,7 +1234,7 @@ Friend Class TelescopeTester
         If TestStop() Then Exit Sub
 
         'TargetRightAscension Write - Optional
-        LogMsg("TargetRightAscension Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coorindates.")
+        LogMsg("TargetRightAscension Write", MessageLevel.msgInfo, "Tests moved after the SlewToCoordinates tests so that Conform can check they properly set target coordinates.")
 
         'Tracking Read - Required
         Try
@@ -1360,7 +1360,7 @@ Friend Class TelescopeTester
                     LogMsg("TrackingRates", MessageLevel.msgOK, "Drive rates read OK")
                 Else
                     If l_Count > 0 Then 'We did get some members on the first call, but now they have disappeared!
-                        'This can be due to the drvier returning the same trackingrates object on every TrackingRates call but not resetting the iterator pointer
+                        'This can be due to the driver returning the same TrackingRates object on every TrackingRates call but not resetting the iterator pointer
                         LogMsg("TrackingRates", MessageLevel.msgError, "Multiple calls to TrackingRates returned different answers!")
                         LogMsg("TrackingRates", MessageLevel.msgInfo, "")
                         LogMsg("TrackingRates", MessageLevel.msgInfo, "The first call to TrackingRates returned " & l_Count & " drive rates; the next call appeared to return no rates.")
@@ -1404,7 +1404,7 @@ Friend Class TelescopeTester
             l_TrackingRates = Nothing
             If TestStop() Then Exit Sub
 
-            'TrackingRate - Test after TrackingRates so we kow what the valid values are
+            'TrackingRate - Test after TrackingRates so we know what the valid values are
             'TrackingRate Read - Required
             Try
                 If g_Settings.DisplayMethodCalls Then LogMsg("TrackingRates", MessageLevel.msgComment, "About to get TrackingRates property")
@@ -1468,7 +1468,7 @@ Friend Class TelescopeTester
             LogMsg("UTCDate Read", MessageLevel.msgOK, m_UTCDate.ToString("dd-MMM-yyyy HH:mm:ss.fff"))
             Try ' UTCDate Write is optional since if you are using the PC time as UTCTime then you should not write to the PC clock!
                 If g_Settings.DisplayMethodCalls Then LogMsg("UTCDate Write", MessageLevel.msgComment, "About to set UTCDate property to " & m_UTCDate.AddHours(1.0).ToString())
-                telescopeDevice.UTCDate = m_UTCDate.AddHours(1.0) 'Try and write a new utcdate in the future
+                telescopeDevice.UTCDate = m_UTCDate.AddHours(1.0) 'Try and write a new UTCDate in the future
                 LogMsg("UTCDate Write", MessageLevel.msgOK, "New UTCDate written successfully: " & m_UTCDate.AddHours(1.0).ToString)
                 If g_Settings.DisplayMethodCalls Then LogMsg("UTCDate Write", MessageLevel.msgComment, "About to set UTCDate property to " & m_UTCDate.ToString())
                 telescopeDevice.UTCDate = m_UTCDate 'Restore original value
@@ -1503,7 +1503,7 @@ Friend Class TelescopeTester
                 If canPark Then 'Can Park
                     Try
                         If g_Settings.DisplayMethodCalls Then LogMsg("Park", MessageLevel.msgComment, "About to get AtPark property")
-                        If Not telescopeDevice.AtPark Then ' OK We are unparked so check that no error is generated
+                        If Not telescopeDevice.AtPark Then ' OK We are un-parked so check that no error is generated
                             Status(StatusType.staTest, "Park")
                             Try
                                 Status(StatusType.staAction, "Park scope")
@@ -1564,11 +1564,11 @@ Friend Class TelescopeTester
                                         Status(StatusType.staStatus, "Scope UnParked")
                                         LogMsg("UnPark", MessageLevel.msgOK, "Success")
 
-                                        'Scope Unparked
-                                        Try 'Confirm UnPark is harmless if already unparked
+                                        'Scope Un-parked
+                                        Try 'Confirm UnPark is harmless if already un-parked
                                             If g_Settings.DisplayMethodCalls Then LogMsg("UnPark", MessageLevel.msgComment, "About to call UnPark method")
                                             telescopeDevice.Unpark()
-                                            LogMsg("UnPark", MessageLevel.msgOK, "Success if already unparked")
+                                            LogMsg("UnPark", MessageLevel.msgOK, "Success if already un-parked")
                                         Catch ex As COMException
                                             LogMsg("UnPark", MessageLevel.msgIssue, "Exception when calling UnPark two times in succession: " & ex.Message & " " & Hex(ex.ErrorCode))
                                         Catch ex As Exception
@@ -1598,14 +1598,14 @@ Friend Class TelescopeTester
                                     End Try
                                     'Create user interface message asking for manual scope UnPark
                                     LogMsg("UnPark", MessageLevel.msgComment, "CanUnPark is false so you need to unpark manually")
-                                    MsgBox("This scope cannot be unparked automatically, please unpark it now", MsgBoxStyle.Critical, "UnPark")
+                                    MsgBox("This scope cannot be un-parked automatically, please unpark it now", MsgBoxStyle.Critical, "UnPark")
                                 End If
                             Catch ex As COMException
                                 LogMsg("Park", MessageLevel.msgError, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
                             Catch ex As Exception
                                 LogMsg("Park", MessageLevel.msgError, EX_NET & ex.Message)
                             End Try
-                        Else ' We are still in parked status despite a successul UnPark
+                        Else ' We are still in parked status despite a successful UnPark
                             LogMsg("Park", MessageLevel.msgError, "AtPark still true despite an earlier successful unpark")
                         End If
                     Catch ex As Exception
@@ -1619,9 +1619,9 @@ Friend Class TelescopeTester
                     Catch ex As Exception
                         HandleException("Park", MemberType.Method, Required.MustNotBeImplemented, ex, "CanPark is False")
                     End Try
-                    'v1.0.12.0 Added test for unpark if canpark is false
+                    'v1.0.12.0 Added test for unpark if CanPark is false
                     'Now test unpark
-                    If canUnpark Then ' We should already be unparked so confirm that unpark works fine
+                    If canUnpark Then ' We should already be un-parked so confirm that unpark works fine
                         Try
                             If g_Settings.DisplayMethodCalls Then LogMsg("UnPark", MessageLevel.msgComment, "About to call UnPark method")
                             telescopeDevice.Unpark()
@@ -1707,7 +1707,7 @@ Friend Class TelescopeTester
             LogMsg(TELTEST_SLEW_TO_COORDINATES, MessageLevel.msgInfo, "Tests skipped")
         End If
 
-        'Test Equatorial slewing to coordinates async - Optional
+        'Test Equatorial slewing to coordinates asynchronous - Optional
         If g_TelescopeTests.Item(TELTEST_SLEW_TO_COORDINATES_ASYNC) = CheckState.Checked Then
             TelescopeSlewTest(SlewSyncType.SlewToCoordinatesAsync, "SlewToCoordinatesAsync", canSlewAsync, "CanSlewAsync") : If TestStop() Then Exit Sub
             If canSlewAsync Then ' Test slewing to bad co-ordinates
@@ -1729,7 +1729,7 @@ Friend Class TelescopeTester
             LogMsg(TELTEST_SYNC_TO_COORDINATES, MessageLevel.msgInfo, "Tests skipped")
         End If
 
-        'TargetRightAscension Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coorindates.")
+        'TargetRightAscension Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coordinates.")
         Try
             If g_Settings.DisplayMethodCalls Then LogMsg("TargetRightAscension Write", MessageLevel.msgComment, "About to set TargetRightAscension property to -1.0")
             telescopeDevice.TargetRightAscension = -1.0
@@ -1775,7 +1775,7 @@ Friend Class TelescopeTester
         End Try
         If TestStop() Then Exit Sub
 
-        'TargetDeclination Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coorindates.")
+        'TargetDeclination Write - Optional - Test moved here so that Conform can check that the SlewTo... methods properly set target coordinates.")
         Try
             If g_Settings.DisplayMethodCalls Then LogMsg("TargetDeclination Write", MessageLevel.msgComment, "About to set TargetDeclination property to -91.0")
             telescopeDevice.TargetDeclination = -91.0
@@ -1832,7 +1832,7 @@ Friend Class TelescopeTester
             LogMsg(TELTEST_SLEW_TO_TARGET, MessageLevel.msgInfo, "Tests skipped")
         End If
 
-        'Test Equatorial target slewing async - Optional
+        'Test Equatorial target slewing asynchronous - Optional
         If g_TelescopeTests.Item(TELTEST_SLEW_TO_TARGET_ASYNC) = CheckState.Checked Then
             TelescopeSlewTest(SlewSyncType.SlewToTargetAsync, "SlewToTargetAsync", canSlewAsync, "CanSlewAsync") : If TestStop() Then Exit Sub
             If canSlewAsync Then ' Test slewing to bad co-ordinates
@@ -1873,7 +1873,7 @@ Friend Class TelescopeTester
             LogMsg("SlewToAltAz", MessageLevel.msgInfo, "Skipping test as this method is not supported in interface V" & g_InterfaceVersion)
         End If
 
-        'Test AltAz Slewing async - Optional
+        'Test AltAz Slewing asynchronous - Optional
         If g_InterfaceVersion > 1 Then
             If g_TelescopeTests.Item(TELTEST_SLEW_TO_ALTAZ_ASYNC) = CheckState.Checked Then
                 TelescopeSlewTest(SlewSyncType.SlewToAltAzAsync, "SlewToAltAzAsync", canSlewAltAzAsync, "CanSlewAltAzAsync") : If TestStop() Then Exit Sub
@@ -1936,7 +1936,7 @@ Friend Class TelescopeTester
                                 LogMsg("SideOfPier Model Tests", MessageLevel.msgInfo, "This places the celestial poles close to the horizon and the mount's flip logic may override Conform's expected behaviour.")
                                 LogMsg("SideOfPier Model Tests", MessageLevel.msgInfo, "Please set the site latitude to a value within the ranges " & SIDE_OF_PIER_INVALID_LATITUDE.ToString("+0.0;-0.0") & " to +90.0 or " & (-SIDE_OF_PIER_INVALID_LATITUDE).ToString("+0.0;-0.0") & " to -90.0 to obtain a reliable result.")
                                 Exit Select
-                            Case -90.0 To 90.0 ' Normal case, just run the tests becuae latitude is outside the invalid range but within -90.0 to +90.0
+                            Case -90.0 To 90.0 ' Normal case, just run the tests barbecue latitude is outside the invalid range but within -90.0 to +90.0
                                 'SideOfPier write property test - Optional
                                 If g_Settings.TestSideOfPierWrite Then
                                     LogMsg("SideOfPier Model Tests", MessageLevel.msgDebug, "Testing SideOfPier write...")
@@ -2024,7 +2024,7 @@ Friend Class TelescopeTester
         Dim showOutcome As Boolean = False
         Dim difference, syncRA, syncDEC, syncAlt, syncAz, newAlt, newAz, currentAz, currentAlt, startRA, startDec, currentRA, currentDec As Double
 
-        ' Basic test to make sure the method is either eimplemented Ok or fails as expected if it is not supported in this driver.
+        ' Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get RightAscension property")
         syncRA = telescopeDevice.RightAscension
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Declination property")
@@ -2096,7 +2096,7 @@ Friend Class TelescopeTester
         Else ' Call should work
             Try
                 Select Case testType
-                    Case SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget 'Only do this for euqatorial syncs
+                    Case SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget 'Only do this for equatorial syncs
 
                         ' Calculate the Sync test RA position
                         startRA = TelescopeRAFromHourAngle(testName, +3.0)
@@ -2105,7 +2105,7 @@ Friend Class TelescopeTester
                         ' Calculate the Sync test DEC position
                         If m_SiteLatitude > 0.0 Then ' We are in the northern hemisphere
                             startDec = 90.0 - ((180.0 - m_SiteLatitude) * 0.5) ' Calculate for northern hemisphere
-                        Else ' We are in the sourthern hemisphere
+                        Else ' We are in the southern hemisphere
                             startDec = -90.0 + ((180.0 + m_SiteLatitude) * 0.5) ' Calculate for southern hemisphere
                         End If
                         LogMsg(testName, MessageLevel.msgDebug, String.Format("Declination for sync tests: {0}", FormatDec(startDec)))
@@ -2612,7 +2612,7 @@ Friend Class TelescopeTester
                             telescopeDevice.AbortSlew()
                         Catch : End Try ' Attempt to stop any motion that has actually started
                         LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad RA coordinate: " & FormatRA(m_TargetRightAscension))
-                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check wehter an invalidvalue exception was thrown or something else
+                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         Status(StatusType.staAction, "Slew rejected")
                         HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad RA coordinate", "Correctly rejected bad RA coordinate: " & FormatRA(m_TargetRightAscension))
                     End Try
@@ -2644,7 +2644,7 @@ Friend Class TelescopeTester
                             telescopeDevice.AbortSlew()
                         Catch : End Try ' Attempt to stop any motion that has actually started
                         LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Dec coordinate: " & FormatDec(m_TargetDeclination))
-                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check wehter an invalidvalue exception was thrown or something else
+                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         Status(StatusType.staAction, "Slew rejected")
                         HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " & FormatDec(m_TargetDeclination))
                     End Try
@@ -2673,7 +2673,7 @@ Friend Class TelescopeTester
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call SyncToTarget method")
                         telescopeDevice.SyncToTarget()
                         LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad RA coordinate: " & FormatRA(m_TargetRightAscension))
-                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check wehter an invalidvalue exception was thrown or something else
+                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         Status(StatusType.staAction, "Sync rejected")
                         HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad RA coordinate", "Correctly rejected bad RA coordinate: " & FormatRA(m_TargetRightAscension))
                     End Try
@@ -2695,7 +2695,7 @@ Friend Class TelescopeTester
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call SyncToTarget method")
                         telescopeDevice.SyncToTarget()
                         LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Dec coordinate: " & FormatDec(m_TargetDeclination))
-                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check wehter an invalidvalue exception was thrown or something else
+                    Catch ex As Exception ' Attempt to set bad coordinate failed, so check whether an invalid value exception was thrown or something else
                         Status(StatusType.staAction, "Sync rejected")
                         HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Dec coordinate", "Correctly rejected bad Dec coordinate: " & FormatDec(m_TargetDeclination))
                     End Try
@@ -2854,7 +2854,7 @@ Friend Class TelescopeTester
         g_Status.Action = p_Name
         g_Status.Test = p_Type.ToString
         If g_Settings.DisplayMethodCalls Then LogMsg("Parked:" & p_Name, MessageLevel.msgComment, "About to get AtPark property")
-        If telescopeDevice.AtPark Then ' We are still parked so test abortslew
+        If telescopeDevice.AtPark Then ' We are still parked so test AbortSlew
             Try
                 Select Case p_Type
                     Case ParkedExceptionType.tstPExcepAbortSlew
@@ -2920,7 +2920,7 @@ Friend Class TelescopeTester
             End Try
             'Check that Telescope is still parked after issuing the command!
             If g_Settings.DisplayMethodCalls Then LogMsg("Parked:" & p_Name, MessageLevel.msgComment, "About to get AtPark property")
-            If Not telescopeDevice.AtPark Then LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Telescope was unparked by the " & p_Name & " command. This should not happen!")
+            If Not telescopeDevice.AtPark Then LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Telescope was un-parked by the " & p_Name & " command. This should not happen!")
 
         Else
             LogMsg("Parked:" & p_Name, MessageLevel.msgIssue, "Not parked after Telescope.Park command, " & p_Name & " when parked test skipped")
@@ -3091,18 +3091,18 @@ Friend Class TelescopeTester
                     End If
 #End If
                 Catch ex As COMException
-                    LogMsg(p_Name, MessageLevel.msgError, "COM Unable to read AxisRates object - Exeption: " & ex.Message & " " & Hex(ex.ErrorCode))
-                    LogMsg(p_Name, MessageLevel.msgDebug, "COM Unable to read AxisRates object - Exeption: " & ex.ToString)
+                    LogMsg(p_Name, MessageLevel.msgError, "COM Unable to read AxisRates object - Exception: " & ex.Message & " " & Hex(ex.ErrorCode))
+                    LogMsg(p_Name, MessageLevel.msgDebug, "COM Unable to read AxisRates object - Exception: " & ex.ToString)
                 Catch ex As DriverException
-                    LogMsg(p_Name, MessageLevel.msgError, ".NET Unable to read AxisRates object - Exeption: " & ex.Message & " " & Hex(ex.Number))
-                    LogMsg(p_Name, MessageLevel.msgDebug, ".NET Unable to read AxisRates object - Exeption: " & ex.ToString)
+                    LogMsg(p_Name, MessageLevel.msgError, ".NET Unable to read AxisRates object - Exception: " & ex.Message & " " & Hex(ex.Number))
+                    LogMsg(p_Name, MessageLevel.msgDebug, ".NET Unable to read AxisRates object - Exception: " & ex.ToString)
                 Catch ex As Exception
-                    LogMsg(p_Name, MessageLevel.msgError, "Unable to read AxisRates object - Exeption: " & ex.Message)
-                    LogMsg(p_Name, MessageLevel.msgDebug, "Unable to read AxisRates object - Exeption: " & ex.ToString)
+                    LogMsg(p_Name, MessageLevel.msgError, "Unable to read AxisRates object - Exception: " & ex.Message)
+                    LogMsg(p_Name, MessageLevel.msgDebug, "Unable to read AxisRates object - Exception: " & ex.ToString)
                 End Try
 
                 'Overlap testing
-                If l_NAxisRates > 1 Then 'Confirm whether there are overlaps if number of axisrate pairs exceeds 1
+                If l_NAxisRates > 1 Then 'Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     For l_i = 1 To l_NAxisRates
                         For l_j = 1 To l_NAxisRates
                             If l_i <> l_j Then 'Only test different lines, shouldn't compare same lines!
@@ -3120,7 +3120,7 @@ Friend Class TelescopeTester
 
                 'Duplicate testing
                 l_AxisRateDuplicate = False
-                If l_NAxisRates > 1 Then 'Confirm whether there are overlaps if number of axisrate pairs exceeds 1
+                If l_NAxisRates > 1 Then 'Confirm whether there are overlaps if number of axis rate pairs exceeds 1
                     For l_i = 1 To l_NAxisRates
                         For l_j = 1 To l_NAxisRates
                             If l_i <> l_j Then 'Only test different lines, shouldn't compare same lines!
@@ -3133,7 +3133,7 @@ Friend Class TelescopeTester
                 If l_AxisRateDuplicate Then
                     LogMsg(p_Name, MessageLevel.msgIssue, "Duplicate axis rates found, suggest these be removed")
                 Else
-                    LogMsg(p_Name, MessageLevel.msgOK, "No duplcate axis rates found")
+                    LogMsg(p_Name, MessageLevel.msgOK, "No duplicate axis rates found")
                 End If
 
             Else
@@ -3143,14 +3143,14 @@ Friend Class TelescopeTester
             l_CanGetAxisRates = True ' Record that this driver can deliver a viable AxisRates object that can be tested for AxisRates.Dispose() later
 
         Catch ex As COMException
-            LogMsg(p_Name, MessageLevel.msgError, "COM Unable to get an AxisRates object - Exeption: " & ex.Message & " " & Hex(ex.ErrorCode))
+            LogMsg(p_Name, MessageLevel.msgError, "COM Unable to get an AxisRates object - Exception: " & ex.Message & " " & Hex(ex.ErrorCode))
         Catch ex As DriverException
-            LogMsg(p_Name, MessageLevel.msgError, ".NET Unable to get an AxisRates object - Exeption: " & ex.Message & " " & Hex(ex.Number))
+            LogMsg(p_Name, MessageLevel.msgError, ".NET Unable to get an AxisRates object - Exception: " & ex.Message & " " & Hex(ex.Number))
         Catch ex As NullReferenceException 'Report null objects returned by the driver that are caught by DriverAccess.
             LogMsg(p_Name, MessageLevel.msgError, ex.Message)
             LogMsg(p_Name, MessageLevel.msgDebug, ex.ToString()) 'If debug then give full information
         Catch ex As Exception
-            LogMsg(p_Name, MessageLevel.msgError, "Unable to get or unable to use an AxisRates object - Exeption: " & ex.ToString)
+            LogMsg(p_Name, MessageLevel.msgError, "Unable to get or unable to use an AxisRates object - Exception: " & ex.ToString)
         End Try
 
         ' Clean up AxisRate object if used
@@ -3170,7 +3170,7 @@ Friend Class TelescopeTester
         If l_CanGetAxisRates Then ' The driver does return a viable AxisRates object that can be tested for correct AxisRates.Dispose() and Rate.Dispose() operation
             Try
                 ' Test Rate.Dispose()
-                Select Case p_Axis ' Get the relevant axisrates object for this axis
+                Select Case p_Axis ' Get the relevant axis rates object for this axis
                     Case TelescopeAxes.axisPrimary
                         l_AxisRates = DriverAsObject.AxisRates(TelescopeAxes.axisPrimary)
                     Case TelescopeAxes.axisSecondary
@@ -3208,7 +3208,7 @@ Friend Class TelescopeTester
                 End Try
 
             Catch ex As Exception
-                LogMsg(p_Name, MessageLevel.msgError, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exeption: " & ex.ToString)
+                LogMsg(p_Name, MessageLevel.msgError, "AxisRate.Dispose() - Unable to get or unable to use an AxisRates object - Exception: " & ex.ToString)
             End Try
         Else
             LogMsgInfo(p_Name, "AxisRates.Dispose() testing skipped because of earlier issues in obtaining a viable AxisRates object.")
@@ -3267,7 +3267,7 @@ Friend Class TelescopeTester
                     Case OptionalMethodType.AbortSlew
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call AbortSlew method")
                         telescopeDevice.AbortSlew()
-                        LogMsg("AbortSlew", MessageLevel.msgOK, "AbortSlew Ok when not slewing")
+                        LogMsg("AbortSlew", MessageLevel.msgOK, "AbortSlew OK when not slewing")
 
                     Case OptionalMethodType.DestinationSideOfPier
                         m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRA)
@@ -3320,7 +3320,7 @@ Friend Class TelescopeTester
                             g_Status.Clear()
                             LogMsg(p_Name, MessageLevel.msgOK, "Found home OK.")
                             If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call Unpark method")
-                            telescopeDevice.Unpark() ' Make sure we are still unparked!
+                            telescopeDevice.Unpark() ' Make sure we are still un parked!
                         End If
 
                     Case OptionalMethodType.MoveAxisPrimary
@@ -3343,7 +3343,7 @@ Friend Class TelescopeTester
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get IsPulseGuiding property")
                         If telescopeDevice.IsPulseGuiding Then ' IsPulseGuiding is true before we've started so this is an error and voids a real test
                             LogMsg(p_Name, MessageLevel.msgError, "IsPulseGuiding is True when not pulse guiding - PulseGuide test omitted")
-                        Else 'Ok to test pulse guiding
+                        Else 'OK to test pulse guiding
                             Status(StatusType.staAction, "Start PulseGuide")
                             m_StartTime = Now
                             If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call PulseGuide method, Direction: " & GuideDirections.guideEast & ", Duration: " & PULSEGUIDE_MOVEMENT_TIME * 1000 & "ms")
@@ -3365,27 +3365,27 @@ Friend Class TelescopeTester
 
                                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get IsPulseGuiding property")
                                     If Not telescopeDevice.IsPulseGuiding Then
-                                        LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous pulseguide found OK")
+                                        LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous pulse guide found OK")
                                         LogMsg(p_Name, MessageLevel.msgDebug, "IsPulseGuiding = True duration: " & DateTime.Now.Subtract(m_StartTime).TotalMilliseconds & " milliseconds")
                                     Else
-                                        LogMsg(p_Name, MessageLevel.msgIssue, "Asynchronous pulseguide expected but IsPulseGuiding is still TRUE " & PULSEGUIDE_TIMEOUT_TIME & " seconds beyond expected time")
+                                        LogMsg(p_Name, MessageLevel.msgIssue, "Asynchronous pulse guide expected but IsPulseGuiding is still TRUE " & PULSEGUIDE_TIMEOUT_TIME & " seconds beyond expected time")
                                     End If
                                 Else
-                                    LogMsg(p_Name, MessageLevel.msgIssue, "Asynchronous pulseguide expected but IsPulseGuiding has returned FALSE")
+                                    LogMsg(p_Name, MessageLevel.msgIssue, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE")
                                 End If
-                            Else 'Assume synchronous pulseguide and that ispulseguideing is false
+                            Else 'Assume synchronous pulse guide and that IsPulseGuiding is false
                                 If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get IsPulseGuiding property")
                                 If Not telescopeDevice.IsPulseGuiding Then
-                                    LogMsg(p_Name, MessageLevel.msgOK, "Synchronous pulseguide found OK")
+                                    LogMsg(p_Name, MessageLevel.msgOK, "Synchronous pulse guide found OK")
                                 Else
-                                    LogMsg(p_Name, MessageLevel.msgIssue, "Synchronous pulseguide expected but IsPulseGuiding has returned TRUE")
+                                    LogMsg(p_Name, MessageLevel.msgIssue, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE")
                                 End If
                             End If
                         End If
 
                     Case OptionalMethodType.SideOfPierWrite
                         'SideOfPier Write
-                        If canSetPierside Then 'Can set pierside so test if we can
+                        If canSetPierside Then 'Can set pier side so test if we can
                             SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0), 0.0, "Slewing to far start point")
                             If TestStop() Then Exit Sub
 
@@ -3446,7 +3446,7 @@ Friend Class TelescopeTester
                                 Case Else 'Unknown pier side
                                     LogMsg(p_Name, MessageLevel.msgError, "Unknown PierSide: " & m_SideOfPier.ToString)
                             End Select
-                        Else 'Can't set pierside so it should generate an error
+                        Else 'Can't set pier side so it should generate an error
                             Try
                                 LogMsg(p_Name, MessageLevel.msgDebug, "Attempting to set SideOfPier")
                                 If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set SideOfPier property to " & PierSide.pierEast)
@@ -3530,7 +3530,7 @@ Friend Class TelescopeTester
                 If IsInvalidValueException(p_Name, ex) Then
                     LogMsg(p_Name, MessageLevel.msgOK, "Received an invalid value exception")
                 Else
-                    If p_Type = OptionalMethodType.SideOfPierWrite Then ' PierSide is actually a property evn though I have it in the methods section!!
+                    If p_Type = OptionalMethodType.SideOfPierWrite Then ' PierSide is actually a property even though I have it in the methods section!!
                         HandleException(p_Name, MemberType.Property, Required.MustNotBeImplemented, ex, "Can" & p_Name & " is False")
                     Else
                         HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "Can" & p_Name & " is False")
@@ -3695,7 +3695,7 @@ Friend Class TelescopeTester
                 Status(StatusType.staAction, "Set lower rate")
                 'Test that error is generated on attempt to set rate lower than minimum
                 Try
-                    If l_RateMinimum > 0 Then ' choose a value between the minumum and zero
+                    If l_RateMinimum > 0 Then ' choose a value between the minimum and zero
                         l_MoveRate = l_RateMinimum / 2.0
                     Else ' Choose a large negative value
                         l_MoveRate = -l_RateMaximum - 1.0
@@ -3703,12 +3703,12 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgDebug, "Using minimum rate: " & l_MoveRate)
                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call MoveAxis method for axis " & p_Axis & " at speed " & l_MoveRate)
                     telescopeDevice.MoveAxis(p_Axis, l_MoveRate) ' Set a value lower than the minimum
-                    LogMsg(p_Name, MessageLevel.msgIssue, "No exception raised when moveaxis value < minimum rate: " & l_MoveRate)
+                    LogMsg(p_Name, MessageLevel.msgIssue, "No exception raised when move axis value < minimum rate: " & l_MoveRate)
                     'Clean up and release each object after use
                     Try : Marshal.ReleaseComObject(l_Rate) : Catch : End Try
                     l_Rate = Nothing
                 Catch ex As Exception
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when moveaxis is set below lowest rate (" & l_MoveRate & ")", "Exception correctly generated when moveaxis is set below lowest rate (" & l_MoveRate & ")")
+                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set below lowest rate (" & l_MoveRate & ")", "Exception correctly generated when move axis is set below lowest rate (" & l_MoveRate & ")")
                 End Try
                 'Clean up and release each object after use
                 Try : Marshal.ReleaseComObject(l_Rate) : Catch : End Try
@@ -3722,12 +3722,12 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgDebug, "Using maximum rate: " & l_MoveRate)
                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call MoveAxis method for axis " & p_Axis & " at speed " & l_MoveRate)
                     telescopeDevice.MoveAxis(p_Axis, l_MoveRate) ' Set a value higher than the maximum
-                    LogMsg(p_Name, MessageLevel.msgIssue, "No exception raised when moveaxis value > maximum rate: " & l_MoveRate)
+                    LogMsg(p_Name, MessageLevel.msgIssue, "No exception raised when move axis value > maximum rate: " & l_MoveRate)
                     'Clean up and release each object after use
                     Try : Marshal.ReleaseComObject(l_Rate) : Catch : End Try
                     l_Rate = Nothing
                 Catch ex As Exception
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when moveaxis is set above highest rate (" & l_MoveRate & ")", "Exception correctly generated when moveaxis is set above highest rate (" & l_MoveRate & ")")
+                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "when move axis is set above highest rate (" & l_MoveRate & ")", "Exception correctly generated when move axis is set above highest rate (" & l_MoveRate & ")")
                 End Try
                 'Clean up and release each object after use
                 Try : Marshal.ReleaseComObject(l_Rate) : Catch : End Try
@@ -3816,7 +3816,7 @@ Friend Class TelescopeTester
                     End If
                     If TestStop() Then Exit Sub
 
-                    'Confirm that tracking state is correctly restored after a moveaxis command
+                    'Confirm that tracking state is correctly restored after a move axis command
                     Try
                         Status(StatusType.staAction, "Tracking state restore")
                         If canSetTracking Then
@@ -3832,7 +3832,7 @@ Friend Class TelescopeTester
                             If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
                             l_TrackingEnd = telescopeDevice.Tracking 'Save the final tracking state
                             If l_TrackingStart = l_TrackingEnd Then 'Successfully retained tracking state
-                                If l_TrackingStart Then 'Tracking is true so switch to false for return movment
+                                If l_TrackingStart Then 'Tracking is true so switch to false for return movement
                                     Status(StatusType.staStatus, "Set tracking off")
                                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property false")
                                     telescopeDevice.Tracking = False
@@ -3849,7 +3849,7 @@ Friend Class TelescopeTester
                                     Else
                                         LogMsg(p_Name, MessageLevel.msgIssue, "Tracking state correctly retained when tracking is " & l_TrackingStart.ToString & ", but not when tracking is false")
                                     End If
-                                Else 'Tracking false so switch to true for return movment
+                                Else 'Tracking false so switch to true for return movement
                                     Status(StatusType.staStatus, "Set tracking on")
                                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property true")
                                     telescopeDevice.Tracking = True
@@ -3932,12 +3932,12 @@ Friend Class TelescopeTester
         'Slew to starting position
         LogMsg("SideofPier", MessageLevel.msgDebug, "Starting Side of Pier tests")
 
-        Status(StatusType.staTest, "Sideof pier tests")
+        Status(StatusType.staTest, "Side of pier tests")
         l_StartRA = TelescopeRAFromHourAngle("SideofPier", -3.0)
         If m_SiteLatitude > 0.0 Then ' We are in the northern hemisphere
             l_Declination3 = 90.0 - ((180.0 - m_SiteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR) ' Calculate for northern hemisphere
             l_Declination9 = 90.0 - m_SiteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR
-        Else ' We are in the sourthern hemisphere
+        Else ' We are in the southern hemisphere
             l_Declination3 = -90.0 + ((180.0 + m_SiteLatitude) * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR) ' Calculate for southern hemisphere
             l_Declination9 = -90.0 - m_SiteLatitude * SIDE_OF_PIER_TARGET_DECLINATION_ESTIMATOR
         End If
@@ -3961,7 +3961,7 @@ Friend Class TelescopeTester
         Else ' Make other tests
             If (l_PierSideMinus3.SideOfPier = l_PierSideMinus9.SideOfPier) And (l_PierSidePlus3.SideOfPier = l_PierSidePlus9.SideOfPier) Then
                 LogMsg("SideofPier", MessageLevel.msgOK, "Reports the pointing state of the mount as expected")
-            Else 'Don't know ewhat this means!
+            Else 'Don't know what this means!
                 LogMsg("SideofPier", MessageLevel.msgInfo, "Unknown SideofPier reporting model: HA-3: " & l_PierSideMinus3.SideOfPier.ToString & " HA-9: " & l_PierSideMinus9.SideOfPier.ToString & " HA+3: " & l_PierSidePlus3.SideOfPier.ToString & " HA+9: " & l_PierSidePlus9.SideOfPier.ToString)
             End If
         End If
@@ -4086,7 +4086,7 @@ Friend Class TelescopeTester
             If (l_PierSideMinus3 = l_PierSideMinus9) And (l_PierSidePlus3 = l_PierSidePlus9) Then
                 LogMsg("DestinationSideofPier", MessageLevel.msgOK, "The driver reports the pointing state of the mount")
             Else 'Don't know what this means!
-                LogMsg("DestinationSideofPier", MessageLevel.msgInfo, "Unknown pierside reporting model: HA-3: " & l_PierSideMinus3.ToString & " HA-9: " & l_PierSideMinus9.ToString & " HA+3: " & l_PierSidePlus3.ToString & " HA+9: " & l_PierSidePlus9.ToString)
+                LogMsg("DestinationSideofPier", MessageLevel.msgInfo, "Unknown pier side reporting model: HA-3: " & l_PierSideMinus3.ToString & " HA-9: " & l_PierSideMinus9.ToString & " HA+3: " & l_PierSidePlus3.ToString & " HA+9: " & l_PierSidePlus9.ToString)
             End If
         End If
         telescopeDevice.Tracking = False
@@ -4236,7 +4236,7 @@ Friend Class TelescopeTester
         'Create a legal RA based on an offset from Sidereal time
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
         CurrentSiderealTime = telescopeDevice.SiderealTime
-        Select Case CurrentSiderealTime 'Deal with possibilty that sidereal time from the driver is bad
+        Select Case CurrentSiderealTime 'Deal with possibility that sidereal time from the driver is bad
             Case Is < 0.0 'Illegal if < 0 hours
                 CurrentSiderealTime = 0
             Case Is >= 24.0 'Illegal if > 24 hours
@@ -4372,7 +4372,7 @@ Friend Class TelescopeTester
                         Case Axis.RA
                             If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to set RightAscensionRate property to {1}", Description, Rate))
                             telescopeDevice.RightAscensionRate = Rate
-                            SetStatus(String.Format("Wating for mount to settle after setting RightAcensionRate to {0}", Rate), "", "")
+                            SetStatus(String.Format("Watling for mount to settle after setting RightAcensionRate to {0}", Rate), "", "")
                             WaitFor(2000) ' Give a short wait to allow the mount to settle
 
                             ' Value set OK, now check that the new rate is returned by RightAscensionRate Get and that Slewing is false
@@ -4393,7 +4393,7 @@ Friend Class TelescopeTester
                         Case Axis.Dec
                             If g_Settings.DisplayMethodCalls Then LogMsg(TestName, MessageLevel.msgComment, String.Format("{0} - About to set DeclinationRate property to {1}", Description, Rate))
                             telescopeDevice.DeclinationRate = Rate
-                            SetStatus(String.Format("Wating for mount to settle after setting DeclinationRate to {0}", Rate), "", "")
+                            SetStatus(String.Format("Watling for mount to settle after setting DeclinationRate to {0}", Rate), "", "")
                             WaitFor(2000) ' Give a short wait to allow the mount to settle
 
                             ' Value set OK, now check that the new rate is returned by DeclinationRate Get and that Slewing is false
@@ -4416,7 +4416,7 @@ Friend Class TelescopeTester
                     End Select
 
                 Catch ex As Exception
-                    If IsInvalidOperationException(TestName, ex) Then ' We can't knwo what the valid range for this telescope is in advance so its possible that our test value will be rejected, if so just report this.
+                    If IsInvalidOperationException(TestName, ex) Then ' We can't know what the valid range for this telescope is in advance so its possible that our test value will be rejected, if so just report this.
                         LogMsg(TestName, MessageLevel.msgInfo, String.Format("Unable to set test rate {0}, it was rejected as an invalid value.", Rate))
                     Else
                         HandleException(TestName, MemberType.Property, Required.MustBeImplemented, ex, "CanSetRightAscensionRate is True")
@@ -4506,7 +4506,7 @@ Friend Class TelescopeTester
         Dim l_Declination, l_StartRA As Double
 
         'Slew to starting position
-        Status(StatusType.staTest, "Sideof pier tests")
+        Status(StatusType.staTest, "Side of pier tests")
         l_StartRA = TelescopeRAFromHourAngle("SideofPier", -3.0)
         l_Declination = 60.0
 
@@ -4532,7 +4532,7 @@ Friend Class TelescopeTester
         Else ' Make other tests
             If (l_PierSideMinus3.SideOfPier = l_PierSideMinus9.SideOfPier) And (l_PierSidePlus3.SideOfPier = l_PierSidePlus9.SideOfPier) Then
                 LogMsg("SideofPier", MessageLevel.msgOK, "Reports the pointing state of the mount as expected")
-            Else 'Don't know ewhat this means!
+            Else 'Don't know what this means!
                 LogMsg("SideofPier", MessageLevel.msgInfo, "Unknown SideofPier reporting model: HA-3: " & l_PierSideMinus3.SideOfPier.ToString & " HA-9: " & l_PierSideMinus9.SideOfPier.ToString & " HA+3: " & l_PierSidePlus3.SideOfPier.ToString & " HA+9: " & l_PierSidePlus9.SideOfPier.ToString)
                 LogMsg("SideofPier", MessageLevel.msgInfo, TranslatePierSide(l_PierSideMinus9.SideOfPier, False) & TranslatePierSide(l_PierSidePlus9.SideOfPier, False))
                 LogMsg("SideofPier", MessageLevel.msgInfo, TranslatePierSide(l_PierSideMinus3.SideOfPier, False) & TranslatePierSide(l_PierSidePlus3.SideOfPier, False))
@@ -4596,7 +4596,7 @@ Friend Class TelescopeTester
         Dim l_FlipPoint, l_TargetDEC As Double
 
 
-        LogMsg("FlipCheck", MessageLevel.msgOK, "Test parameters - Start DEC: " & p_DECStart.ToString & " End DEC: " & p_DECEnd.ToString & " DEC Stepsize: " & p_DECStep.ToString & " Start HA: " & p_HAStart & " End HA: " & p_HAEnd)
+        LogMsg("FlipCheck", MessageLevel.msgOK, "Test parameters - Start DEC: " & p_DECStart.ToString & " End DEC: " & p_DECEnd.ToString & " DEC Step size: " & p_DECStep.ToString & " Start HA: " & p_HAStart & " End HA: " & p_HAEnd)
         LogMsg("", MessageLevel.msgAlways, "")
 
         For l_TargetDEC = p_DECStart To p_DECEnd Step p_DECStep
@@ -4626,11 +4626,11 @@ Friend Class TelescopeTester
                 Case FlipTestType.SideOfPier
                     'Move scope to requested position
                     SlewScope(TelescopeRAFromHourAngle("FlipRange: " & l_SideOfPier.ToString, l_TargetHA), p_TargetDEC, "Moving to requested position")
-                    l_TargetSideOfPier = telescopeDevice.SideOfPier 'Record pierside of target RA, DEC
+                    l_TargetSideOfPier = telescopeDevice.SideOfPier 'Record pier side of target RA, DEC
                 Case Else
                     MsgBox("TelescopeFindFlipPoint - unexpected test type: " & p_TestType.ToString, MsgBoxStyle.Critical)
             End Select
-            Select Case l_TargetSideOfPier 'Check outcome interms of pierside and then adjust parameters to home in on correct value
+            Select Case l_TargetSideOfPier 'Check outcome in terms of pier side and then adjust parameters to home in on correct value
                 Case l_SideOfPier 'We have come back too far so go further out
                     l_Temp = l_TargetHA
                     l_TargetHA = l_TargetHA + (l_EndHARange - l_StartHARange) / 2.0

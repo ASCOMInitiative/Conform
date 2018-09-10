@@ -58,8 +58,8 @@ Module GlobalVarsAndCode
     Friend Const EX_NET As String = ".NET - Exception: "
     Friend Const EX_COM As String = "COM - Exception: "
     Friend Const PERF_LOOP_TIME As Integer = 5 'Performance loop run time in seconds
-    Friend Const SLEEP_TIME As Integer = 200 'Loop time for testing wherther slewing has completed
-    Friend Const CAMERA_SLEEP_TIME As Integer = 10 'Loop time for testing wherther camera events have completed
+    Friend Const SLEEP_TIME As Integer = 200 'Loop time for testing whether slewing has completed
+    Friend Const CAMERA_SLEEP_TIME As Integer = 10 'Loop time for testing whether camera events have completed
     Friend Const DEVICE_DESTROY_WAIT = 500 'Time to wait after destroying a device before continuing
 
     'TelescopeTest Constants
@@ -126,7 +126,7 @@ Module GlobalVarsAndCode
     Friend g_TelescopeTests As New Generic.Dictionary(Of String, CheckState)
 
     Friend Sub SetTelescopeTestOptions()
-        'Set up list of Telescope Tests called from main and setup forms onload events
+        'Set up list of Telescope Tests called from main and setup forms on-load events
         g_TelescopeTests.Add(TELTEST_CAN_MOVE_AXIS, CheckState.Checked)
         g_TelescopeTests.Add(TELTEST_PARK_UNPARK, CheckState.Checked)
         g_TelescopeTests.Add(TELTEST_ABORT_SLEW, CheckState.Checked)
@@ -182,7 +182,7 @@ Module GlobalVarsAndCode
         If WaitDuration > SLEEP_TIME Then WaitDuration = SLEEP_TIME
         If WaitDuration < 1 Then WaitDuration = 1
         'Wait for p_Duration milliseconds
-        l_StartTime = Now 'Save starttime
+        l_StartTime = Now 'Save start time
         Do
             System.Threading.Thread.Sleep(WaitDuration)
             Application.DoEvents()

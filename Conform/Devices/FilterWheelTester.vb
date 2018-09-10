@@ -30,7 +30,7 @@
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the FilterWheel object (useful for retaining driver in memory to change flags)
                 Try : m_FilterWheel.Connected = False : Catch : End Try
                 Try : m_FilterWheel.Dispose() : Catch : End Try
                 'Try : Marshal.ReleaseComObject(m_FilterWheel) : Catch : End Try
@@ -49,8 +49,8 @@
 #Region "Code"
 
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
 
         Select Case g_FilterWheelProgID
@@ -123,7 +123,7 @@
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessFilterWheel.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -176,9 +176,9 @@
                 SetStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", Now.Subtract(StartTime).Seconds & " second(s)")
                 WaitFor(SLEEP_TIME)
             Loop Until (m_FilterWheel.Position <> FWTEST_IS_MOVING) Or (Now.Subtract(StartTime).TotalSeconds > FWTEST_TIMEOUT) ' Wait until movement has stopped or 30 seconds have passed
-            If m_FilterWheel.Position <> FWTEST_IS_MOVING Then LogMsg("Pre-run Check", MessageLevel.msgOK, "Filterwheel is stationary, ready to start tests")
+            If m_FilterWheel.Position <> FWTEST_IS_MOVING Then LogMsg("Pre-run Check", MessageLevel.msgOK, "Filter wheel is stationary, ready to start tests")
         Catch ex As Exception
-            LogMsg("Pre-run Check", MessageLevel.msgInfo, "Unable to determine that the Filterwheel is stationary")
+            LogMsg("Pre-run Check", MessageLevel.msgInfo, "Unable to determine that the Filter wheel is stationary")
             LogMsg("Pre-run Check", MessageLevel.msgError, "Exception: " & ex.ToString)
         End Try
         SetStatus("", "", "")
@@ -256,7 +256,7 @@
                 Try
                     l_StartFilterNumber = m_FilterWheel.Position
                     If (l_StartFilterNumber < 0) Or (l_StartFilterNumber >= l_NOffsets) Then 'Illegal starting position provided
-                        LogMsg("Position Get", MessageLevel.msgError, "Illegal filter posiiton returned: " & l_StartFilterNumber.ToString)
+                        LogMsg("Position Get", MessageLevel.msgError, "Illegal filter position returned: " & l_StartFilterNumber.ToString)
                     Else 'Legal value returned
                         LogMsg("Position Get", MessageLevel.msgOK, "Currently at position: " & i.ToString)
                         For i = 0 To CShort(l_NOffsets - 1)

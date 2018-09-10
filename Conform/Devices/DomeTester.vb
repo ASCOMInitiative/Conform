@@ -87,7 +87,7 @@ Friend Class DomeTester
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the Dome object (useful for retaining driver in memory to change flags
                 Try : m_Dome.Connected = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_Dome) : Catch : End Try
                 m_Dome = Nothing
@@ -104,8 +104,8 @@ Friend Class DomeTester
 
 #Region "Code"
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
         Select Case g_DomeProgID.ToUpper
             Case Else 'I'm using the simulator values as the defaults since it is the reference platform
@@ -178,7 +178,7 @@ Friend Class DomeTester
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessDome.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -388,7 +388,7 @@ Friend Class DomeTester
         m_Dome.SlewToAltitude(p_Altitude)
         If m_CanReadSlewing Then 'Can read slewing so make sure dome is at rest
             l_StartTime = Now
-            If m_Dome.Slewing Then 'Async slew
+            If m_Dome.Slewing Then 'Asynchronous slew
                 DomeWaitForSlew(g_Settings.DomeAltitudeTimeout) : If TestStop() Then Exit Sub
                 m_AsyncSlewAltitude = True
                 LogMsg(p_Name & " " & p_Altitude, MessageLevel.msgOK, "Asynchronous slew OK")
@@ -411,7 +411,7 @@ Friend Class DomeTester
             m_Dome.SlewToAzimuth(p_Azimuth)
         End If
         If m_CanReadSlewing Then 'Can read slewing so make sure dome is at rest
-            If m_Dome.Slewing Then 'Async slew
+            If m_Dome.Slewing Then 'Asynchronous slew
                 DomeWaitForSlew(g_Settings.DomeAzimuthTimeout) : If TestStop() Then Exit Sub
                 m_AsyncSlewAzimuth = True
                 LogMsg(p_Name & " " & p_Azimuth, MessageLevel.msgOK, "Asynchronous slew OK")
@@ -434,7 +434,7 @@ Friend Class DomeTester
         Loop Until Not m_Dome.Slewing Or TestStop() Or (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut)
         Status(StatusType.staStatus, "")
         If (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut) Then
-            LogMsg("DomeWaitForSlew", MessageLevel.msgError, "Timed out waiting for Dome slew, consider increasing timeouts in Options/Conform Options")
+            LogMsg("DomeWaitForSlew", MessageLevel.msgError, "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options")
         End If
     End Sub
     Private Sub DomeMandatoryTest(ByVal p_Type As DomePropertyMethod, ByVal p_Name As String)
@@ -499,7 +499,7 @@ Friend Class DomeTester
                     m_Dome.AbortSlew()
                     'Confirm that slaved is false
                     If m_CanReadSlaved Then 'Check it is false
-                        If m_Dome.Slaved Then 'Should not be showing slaved after abortslew
+                        If m_Dome.Slaved Then 'Should not be showing slaved after AbortSlew
                             LogMsg("AbortSlew", MessageLevel.msgError, "Slaved property is true after AbortSlew")
                         Else ' Not slaved so fine
                             LogMsg("AbortSlew", MessageLevel.msgOK, "AbortSlew command issued successfully")
@@ -543,7 +543,7 @@ Friend Class DomeTester
                     m_CanReadShutterStatus = False
                     m_ShutterStatus = m_Dome.ShutterStatus
                     m_CanReadShutterStatus = True
-                    m_ShutterStatus = CType(m_ShutterStatus, ShutterState) 'In relase mode only an integer value is returned
+                    m_ShutterStatus = CType(m_ShutterStatus, ShutterState) 'In release mode only an integer value is returned
                     LogMsg(p_Name, MessageLevel.msgOK, m_ShutterStatus.ToString)
                 Case DomePropertyMethod.SlavedWrite
                     If m_CanSlave Then 'Write test should succeed
@@ -561,7 +561,7 @@ Friend Class DomeTester
                     Else 'Slaved write should generate an exception
                         m_Dome.Slaved = True
                         LogMsg(p_Name, MessageLevel.msgError, "CanSlave is false but setting Slaved true did not raise an exception")
-                        m_Dome.Slaved = False 'Unslave to continue tests
+                        m_Dome.Slaved = False 'Un-slave to continue tests
                     End If
                     'Methods
                 Case DomePropertyMethod.CloseShutter
@@ -599,7 +599,7 @@ Friend Class DomeTester
                             Loop Until Not m_Dome.Slewing Or TestStop()
                         End If
                         If Not TestStop() Then 'Only do remaining tests if stop hasn't been pressed
-                            If m_CanReadAtHome Then 'Can read athome so confirm that it 
+                            If m_CanReadAtHome Then 'Can read AtHome so confirm that it 
                                 If m_Dome.AtHome Then 'Dome shows as homed - hooray!
                                     LogMsg(p_Name, MessageLevel.msgOK, "Dome homed successfully")
                                 Else 'Home completed but apparently dome isn't homed!
@@ -701,7 +701,7 @@ Friend Class DomeTester
                     End If
 
                 Case DomePropertyMethod.SlewToAzimuth
-                    If m_CanSetAzimuth Then 'Can set azimuth so SlewToAzimuth sould succeed
+                    If m_CanSetAzimuth Then 'Can set azimuth so SlewToAzimuth should succeed
                         Status(StatusType.staTest, p_Name)
 #If DEBUG Then
                         For l_SlewAngle = 0 To 30 Step 30
@@ -744,11 +744,11 @@ Friend Class DomeTester
                                 ' OK Dome hasn't moved but should now show azimuth as a new value
                                 Select Case Math.Abs(l_NewAzimuth - m_Dome.Azimuth)
                                     Case Is < 1.0 'very close so give it an OK
-                                        LogMsg(p_Name, MessageLevel.msgOK, "Dome sync'd OK to within +- 1 degree")
+                                        LogMsg(p_Name, MessageLevel.msgOK, "Dome synced OK to within +- 1 degree")
                                     Case Is < 2.0 'close so give it an INFO
-                                        LogMsg(p_Name, MessageLevel.msgInfo, "Dome sync'd to within +- 2 degrees")
-                                    Case Is < 5.0 'Closeish so give an issue
-                                        LogMsg(p_Name, MessageLevel.msgIssue, "Dome only sync'd to within +- 5 degrees")
+                                        LogMsg(p_Name, MessageLevel.msgInfo, "Dome synced to within +- 2 degrees")
+                                    Case Is < 5.0 'Closish so give an issue
+                                        LogMsg(p_Name, MessageLevel.msgIssue, "Dome only synced to within +- 5 degrees")
                                     Case (DOME_SYNC_OFFSET - 2.0) To (DOME_SYNC_OFFSET + 2) 'Hasn't really moved
                                         LogMsg(p_Name, MessageLevel.msgError, "Dome did not sync, Azimuth didn't change value after sync command")
                                     Case Else 'Something else!
@@ -757,8 +757,8 @@ Friend Class DomeTester
                                 'Now try and restore original value
                                 m_Dome.SyncToAzimuth(l_OriginalAzimuth)
                             Else 'Can't read azimuth so can only test that command completes
-                                m_Dome.SyncToAzimuth(45.0) 'Sync to an arbitary direction
-                                LogMsg(p_Name, MessageLevel.msgOK, "Dome successfully sync'd to 45 degrees but unable to read azimuth to confirm this")
+                                m_Dome.SyncToAzimuth(45.0) 'Sync to an arbitrary direction
+                                LogMsg(p_Name, MessageLevel.msgOK, "Dome successfully synced to 45 degrees but unable to read azimuth to confirm this")
                             End If
 
                             'Now test sync to illegal values
@@ -901,11 +901,11 @@ Friend Class DomeTester
             Else 'Can't read shutter status so don't try
                 LogMsg(p_Name, MessageLevel.msgDebug, "Can't read shutter status!")
                 If p_RequiredShutterState = ShutterState.shutterClosed Then 'Testing ShutterClose
-                    'Just issue command to seee if it doesn't generate an error
+                    'Just issue command to see if it doesn't generate an error
                     m_Dome.CloseShutter()
                     Call DomeStabliisationWait()
                 Else 'Testing ShutterOpen
-                    'Just issue command to seee if it doesn't generate an error
+                    'Just issue command to see if it doesn't generate an error
                     m_Dome.OpenShutter()
                     Call DomeStabliisationWait()
                 End If

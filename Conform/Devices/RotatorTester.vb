@@ -44,7 +44,7 @@
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the rotator object (useful for retaining driver in memory to change flags)
                 Try : m_Rotator.Connected = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_Rotator) : Catch : End Try
                 m_Rotator = Nothing
@@ -62,8 +62,8 @@
 #Region "Code"
 
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
 
         Select Case g_RotatorProgID
@@ -136,7 +136,7 @@
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessRotator.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -202,7 +202,7 @@
                 WaitFor(500)
                 Status(StatusType.staStatus, Now.Subtract(l_Now).TotalSeconds & "/" & ROTATOR_WAIT_LIMIT)
             Loop Until (Not m_Rotator.IsMoving) Or (Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT)
-            If Not m_Rotator.IsMoving Then 'Rotator is stoped so OK
+            If Not m_Rotator.IsMoving Then 'Rotator is stopped so OK
                 g_Stop = False 'Clear stop flag to allow other tests to run
             Else 'Report error message and don't do other tests
                 LogMsg("Pre-run Check", MessageLevel.msgError, "Rotator still moving after " & ROTATOR_WAIT_LIMIT & "seconds, IsMoving stuck on?")
@@ -351,7 +351,7 @@
             Select Case p_type
                 Case RotatorPropertyMethod.Move
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Reading rotator start position: " & m_CanReadPosition)
-                    If m_CanReadPosition Then 'Get us to a startig point of 10 degrees
+                    If m_CanReadPosition Then 'Get us to a starting point of 10 degrees
                         l_RotatorStartPosition = m_Rotator.Position
                     End If
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Starting relative move")
@@ -366,7 +366,7 @@
                     LogMsg(p_Name, MessageLevel.msgError, "RotatorMoveTest: Unknown test type - " & p_type.ToString)
             End Select
             RotatorWait(p_type, p_Name, p_Value, l_RotatorStartPosition)
-            If m_LastMoveWasAsync Then 'Async move
+            If m_LastMoveWasAsync Then 'Asynchronous move
                 Select Case p_type
                     Case RotatorPropertyMethod.Move
                         If m_CanReadPosition Then
@@ -392,7 +392,7 @@
             'Now test whether we got to where we expected to go
             If m_CanReadPosition Then
                 If m_CanReadStepSize Then
-                    l_OKLimit = 1.1 * m_RotatorStepSize ' Set to 110% of stepsize to allow tolerance on reporting within 1 setp of required location
+                    l_OKLimit = 1.1 * m_RotatorStepSize ' Set to 110% of step size to allow tolerance on reporting within 1 step of required location
                 Else
                     l_OKLimit = ROTATOR_OK_TOLERANCE
                 End If
@@ -449,7 +449,7 @@
     End Sub
     Private Sub RotatorWait(ByVal p_type As RotatorPropertyMethod, ByVal p_Name As String, ByVal p_value As Single, ByVal p_RotatorStartPosition As Single)
         LogMsg("RotatorWait", MessageLevel.msgDebug, "Entered RotatorWait")
-        If m_CanReadIsMoving Then 'Can read ismoving so test for async and sync behaviour
+        If m_CanReadIsMoving Then 'Can read IsMoving so test for asynchronous and synchronous behaviour
             LogMsg("RotatorWait", MessageLevel.msgDebug, "Can Read IsMoving OK")
             If m_Rotator.IsMoving Then
                 LogMsg("RotatorWait", MessageLevel.msgDebug, "Rotator is moving, waiting for move to complete")
@@ -460,7 +460,7 @@
                     If m_CanReadPosition Then 'Only do this if position doesn't generate an exception
                         Select Case p_type
                             Case RotatorPropertyMethod.Move
-                                Status(StatusType.staStatus, System.Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & p_value & " releative")
+                                Status(StatusType.staStatus, System.Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & p_value & " relative")
                             Case RotatorPropertyMethod.MoveAbsolute
                                 Status(StatusType.staStatus, System.Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & System.Math.Abs(p_value - p_RotatorStartPosition) & " absolute")
                         End Select
@@ -473,7 +473,7 @@
             Else
                 m_LastMoveWasAsync = False
             End If
-        Else 'Can only test for synchroous move
+        Else 'Can only test for synchronous move
             LogMsg("RotatorWait", MessageLevel.msgDebug, "Cannot Read IsMoving")
             m_LastMoveWasAsync = False
         End If

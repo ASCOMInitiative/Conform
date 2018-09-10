@@ -1,4 +1,4 @@
-﻿'Base class from which particular device testers are derrived
+﻿'Base class from which particular device testers are derived
 'Put all common elements in here
 Imports ASCOM.DeviceInterface
 Imports System.Threading
@@ -63,7 +63,7 @@ Friend Class DeviceTesterBaseClass
     ''' <param name="HasPreRunCheck">Device requires a pre run safety check </param>
     ''' <param name="HasPreConnectCheck">Device requires a pre connection check</param>
     ''' <param name="HasPerformanceCheck">Device has a performance test</param>
-    ''' <param name="HasPostRunCheck">Device requiures a post run safety check</param>
+    ''' <param name="HasPostRunCheck">Device requires a post run safety check</param>
     ''' <remarks></remarks>
     Sub New(HasCanProperties As Boolean, HasProperties As Boolean, HasMethods As Boolean, HasPreRunCheck As Boolean, HasPreConnectCheck As Boolean, HasPerformanceCheck As Boolean, HasPostRunCheck As Boolean)
         MyBase.New()
@@ -93,7 +93,7 @@ Friend Class DeviceTesterBaseClass
 
     ' This code added by Visual Basic to correctly implement the disposable pattern.
     Public Sub Dispose() Implements IDisposable.Dispose
-        ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+        ' Do not change this code.  Put clean-up code in Dispose(ByVal disposing As Boolean) above.
         Dispose(True)
         GC.SuppressFinalize(Me)
     End Sub
@@ -239,7 +239,7 @@ Friend Class DeviceTesterBaseClass
         'Action - optional but cannot be tested
         LogMsg("Action", MessageLevel.msgInfo, "Conform cannot test the Action method")
 
-        'Supported actions - Optional but Required through Driveraccess
+        'Supported actions - Optional but Required through DriverAccess
         Try
             If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method SupportedActions")
             SA = Device.SupportedActions()
@@ -355,7 +355,7 @@ Friend Class DeviceTesterBaseClass
     ''' <summary>
     ''' Get error codes.
     ''' </summary>
-    ''' <param name="p_ProgID">The p_ prog ID.</param>
+    ''' <param name="p_ProgID">The ProgID.</param>
     Protected Sub CheckInitialise(ByVal p_ProgID As String)
         Dim Prof As ASCOM.Utilities.RegistryAccess
         Prof = New ASCOM.Utilities.RegistryAccess
@@ -453,7 +453,7 @@ Friend Class DeviceTesterBaseClass
                             LogMsg("AccessChecks", MessageLevel.msgInfo, "The driver implements interface: " & l_Type.FullName)
                         Next
                     Catch ex As Exception
-                        LogMsg("AccessChecks", MessageLevel.msgError, "Error reading driver characteristsics: " & ex.Message)
+                        LogMsg("AccessChecks", MessageLevel.msgError, "Error reading driver characteristics: " & ex.Message)
                         LogMsg("", MessageLevel.msgAlways, "")
                     End Try
                 Catch ex As Exception
@@ -488,10 +488,10 @@ Friend Class DeviceTesterBaseClass
     End Sub
 
     Overridable Sub CreateDevice()
-        LogMsg("CreateDevice", MessageLevel.msgError, "DeviceTester base Class warning messagev")
+        LogMsg("CreateDevice", MessageLevel.msgError, "DeviceTester base Class warning message")
     End Sub
     Overridable Sub PreConnectChecks()
-        LogMsg("PreConnectChecks", MessageLevel.msgError, "DeviceTester base Class warning messagev")
+        LogMsg("PreConnectChecks", MessageLevel.msgError, "DeviceTester base Class warning message")
     End Sub
 
     Overridable Property Connected() As Boolean
@@ -535,7 +535,7 @@ Friend Class DeviceTesterBaseClass
             Case GlobalVarsAndCode.SpecialTests.TelescopeCommands
                 SpecialTelescopeCommands()
             Case Else
-                MsgBox("Devicetester BaseClass:SpecialTests - Unknown test: " & p_Test.ToString, MsgBoxStyle.Critical)
+                MsgBox("DeviceTesterBaseClass:SpecialTests - Unknown test: " & p_Test.ToString, MsgBoxStyle.Critical)
         End Select
     End Sub
     Protected Overridable Sub SpecialTelescopeSideOfPier()
@@ -624,7 +624,7 @@ Friend Class DeviceTesterBaseClass
 #Else
                         m_CommandString = Device.CommandString(l_CmdSent)
 #End If
-                        If Not g_CmdStrings.ReturnString Is Nothing Then 'Valid return string toi test
+                        If Not g_CmdStrings.ReturnString Is Nothing Then 'Valid return string to test
                             If m_CommandString = g_CmdStrings.ReturnString Then
                                 LogMsg(p_Name, MessageLevel.msgOK, "Sent string """ & g_CmdStrings.CommandString & """ - Received string: """ & m_CommandString & """")
                             Else
@@ -731,7 +731,7 @@ Friend Class DeviceTesterBaseClass
         IsMethodNotImplementedException = False ' Set false default value
 
         Try
-            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indciates that it is a not implemented exception
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 COMException = CType(deviceException, COMException)
                 If (COMException.ErrorCode = g_ExNotImplemented) Or (COMException.ErrorCode = ErrorCodes.NotImplemented) Then ' This is a not implemented exception
                     IsMethodNotImplementedException = True
@@ -757,7 +757,7 @@ Friend Class DeviceTesterBaseClass
         IsPropertyNotImplementedException = False ' Set false default value
 
         Try
-            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indciates that it is a not implemented exception
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is a not implemented exception
                 COMException = CType(deviceException, COMException)
                 If (COMException.ErrorCode = g_ExNotImplemented) Or (COMException.ErrorCode = ErrorCodes.NotImplemented) Then ' This is a not implemented exception
                     IsPropertyNotImplementedException = True
@@ -783,7 +783,7 @@ Friend Class DeviceTesterBaseClass
         IsInvalidValueException = False ' Set false default value
 
         Try
-            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indciates that it is an invalid value exception
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is an invalid value exception
                 COMException = CType(deviceException, COMException)
                 If (COMException.ErrorCode = ErrorCodes.InvalidValue) Or
                    (COMException.ErrorCode = g_ExInvalidValue1) Or
@@ -828,7 +828,7 @@ Friend Class DeviceTesterBaseClass
         IsInvalidOperationException = False ' Set false default value
 
         Try
-            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indciates that it is an invalid operation exception
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is an invalid operation exception
                 COMException = CType(deviceException, COMException)
                 If (COMException.ErrorCode = ErrorCodes.InvalidOperationException) Then ' This is an invalid operation exception
                     IsInvalidOperationException = True
@@ -867,7 +867,7 @@ Friend Class DeviceTesterBaseClass
         IsNotSetException = False ' Set false default value
 
         Try
-            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indciates that it is a not set exception
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is a not set exception
                 COMException = CType(deviceException, COMException)
                 If (COMException.ErrorCode = g_ExNotSet1) Then ' This is a not set exception
                     IsNotSetException = True
@@ -900,14 +900,14 @@ Friend Class DeviceTesterBaseClass
                 Case Required.MustNotBeImplemented
                     LogMsg(MemberName, MessageLevel.msgOK, UserMessage & " and a " & GetExceptionName(ex) & " exception was generated as expected")
                 Case Required.MustBeImplemented
-                    LogMsg(MemberName, MessageLevel.msgIssue, UserMessage & " and a " & GetExceptionName(ex) & " exception was thrown, this method must must function per the ASCOM specification.")
+                    LogMsg(MemberName, MessageLevel.msgIssue, UserMessage & " and a " & GetExceptionName(ex) & " exception was thrown, this method must function per the ASCOM specification.")
                 Case Required.Optional
                     LogMsg(MemberName, MessageLevel.msgOK, "Optional member threw a " & GetExceptionName(ex) & " exception.")
                 Case Else
                     LogMsg(MemberName, MessageLevel.msgError, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired)
             End Select
 
-            ' Handle wrong type of not implemnented exceptions
+            ' Handle wrong type of not implemented exceptions
         ElseIf (TypeOf ex Is MethodNotImplementedException) And TypeOfMember = MemberType.Property Then ' We got a MethodNotImplementedException so this is an error
             LogMsg(MemberName, MessageLevel.msgIssue, "Received a MethodNotImplementedException instead of a PropertyNotImplementedException")
         ElseIf (TypeOf ex Is PropertyNotImplementedException) And TypeOfMember = MemberType.Method Then ' We got a PropertyNotImplementedException so this is an error
@@ -951,7 +951,7 @@ Friend Class DeviceTesterBaseClass
     End Sub
 
     ''' <summary>
-    ''' Get an exception name (and number if a COM or Driver execption)
+    ''' Get an exception name (and number if a COM or Driver exception)
     ''' </summary>
     ''' <param name="ex">Exception whose name is required</param>
     ''' <returns>String exception name</returns>
@@ -961,7 +961,7 @@ Friend Class DeviceTesterBaseClass
 
         ' Treat ASCOM exceptions specially
         If ex.GetType.FullName.ToUpper().Contains("ASCOM") Then
-            If ex.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver execption so add its number
+            If ex.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver exception so add its number
                 DriverEx = CType(ex, DriverException)
                 RetVal = "DriverException(0x" & DriverEx.Number.ToString("X8") & ")"
             Else ' Otherwise just use the ASCOM exception's name

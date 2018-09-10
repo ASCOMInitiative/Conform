@@ -6,7 +6,7 @@ Friend Class VideoTester
 
 #Region "Variables and Constants"
     Const CAMERA_PULSE_DURATION As Integer = 2000 'Duration of camera pulse guide test (ms)
-    Const CAMERA_PULSE_TOLERANCE As Integer = 300 'Tolerance for acceptab;e performance (ms)
+    Const CAMERA_PULSE_TOLERANCE As Integer = 300 'Tolerance for acceptable;e performance (ms)
 
     'Camera variables
     Private CanConfigureDeviceProperties, CanReadCameraState, CanReadSensorType, CanReadGain, CanReadGainMax, CanReadGainMin, CanReadGains, CanReadFrameRate As Boolean
@@ -98,7 +98,7 @@ Friend Class VideoTester
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the video object (useful for retaining driver in memory to change flags
                 Try : Video.Connected = False : Catch : End Try
                 Try : Video.Dispose() : Catch : End Try
                 Try : Marshal.ReleaseComObject(Video) : Catch : End Try
@@ -120,8 +120,8 @@ Friend Class VideoTester
     End Sub
 
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
         Select Case g_VideoCameraProgID.ToUpper
             Case Else 'I'm using the simulator values as the defaults since it is the reference platform
@@ -196,7 +196,7 @@ Friend Class VideoTester
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessCamera.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -437,7 +437,7 @@ Friend Class VideoTester
                                     Case 3 ' NumPlanes x Height x Width. NumPlanes should be 3
                                         CheckImage(ImageArrayAsArray, 3, Height, Width)
                                     Case Else
-                                        ' This is an unsuported rank 0 or >3 so create an error
+                                        ' This is an unsupported rank 0 or >3 so create an error
                                         LogMsg("ImageArray", MessageLevel.msgError, "  The zero based array rank must be 1, 2 or 3 . The returned array had rank: " & ImageArrayAsArray.Rank)
                                 End Select
                             Case Else
@@ -452,7 +452,7 @@ Friend Class VideoTester
                                         LogMsg("ImageArray", MessageLevel.msgError, "  The SensorType is not Colour and the array rank is 3. For non-colour sensors the array rank must be 1 or 2.")
                                         LogMsg("ImageArray", MessageLevel.msgInfo, "  Please see the IVideoFrame.ImageArray entry in the Platform Help file for allowed combinations of SensorType and ImageArray format.")
                                     Case Else
-                                        ' This is an unsuported rank 0 or >3 so create an error
+                                        ' This is an unsupported rank 0 or >3 so create an error
                                         LogMsg("ImageArray", MessageLevel.msgError, "  The ImageArray rank must be 1, 2 or 3. The returned array had rank: " & ImageArrayAsArray.Rank)
                                 End Select
                         End Select
@@ -554,7 +554,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() ' & " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -630,7 +630,7 @@ Friend Class VideoTester
     ''' <param name="p_Min">Lowest valid value</param>
     ''' <param name="p_Max">Highest valid value</param>
     ''' <param name="p_Mandatory">Mandatory method</param>
-    ''' <returns>Integrer value returned by the driver</returns>
+    ''' <returns>Integer value returned by the driver</returns>
     ''' <remarks></remarks>
     Private Function TestInteger(ByVal p_Type As VideoProperty, ByVal p_Min As Integer, ByVal p_Max As Integer, p_Mandatory As Boolean) As Integer
         Dim MethodName As String
@@ -638,7 +638,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -683,7 +683,7 @@ Friend Class VideoTester
     ''' <param name="p_Min">Lowest valid value</param>
     ''' <param name="p_Max">Highest valid value</param>
     ''' <param name="p_Mandatory">Mandatory method</param>
-    ''' <returns>Integrer value returned by the driver</returns>
+    ''' <returns>Integer value returned by the driver</returns>
     ''' <remarks></remarks>
     Private Function TestLong(ByVal p_Type As VideoProperty, ByVal p_Min As Long, ByVal p_Max As Long, p_Mandatory As Boolean) As Long
         Dim MethodName As String
@@ -691,7 +691,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -725,7 +725,7 @@ Friend Class VideoTester
     ''' <param name="p_Min">Lowest valid value</param>
     ''' <param name="p_Max">Highest valid value</param>
     ''' <param name="p_Mandatory">Mandatory method</param>
-    ''' <returns>Integrer value returned by the driver</returns>
+    ''' <returns>Integer value returned by the driver</returns>
     ''' <remarks></remarks>
     Private Function TestVideoFrame(ByVal p_Type As VideoProperty, ByVal p_Min As Integer, ByVal p_Max As Integer, p_Mandatory As Boolean) As IVideoFrame
         Dim MethodName As String
@@ -733,7 +733,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -762,7 +762,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -801,7 +801,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -833,7 +833,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -880,7 +880,7 @@ Friend Class VideoTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that wqe havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 
@@ -979,7 +979,7 @@ Friend Class VideoTester
 
     Public Overrides Sub PostRunCheck()
         Try : Video.StopRecordingVideoFile() : Catch : End Try
-        LogMsg("PostRunCheck", MessageLevel.msgOK, "Camera returned to intitial cooler temperature")
+        LogMsg("PostRunCheck", MessageLevel.msgOK, "Camera returned to initial cooler temperature")
     End Sub
 
 #End Region

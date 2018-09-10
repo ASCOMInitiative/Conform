@@ -11,7 +11,7 @@ Public Class frmSetup
 
     Private Sub FrmSetup_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 #If Not Debug Then
-        TabControl1.Controls.Remove(Me.TabControl1.Controls.Item("SpecialTests")) 'Hide special tests config in release version
+        TabControl1.Controls.Remove(Me.TabControl1.Controls.Item("SpecialTests")) 'Hide special tests configuration in release version
 #End If
         txtLogFileDirectory.Text = g_Settings.LogFileDirectory
         dirLogFile.SelectedPath = g_Settings.LogFileDirectory
@@ -24,7 +24,7 @@ Public Class frmSetup
         txtLastUpdate.Text = g_Settings.UpdateCheckDate.ToString
         chkDebug.Checked = g_Settings.Debug
         chkRunAs32Bit.Checked = g_Settings.RunAs32Bit
-        If VersionCode.OSBits = Bitness.Bits32 Then chkRunAs32Bit.Enabled = False 'If we are on a 32bit OS diable this option
+        If VersionCode.OSBits = Bitness.Bits32 Then chkRunAs32Bit.Enabled = False 'If we are on a 32bit OS doable this option
         chkInferStateFromErrorMessages.Checked = g_Settings.InterpretErrorMessages
         chkUseDriverAccess.Checked = g_Settings.UseDriverAccess
         UpDownObservingConditionsRetries.Value = Convert.ToDecimal(g_Settings.ObservingConditionsMaxRetries)
@@ -95,7 +95,7 @@ Public Class frmSetup
         TScopeMethodTests.CheckOnClick = True
         TScopeMethodTests.Items.Clear()
 
-        'Construct the collection from the contents of the checked listbox
+        'Construct the collection from the contents of the checked list box
         For Each kvp As Generic.KeyValuePair(Of String, CheckState) In g_TelescopeTests
             TScopeMethodTests.Items.Add(kvp.Key, kvp.Value = CheckState.Checked)
         Next
@@ -184,7 +184,7 @@ Public Class frmSetup
                 l_TScopeValues.Add(kvp.Key, TScopeMethodTests.GetItemCheckState(TScopeMethodTests.Items.IndexOf(kvp.Key)))
             Next
 
-            'Update the gloabl variable with current values
+            'Update the global variable with current values
             For Each kvp As KeyValuePair(Of String, CheckState) In l_TScopeValues
                 g_TelescopeTests.Item(kvp.Key) = kvp.Value
             Next

@@ -9,14 +9,14 @@
 'Version 1.0.3
 'Added a STOP button and altered the sidereal time check to stop the app and not to close it
 'Added STOP button detection to all internal loops and inside long running tests
-'Added Setup dialog with log file directory and selection of tests proerties, methods and performance
+'Added Setup dialogue with log file directory and selection of tests properties, methods and performance
 'Tidied up RA and DEC precision checks so the rules are located in one place for easy maintenance
 'Improved error trapping for optional properties so that these are flagged as OK when not implemented
 'Replaced About box with tidier version
 
 'Version 1.0.4
 'Corrected sync fail messages
-'Tidied code reduce repetiion and increase consistencey
+'Tidied code reduce repetition and increase consistency
 'Revised messages to reduce impact on customers while retaining usefulness for developers
 
 'Version 1.05
@@ -54,7 +54,7 @@
 'Partial implementation of testing for conditions by checking text of error messages
 
 'Version 1.0.10
-'Fixed formating of startup PC UTCdate to match scope UTCdate
+'Fixed formatting of start-up PC UTCdate to match scope UTCdate
 'Added a specific test for whether the Telescope object exactly matches ASCOM.DeviceInterface.ITelescope
 'Added reporting of whether the Telescope driver is COM or .NET based
 'Added reporting of supported interface types for .NET drivers
@@ -71,7 +71,7 @@
 'Added Filter Wheel conformance tests
 
 'Version 1.0.11.0
-'Fixed Unparking of mount before telescope test
+'Fixed Un-parking of mount before telescope test
 'Added Automatic periodic update check by Internet (can be turned off)
 'Added Manual update check option to menu
 'Added Tracking turned off at end of telescope test for mount safety
@@ -98,14 +98,14 @@
 'Fixed CanReadSideOfPier test to ensure a value of false is used internally if an exception is generated on read
 'Fixed SideOfPier to suppress performance test if SideOfPier cannot be read
 'Fixed value reporting issue in MoveAxis tests when attempting to move at greater than the maximum rate
-'Fixed SideOfPier write test to esnure that slewing is false before continuing with other tests
+'Fixed SideOfPier write test to ensure that slewing is false before continuing with other tests
 'Changed ScopeSafety references to MountSafety for consistency
 
 'Version 1.0.11.9
 'Fixed StopExposure and AbortExposure so that exceptions are OK if relevant Can properties are false
 
 'Version 1.0.11.10
-'Fixed error in synchronous pulseguide test when IsPulseGuiding property is not supported
+'Fixed error in synchronous pulse guide test when IsPulseGuiding property is not supported
 'Changed Bin exception tests to check for errors on StartExposure
 
 'Version 1.0.11.11
@@ -118,7 +118,7 @@
 'Fixed camera description to properly display description
 
 'Version 1.0.11.12
-'SideOfPier behaviour updated to match revised woding in latest telescope programmer's reference
+'SideOfPier behaviour updated to match revised wording in latest telescope programmer's reference
 
 'Version 1.0.11.13
 'IConform interface added plus checks in Conform to use values returned
@@ -147,7 +147,7 @@
 
 'Version 2.0.0.0
 'Added validation code beta 
-'Filterwheel - added check for number of filter offsets and filter names being the same
+'FilterWheel - added check for number of filter offsets and filter names being the same
 
 'Version 2.0.2.0
 'Fixed issue with identification of current driver ProgID
@@ -198,7 +198,7 @@
 'Removed built in IConform interface and moved this to ASCOM.Utilities
 'Copied command strings to a local object instead of relying on an object that was discarded
 'Added support for new not implemented error codes
-'Improved error reporting in commandstring tests
+'Improved error reporting in command string tests
 
 'Version 3.0.0.3
 'Provided more move test status information
@@ -234,15 +234,15 @@
 'Updated SideOfPier test document to v1.1 to correct caption's swapped on figures 4 and 5
 'Removed Switch tests
 'Removed duplicate Utilities component creation, left over from VB6 migration to new .NET Utilities
-'Upleveled platform version check from 5.0 to 5.5 to ensure use only on platform 5.5 or above
+'Up-levelled platform version check from 5.0 to 5.5 to ensure use only on platform 5.5 or above
 
 'Version 3.0.0.12
 'Exceptions - Exceptions that use words like "not supported" are accepted as "not implemented" exceptions
 'Focuser - Now restores the original TempComp value
 'Focuser - Added delay between successive create attempts to allow previous instances to clean up properly
 'Focuser - Added missing test that Move should throw an exception when TempComp is set to True
-'Telescope - Added test for ablility to set tracking before setting it in three places
-'Startup - Fixed internationalisation issue when testing for platform version. Decimal separator of "," caused an exception
+'Telescope - Added test for ability to set tracking before setting it in three places
+'Start-up - Fixed internationalisation issue when testing for platform version. Decimal separator of "," caused an exception
 
 'Version 3.0.0.14
 'Telescope - Added test to skip SideOfPier tests if SideOfPier Read is not supported
@@ -251,7 +251,7 @@
 'Focuser - Will now accept .NET InvalidValueException thrown by Move when TempComp is true
 
 'Version 3.0.0.16
-'Camera - Fixed bug that flagged all attampts at early binding as errors
+'Camera - Fixed bug that flagged all attempts at early binding as errors
 'Focuser - Added ASCOM.InvalidOperationException as OK if attempt to move focuser when temperature compensation is active
 'Installer - migrated to Inno 5.3.7 Unicode
 'Update - Corrected download location URL in "A new version is available" message
@@ -285,7 +285,7 @@
 'Telescope   Added InvalidOperation exception as OK when target declination and target right ascension are read without first having been set
 'Telescope   Improved diagnostics if TrackingRates is not correctly implemented.
 'Telescope   Fixed incorrect message when returned RA is out of valid range
-'Telescope   Added extra test to check whether commands can unpark the scope when they should not.
+'Telescope   Added extra test to check whether commands can un-park the scope when they should not.
 'Telescope   Added test for IsPulseGuiding stuck on
 'Telescope   Fixed issue in SiderealTime test when PC and scope clocks are close to 00:00:00
 'Telescope   Moved time check to pre-run checks section
@@ -296,10 +296,10 @@
 
 'Version 6.0.0.39
 'All         Added test for System.InvalidOperationException, now provides message advising to use ASCOM.InvalidOperationException
-'All         Removed infintie loop bug in releasing .NET in-process drivers
+'All         Removed infinite loop bug in releasing .NET in-process drivers
 
 'Version 6.0.0.40
-'Telescope   Added support for ServoCAT.Telescope invlaid value COM exception number
+'Telescope   Added support for ServoCAT.Telescope invalid value COM exception number
 'Telescope   Added extra debug information for SyncToCoordinates and SyncToTarget
 
 'Version 6.0.0.42
@@ -308,11 +308,11 @@
 'Telescope   TrackingRates: Improved debug level diagnostic messages
 
 'Version 6.0.0.43
-'Telescope   Improved cleanup of axisrates objects in MoveAxis test
+'Telescope   Improved clean-up of axis rates objects in MoveAxis test
 
 'Version 6.0.0.44
-'Telescope   Allow for possibilty that TargetRA and TargetDEC may throw not implemented exceptions when testing SlewToTarget
-'Telescope   Allow for possibilty that TargetRA and TargetDEC may throw not implemented exceptions when testing SyncToTarget
+'Telescope   Allow for possibility that TargetRA and TargetDEC may throw not implemented exceptions when testing SlewToTarget
+'Telescope   Allow for possibility that TargetRA and TargetDEC may throw not implemented exceptions when testing SyncToTarget
 
 'Version 6.0.0.45
 'Rotator     Rotator.Halt was incorrectly expecting a PropertyNotImplementedException, it now checks for MethodNotImplementedException
@@ -331,15 +331,15 @@
 'Telescope   Revised DestinationSideOfPier test to just check that returned values are different for both sides of the meridian
 
 'Version 6.0.0.49
-'Telescope   Added test for whether interface V1 drivers can unpark the scope, fixes issue in MountSafety when mounts do not support unparking
+'Telescope   Added test for whether interface V1 drivers can un-park the scope, fixes issue in MountSafety when mounts do not support un-parking
 'Telescope   Made SideOfPier Write test more realistic by tracking through the Meridian before attempting to flip the scope
-'Focuser     Added better status messaging during asynchrouous focuser moves
+'Focuser     Added better status messaging during asynchronous focuser moves
 
 'Version 6.0.0.50
-'Rotator     Increased Position test tolerance. A Move is now flagged as OK if the reported position is within 1 step of the required posiiton
+'Rotator     Increased Position test tolerance. A Move is now flagged as OK if the reported position is within 1 step of the required position
 
 'Version 6.1.0.52
-'All         Fix to suppress Windows "Application has stopped working" dialogues due to errors occuring in driver unmanaged code DLLs
+'All         Fix to suppress Windows "Application has stopped working" dialogues due to errors occurring in driver unmanaged code DLLs
 'SafetyMonitor Added safety monitors as testable device types
 'Switch      Added tests for ISwitchV2
 
@@ -348,7 +348,7 @@
 #End Region
 
 #Region "Platform 6.1 Changes"
-' Always put new entries at the top to make it easier to transfer to the release notes txt file!
+' Always put new entries at the top to make it easier to transfer to the release notes text file!
 'Version 6.1.0.55
 'Telescope   Improved messaging for SideOfPier test results
 
@@ -361,7 +361,7 @@
 'Telescope   Formatting consistency improvements for RA and Dec, Altitude and Azimuth values
 'Telescope   Sync information made easier to read
 'Telescope   TrackingRate Read is now required to be implemented per the specification, TrackingRate Write remains optional
-'Rotator     Now properly handles rotators where returned posiitons are slightly less than the requested position
+'Rotator     Now properly handles rotators where returned positions are slightly less than the requested position
 
 'Version 6.1.0.53
 'All         New configuration option: Conform can now test use either late bound COM or DriverAccess to test drivers
@@ -370,7 +370,7 @@
 
 #End Region
 
-' Always put new entries at the top to make it easier to transfer to the release notes txt file!
+' Always put new entries at the top to make it easier to transfer to the release notes text file!
 #Region "Platform 6.2 Changes"
 'Version 6.2.59
 'All          Improved error handling for common methods
@@ -384,7 +384,7 @@
 'Telescope    Sync - Telescope now slews to a known test position before commencing tests
 
 'Version 6.2.58
-'All          Up leveled to platform 6.2
+'All          Up levelled to platform 6.2
 'All          Changed version number format to PlatformMajor.PlatformMinor.ConformVersion.BetaVersion. BetaVersion will be 0 for production versions
 'ObsCond      Added ObservingConditions interface tests
 'Telescope    Increased resolution of UTCDate information to include 3 decimal places.
@@ -399,16 +399,27 @@
 'Camera              Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
 'Camera              Revised exception handling for some properties and improved messaging
 'ObservingConditions Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
-'Telescope           New configuration setting that will log a message before every driver call to aid debuging
+'Telescope           New configuration setting that will log a message before every driver call to aid debugging
 'Telescope           TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
 'Telescope           Add check that no exception is thrown when calling AxisRates.Dispose
 'Telescope           Add check that no exception is thrown when calling Rate.Dispose
 'Telescope           Add check that no exception is thrown when calling TrackingRates.Dispose
-'Switch              The range of switch numbers that wil be searched for valid switches is now configurable through the Options/Conformance Options menu
-'Switch              New configuration setting that will log a message before every driver call to aid debuging
+'Switch              The range of switch numbers that will be searched for valid switches is now configurable through the Options/Conformance Options menu
+'Switch              New configuration setting that will log a message before every driver call to aid debugging
 
 'Version 6.3.60 - test version only
 #End Region
+
+#Region "Platform 6.4 Changes"
+'Version 6.4.62
+'All                 Change all HTTP references to HTTPS
+'All                 Spelling corrections applied to application and comments
+'Telescope           Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
+'Telescope           Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
+'ObservingConditions Add extended SupportedActions / Action tests specially for aggregated drivers presented by the Observing Conditions Hub
+
+#End Region
+
 
 #Region "Imports"
 Imports System.IO
@@ -432,7 +443,7 @@ Public Class FrmConformMain
 
     Const OLD_DIRECTORY As String = "C:\Program Files\Common Files\ASCOM\Conform"
     Const CONFORM_HELP_FILE As String = "Conform.chm"
-    Const CONFORM_TOOLKIT_VERSION As Integer = 1000005 'Version of client access toolkit against which COnform is comiled
+    Const CONFORM_TOOLKIT_VERSION As Integer = 1000005 'Version of client access toolkit against which Conform is compiled
 
     ' Constants for text that the validation code searches for to find particular items of information
     Const VALIDATION_HASH_DRIVER As String = "Driver Hash Value:"
@@ -904,7 +915,7 @@ Public Class FrmConformMain
         Dim l_Device As Object
         SetDeviceType()
         'MsgBox(g_CurrentProgID)
-        LogMsg("DriverSetup", MessageLevel.msgDebug, "Before createobject")
+        LogMsg("DriverSetup", MessageLevel.msgDebug, "Before create object")
 
         l_Device = CreateObject(g_CurrentProgID)
         LogMsg("DriverSetup", MessageLevel.msgDebug, "Before setup")
@@ -921,7 +932,7 @@ Public Class FrmConformMain
         SetupForm = New frmSetup
         SetupForm.ShowDialog()
         If m_LastLogFileDirectory <> g_Settings.LogFileDirectory Then
-            LogFileCreate(g_Settings.LogFileDirectory) 'Create new log file dir if needed
+            LogFileCreate(g_Settings.LogFileDirectory) 'Create new log file directory if needed
         End If
         If g_Settings.Debug Then
             g_LogLevel = MessageLevel.msgDebug
@@ -1130,19 +1141,19 @@ Public Class FrmConformMain
             'Set up list of Telescope Test options
             Call SetTelescopeTestOptions()
             If System.IntPtr.Size = 4 Then
-                LogMsg("Startup", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 32bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 32bit mode")
             Else
-                LogMsg("Startup", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 64bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 64bit mode")
             End If
         Catch ex As Exception
             MsgBox(ex.ToString)
         End Try
 
         Try
-            LogMsg("Startup", MessageLevel.msgDebug, "Initial application error level: " & NativeMethods.GetErrorMode.ToString("F"))
-            ' Set the error level to ensure that all exceptions are returned to the the application
+            LogMsg("Start-up", MessageLevel.msgDebug, "Initial application error level: " & NativeMethods.GetErrorMode.ToString("F"))
+            ' Set the error level to ensure that all exceptions are returned to the application
             NativeMethods.SetErrorMode(NativeMethods.GetErrorMode Or NativeMethods.ErrorModes.ERRORMODE_SEM_FAILCRITICALERRORS Or NativeMethods.ErrorModes.ERRORMODE_SEM_NOGPFAULTERRORBOX Or NativeMethods.ErrorModes.ERRORMODE_SEM_NOOPENFILEERRORBOX)
-            LogMsg("Startup", MessageLevel.msgDebug, "New application error level:     " & NativeMethods.GetErrorMode.ToString("F") & vbCrLf)
+            LogMsg("Start-up", MessageLevel.msgDebug, "New application error level:     " & NativeMethods.GetErrorMode.ToString("F") & vbCrLf)
 
         Catch ex As Exception
             LogMsg("Form.Load.EX2", MessageLevel.msgDebug, ex.ToString)
@@ -1164,7 +1175,7 @@ Public Class FrmConformMain
                 Using Reg As New Utilities.RegistryAccess
                     Dim RegKey As RegistryKey
                     RegKey = Reg.OpenSubKey(Registry.LocalMachine, "SOFTWARE\ASCOM\Platform", False, Utilities.RegistryAccess.RegWow64Options.KEY_WOW64_32KEY)
-                    LogMsg("Startup", MessageLevel.msgAlways, RegKey.GetValue("Platform Name", "Platform Name not found!").ToString() & " " & RegKey.GetValue("Platform Version", "Platform Version not found!").ToString)
+                    LogMsg("Start-up", MessageLevel.msgAlways, RegKey.GetValue("Platform Name", "Platform Name not found!").ToString() & " " & RegKey.GetValue("Platform Version", "Platform Version not found!").ToString)
                     RegKey.Close()
                 End Using
             End If
@@ -1175,7 +1186,7 @@ Public Class FrmConformMain
 
 #If DEBUG Then
             LogMsg("", MessageLevel.msgAlways, "")
-            LogMsg("Startup", MessageLevel.msgAlways, "OPERATING IN DEBUG MODE!")
+            LogMsg("Start-up", MessageLevel.msgAlways, "OPERATING IN DEBUG MODE!")
             LogMsg("", MessageLevel.msgAlways, "")
 #End If
         Catch ex As Exception
@@ -1186,7 +1197,7 @@ Public Class FrmConformMain
             AppDom = AppDomain.CurrentDomain
             Assemblies = AppDom.GetAssemblies 'Get a list of loaded assemblies
             LogMsg("", MessageLevel.msgAlways, "")
-            For Each FoundAssembly As Assembly In Assemblies 'Parse each to find if DriverAccess dll is one of them
+            For Each FoundAssembly As Assembly In Assemblies 'Parse each to find if DriverAccess DLL is one of them
                 LogMsg("Form.Load", MessageLevel.msgDebug, "Found loaded assembly: " & FoundAssembly.GetName.Name & " " & FoundAssembly.GetName.Version.ToString)
             Next
         Catch ex As Exception
@@ -1411,9 +1422,9 @@ Public Class FrmConformMain
                     LogMsg("CheckForUpdates", MessageLevel.msgInfo, "You are using a development BETA version of Conform")
             End Select
 
-            g_Settings.UpdateCheckDate = Now ' Save the date and time of this check so we know ehen to make the next check.
+            g_Settings.UpdateCheckDate = Now ' Save the date and time of this check so we know when to make the next check.
 
-            ' Cleanup the streams and the response.            
+            ' Clean-up the streams and the response.            
             Try : reader.Close() : Catch : End Try
             Try : l_HttpWebResponse.Close() : Catch : End Try
         Catch ex As WebException

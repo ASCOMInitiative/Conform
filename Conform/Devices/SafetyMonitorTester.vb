@@ -36,7 +36,7 @@ Friend Class SafetyMonitorTester
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the SafetyMonitor object (useful for retaining driver in memory to change flags)
                 Try : m_SafetyMonitor.Connected = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_SafetyMonitor) : Catch : End Try
                 m_SafetyMonitor = Nothing
@@ -53,8 +53,8 @@ Friend Class SafetyMonitorTester
 
 #Region "Code"
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
         Select Case g_SafetyMonitorProgID
             Case Else 'I'm using the simulator values as the defaults since it is the reference platform
@@ -111,7 +111,7 @@ Friend Class SafetyMonitorTester
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessSafetyMonitor.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -191,9 +191,9 @@ Friend Class SafetyMonitorTester
                         Else
                             LogMsg(p_Name, MessageLevel.msgIssue, "IsSafe is True when not connected, IsSafe should be False")
                         End If
-                    Else ' We are connected so test whether emergency shutdown is true, if so IsSafes hsoiuld be false
+                    Else ' We are connected so test whether emergency shutdown is true, if so IsSafes should be false
                         If m_CanEmergencyShutdown Then
-                            If m_EmergencyShutdown Then 'EmergencyShutdown is true so IsSafe shoudl be false
+                            If m_EmergencyShutdown Then 'EmergencyShutdown is true so IsSafe should be false
                                 If Not m_IsSafe Then
                                     LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
                                 Else

@@ -7,7 +7,7 @@ Friend Class ObservingConditionsTester
 #Region "Variables and Constants"
     Dim averageperiod, cloudCover, dewPoint, humidity, pressure, rainRate, skyBrightness, skyQuality, starFWHM, skyTemperature, temperature, windDirection, windGust, windSpeed As Double
 
-    ' Variables to indicate whether each funciton is or is not implemented to that it is possible to check that for any given sensor, all three either are are or are not implemented
+    ' Variables to indicate whether each function is or is not implemented to that it is possible to check that for any given sensor, all three either are or are not implemented
     Dim sensorisImplemented As Dictionary(Of String, Boolean) = New Dictionary(Of String, Boolean)
     Dim sensorHasDescription As Dictionary(Of String, Boolean) = New Dictionary(Of String, Boolean)
     Dim sensorHasTimeOfLastUpdate As Dictionary(Of String, Boolean) = New Dictionary(Of String, Boolean)
@@ -131,7 +131,7 @@ Friend Class ObservingConditionsTester
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the ObservingConditions object (useful for retaining driver in memory to change flags)
                 Try : m_ObservingConditions.Connected = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_ObservingConditions) : Catch : End Try
                 m_ObservingConditions = Nothing
@@ -148,8 +148,8 @@ Friend Class ObservingConditionsTester
 
 #Region "Code"
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
 
         Select Case g_ObservingConditionsProgID
@@ -202,7 +202,7 @@ Friend Class ObservingConditionsTester
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected Using driver access toolkit")
                 l_DriverAccessObservingConditions.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting To driver Using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting To driver Using driver access toolkit: " & ex.Message)
                 LogMsg("AccessChecks", MessageLevel.msgDebug, "Exception: " & ex.ToString())
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
@@ -293,7 +293,7 @@ Friend Class ObservingConditionsTester
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both implemented per the interface specification")
         ElseIf (Not IsGoodValue(dewPoint) And Not IsGoodValue(humidity)) Then ' Two not implemented so OK
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both not implemented per the interface specification")
-        Else ' One implemented and the other not... bad acording to the Spec!
+        Else ' One implemented and the other not... bad according to the specification!
             LogMsg("DewPoint & Humidity", MessageLevel.msgIssue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification")
         End If
 
@@ -338,7 +338,7 @@ Friend Class ObservingConditionsTester
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both implemented per the interface specification")
         ElseIf (Not IsGoodValue(LastUpdateTimeDewPoint) And Not IsGoodValue(LastUpdateTimeHumidity)) Then ' Two not implemented so OK
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both not implemented per the interface specification")
-        Else ' One implemented and the other not... bad according to the Spec!
+        Else ' One implemented and the other not... bad according to the specification!
             LogMsg("DewPoint & Humidity", MessageLevel.msgIssue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification")
         End If
 
@@ -356,7 +356,7 @@ Friend Class ObservingConditionsTester
         'Refresh
         Try
             m_ObservingConditions.Refresh()
-            LogMsg("Refesh", MessageLevel.msgOK, "Refreshed OK")
+            LogMsg("Refresh", MessageLevel.msgOK, "Refreshed OK")
         Catch ex As Exception
             HandleException("Refresh", MemberType.Method, Required.Optional, ex, "")
         End Try
@@ -370,7 +370,7 @@ Friend Class ObservingConditionsTester
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both not implemented per the interface specification")
         ElseIf ((Not SensorDescriptionDewPoint Is Nothing) And (Not SensorDescriptionHumidity Is Nothing)) Then ' Two are implemented so OK
             LogMsg("DewPoint & Humidity", MessageLevel.msgOK, "Dew point and humidity are both implemented per the interface specification")
-        Else ' One implemented and the other not... bad acording to the Spec!
+        Else ' One implemented and the other not... bad according to the specification!
             LogMsg("DewPoint & Humidity", MessageLevel.msgIssue, "One of Dew point or humidity is implemented and the other is not. Both must be implemented or both must not be implemented per the interface specification")
         End If
 
@@ -385,7 +385,7 @@ Friend Class ObservingConditionsTester
         SensorDescriptionWindGust = TestSensorDescription(PROPERTY_WINDGUST, ObservingConditionsProperty.SensorDescriptionWindGust, Integer.MaxValue, Required.Optional)
         SensorDescriptionWindSpeed = TestSensorDescription(PROPERTY_WINDSPEED, ObservingConditionsProperty.SensorDescriptionWindSpeed, Integer.MaxValue, Required.Optional)
 
-        ' Now check that the sensor value, description and lastupdated time are all either implemented or not implemented
+        ' Now check that the sensor value, description and last updated time are all either implemented or not implemented
         For Each sensorName As String In ValidSensors
             LogMsg("Consistency", MessageLevel.msgDebug, "Sensor name: " & sensorName)
             If (sensorisImplemented(sensorName) And sensorHasDescription(sensorName) And sensorHasTimeOfLastUpdate(sensorName)) Then
@@ -425,7 +425,7 @@ Friend Class ObservingConditionsTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that we havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
         If MethodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE) Then ' Extract the sensor name from the TimeSinceLastUpdateXXX property name
@@ -547,7 +547,7 @@ Friend Class ObservingConditionsTester
         'Create a text version of the calling method name
         Try
             MethodName = p_Type.ToString() '& " Read"
-        Catch ex As Exception 'Deal with the possibilty that we havn't added it to the ENUM yet!
+        Catch ex As Exception 'Deal with the possibility that we haven't added it to the ENUM yet!
             MethodName = "?????? Read"
         End Try
 

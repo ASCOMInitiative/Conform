@@ -4,7 +4,7 @@ Friend Class CameraTester
     Inherits DeviceTesterBaseClass
 #Region "Variables and Constants"
     Const CAMERA_PULSE_DURATION As Integer = 2000 'Duration of camera pulse guide test (ms)
-    Const CAMERA_PULSE_TOLERANCE As Integer = 300 'Tolerance for acceptab;e performance (ms)
+    Const CAMERA_PULSE_TOLERANCE As Integer = 300 'Tolerance for acceptable performance (ms)
 
     'Camera variables
     Private m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout As Boolean
@@ -152,8 +152,8 @@ Friend Class CameraTester
     End Sub
 
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
         Select Case g_CameraProgID.ToUpper
             Case Else 'I'm using the simulator values as the defaults since it is the reference platform
@@ -228,7 +228,7 @@ Friend Class CameraTester
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessCamera.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -382,13 +382,13 @@ Friend Class CameraTester
         m_MaxBinX = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, 10)) : If TestStop() Then Exit Sub
         m_MaxBinY = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, 10)) : If TestStop() Then Exit Sub
 
-        If Not m_CanAsymmetricBin Then ' Only symetric binning is supported so confirm MaxBinX and Y match
+        If Not m_CanAsymmetricBin Then ' Only symmetric binning is supported so confirm MaxBinX and Y match
             If m_MaxBinX <> m_MaxBinY Then LogMsg("CanAsymmetricBin", MessageLevel.msgError, "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!")
         End If
 
-        m_BinX = CShort(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)) : If TestStop() Then Exit Sub 'Must default to 1 on startup
-        m_BinY = CShort(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)) : If TestStop() Then Exit Sub 'Must default to 1 on startup
-        If Not m_CanAsymmetricBin Then ' Only symetric binning is supported so confirm MaxBinX and Y match
+        m_BinX = CShort(CameraPropertyTestInteger(CamPropertyType.BinX, "BinX Read", 1, 1)) : If TestStop() Then Exit Sub 'Must default to 1 on start-up
+        m_BinY = CShort(CameraPropertyTestInteger(CamPropertyType.BinY, "BinY Read", 1, 1)) : If TestStop() Then Exit Sub 'Must default to 1 on start-up
+        If Not m_CanAsymmetricBin Then ' Only symmetric binning is supported so confirm MaxBinX and Y match
             If m_BinX <> m_BinY Then LogMsg("CanAsymmetricBin", MessageLevel.msgError, "CanAsymmetricBin is false but BinX and BinY are not equal!")
         End If
 
@@ -399,7 +399,7 @@ Friend Class CameraTester
         Catch ex As Exception
             LogMsg("BinX Write", MessageLevel.msgOK, "Exception correctly generated on setting BinX to 0")
         End Try
-        Try 'Invalid highvalue
+        Try 'Invalid high value
             m_Camera.BinX = CShort(m_MaxBinX + 1)
             LogMsg("BinX Write", MessageLevel.msgError, "Invalid value " & m_MaxBinX + 1 & " written but no exception generated")
         Catch ex As Exception
@@ -527,7 +527,7 @@ Friend Class CameraTester
             Catch ex As Exception
                 LogMsg("ImageArray", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
             End Try
-        Else 'Imageready is false so should throw an exception
+        Else 'ImageReady is false so should throw an exception
             Try
                 m_ImageArray = CType(m_Camera.ImageArray, Integer(,))
                 LogMsg("ImageArray", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
@@ -543,7 +543,7 @@ Friend Class CameraTester
             Catch ex As Exception
                 LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
             End Try
-        Else 'Imageready is false so should throw an exception
+        Else 'ImageReady is false so should throw an exception
             Try
                 m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
                 LogMsg("ImageArrayVariant", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
@@ -630,7 +630,7 @@ Friend Class CameraTester
         ' Test ICameraV2 Properties
         If m_Camera.InterfaceVersion > 1 Then ' Only for ICameraV2 and later
             ' SensorType - Mandatory
-            ' This must be tested before BayerOffset because BayerOffset is mandatory for colour and optional for monchrome cameras
+            ' This must be tested before BayerOffset because BayerOffset is mandatory for colour and optional for monochrome cameras
             Try
                 m_SensorType = m_Camera.SensorType
                 m_CanReadSensorType = True ' Set a flag to indicate that we have got a valid SensorType value
@@ -642,7 +642,7 @@ Friend Class CameraTester
 
             ' BayerOffset Read
             If m_CanReadSensorType Then ' SensorType value is available
-                If m_SensorType = SensorType.Monochrome Then ' Monchrome chip
+                If m_SensorType = SensorType.Monochrome Then ' Monochrome chip
                     ' Monochrome so both BayerOffset properties should throw not implemented exceptions
                     CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetX, "BayerOffsetX Read")
                     CameraPropertyMustNotImplemented(CamPropertyType.BayerOffsetY, "BayerOffsetY Read")
@@ -675,9 +675,9 @@ Friend Class CameraTester
             End If
 
             'FastReadout Read Optional
-            If m_CanFastReadout Then ' Should be implemented and not throw a not impemented exception
+            If m_CanFastReadout Then ' Should be implemented and not throw a not implemented exception
                 m_FastReadout = CameraPropertyTestBoolean(CamPropertyType.FastReadout, "FastReadout Read", True)
-            Else ' Should throw a not implememented exception
+            Else ' Should throw a not implemented exception
                 Try
                     m_FastReadout = m_Camera.FastReadout
                     LogMsg("FastReadout Read", MessageLevel.msgError, "CanFastReadout is False but a PropertyNotImplementedException was not thrown")
@@ -687,7 +687,7 @@ Friend Class CameraTester
             End If
 
             ' FastReadout Write Optional
-            If m_CanFastReadout Then ' Should be implemented and not throw a not impemented exception
+            If m_CanFastReadout Then ' Should be implemented and not throw a not implemented exception
                 Try
                     m_Camera.FastReadout = Not m_FastReadout
                     m_Camera.FastReadout = m_FastReadout
@@ -696,7 +696,7 @@ Friend Class CameraTester
                     HandleException("FastReadout Write", MemberType.Property, Required.Mandatory, ex, "")
                 End Try
 
-            Else ' Should throw a not implememented exception
+            Else ' Should throw a not implemented exception
                 Try
                     m_Camera.FastReadout = True
                     LogMsg("FastReadout Write", MessageLevel.msgError, "CanFastReadout is False but a PropertyNotImplementedException was not thrown")
@@ -750,9 +750,9 @@ Friend Class CameraTester
                 HandleInvalidOperationExceptionAsOK("Gains Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperationException correctly thrown")
             End Try
 
-            If m_CanReadGainMax And m_CanReadGainMin And m_CanReadGains Then ' Both GainMin/Max and Gains are enbaled but only one mechanic should be used
+            If m_CanReadGainMax And m_CanReadGainMin And m_CanReadGains Then ' Both GainMin/Max and Gains are enabled but only one mechanic should be used
                 LogMsg("Gains", MessageLevel.msgError, "GainMin, GainMax and Gains are all readable. Only one of GainMin/Max as a pair or Gains should be used, the other should throw a PropertyNotImplementedException")
-            Else ' Only one mechanic is actyive or no mechanic is active so no action
+            Else ' Only one mechanic is active or no mechanic is active so no action
 
             End If
 
@@ -873,16 +873,16 @@ Friend Class CameraTester
                 Case CamPropertyType.BayerOffsetX
                     TestShort = m_Camera.BayerOffsetX
                     CameraPropertyMustNotImplemented = False ' Property should throw an exception but did not so record that fact
-                    LogMsg(p_Name, MessageLevel.msgError, "Sensortype is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value")
+                    LogMsg(p_Name, MessageLevel.msgError, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value")
                 Case CamPropertyType.BayerOffsetY
                     TestShort = m_Camera.BayerOffsetY
                     CameraPropertyMustNotImplemented = False ' Property should throw an exception but did not so record that fact
-                    LogMsg(p_Name, MessageLevel.msgError, "Sensortype is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value")
+                    LogMsg(p_Name, MessageLevel.msgError, "Sensor type is Monochrome so this property must throw a PropertyNotImplementedException; it must not return a value")
                 Case Else
                     LogMsg(p_Name, MessageLevel.msgError, "CameraPropertyMustNotImplemented: Unknown test type - " & p_Type.ToString)
             End Select
         Catch ex As Exception
-            HandleException(p_Name, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensortype is Monochrome")
+            HandleException(p_Name, MemberType.Property, Required.MustNotBeImplemented, ex, "Sensor type is Monochrome")
         End Try
         Return CameraPropertyMustNotImplemented ' Return success indicator, True means property did thrown the exception, False means that it did not
     End Function
@@ -1082,7 +1082,7 @@ Friend Class CameraTester
         Catch ex As Exception
             LogMsg("AbortExposure", MessageLevel.msgError, EX_NET & "exception generated when reading camera state, further AbortExposure tests skipped")
         End Try
-        'Pulseguide
+        'PulseGuide
         If m_CanPulseGuide Then 'Should work OK
             Try
                 CameraPulseGuideTest(GuideDirections.guideNorth) : If TestStop() Then Exit Sub
@@ -1101,13 +1101,13 @@ Friend Class CameraTester
             Catch ex As COMException
                 LogMsg("PulseGuide", MessageLevel.msgOK, "CanPulseGuide is false and exception correctly generated when calling method")
             Catch ex As MethodNotImplementedException
-                LogMsg("PulseGuide", MessageLevel.msgOK, "CanPulseGuide is false and Pulseguide is not implemented in this driver")
+                LogMsg("PulseGuide", MessageLevel.msgOK, "CanPulseGuide is false and PulseGuide is not implemented in this driver")
             Catch ex As Exception
                 LogMsg("PulseGuide", MessageLevel.msgOK, "CanPulseGuide is false and exception correctly generated when calling method")
             End Try
         End If
 
-        'Stopexposure
+        'StopExposure
         Try
             m_CameraState = m_Camera.CameraState
             Select Case m_CameraState
@@ -1231,7 +1231,7 @@ Friend Class CameraTester
                     m_Camera.StartExposure(p_Duration, True)
                     If p_ExpectedErrorMessage = "" Then 'Not expecting an error and didn't get one
                         l_EndTime = Now
-                        If m_Camera.ImageReady And (m_Camera.CameraState = CameraStates.cameraIdle) Then 'Probably a synchrous camera
+                        If m_Camera.ImageReady And (m_Camera.CameraState = CameraStates.cameraIdle) Then 'Probably a synchronous camera
                             If l_EndTime.Subtract(l_StartTime).TotalSeconds >= p_Duration Then 'Is a synchronous camera
                                 LogMsg("StartExposure", MessageLevel.msgOK, "Synchronous exposure found OK: " & p_Duration & " seconds")
                                 CameraTestLast(p_Duration, l_StartTimeUTC)
@@ -1276,7 +1276,7 @@ Friend Class CameraTester
                             Loop Until (m_Camera.CameraState <> CameraStates.cameraExposing) Or (m_Camera.CameraState = CameraStates.cameraError)
 
                             l_EndTime = Now
-                            Status(StatusType.staAction, "Waiting for cameraidle state, reading/downloading image")
+                            Status(StatusType.staAction, "Waiting for camera idle state, reading/downloading image")
                             Do 'Wait for image to become ready
                                 WaitFor(CAMERA_SLEEP_TIME)
                                 If TestStop() Then Exit Sub
@@ -1292,7 +1292,7 @@ Friend Class CameraTester
                                 LogMsg("StartExposure", MessageLevel.msgOK, "Asynchronous exposure found OK: " & p_Duration & " seconds")
                                 CameraTestLast(p_Duration, l_StartTimeUTC)
                             Else 'Failed somehow
-                                LogMsg("StartExposure", MessageLevel.msgError, "Camerastate is CameraError")
+                                LogMsg("StartExposure", MessageLevel.msgError, "Camera state is CameraError")
                             End If
                         End If
                         l_ExposeOK = True 'Camera exposed OK and didn't generate an exception
@@ -1304,7 +1304,7 @@ Friend Class CameraTester
                                 If m_ImageArray.GetType.ToString = "System.Int32[,]" Or m_ImageArray.GetType.ToString = "System.Int32[,,]" Then
                                     If m_ImageArray.Rank = 2 Then 'Single plane image be definition
                                         l_NumPlanes = "1 plane"
-                                    Else 'Read the number of image planes from the maximum value of the third aray index
+                                    Else 'Read the number of image planes from the maximum value of the third array index
                                         l_NumPlanes = "1 plane"
                                         If m_ImageArray.GetUpperBound(2) > 0 Then 'More than 1 plane
                                             l_NumPlanes = CStr(m_ImageArray.GetUpperBound(2) + 1) & " planes"
@@ -1335,7 +1335,7 @@ Friend Class CameraTester
                                     If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
                                         l_NumPlanes = "1 plane"
                                         l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
-                                    Else 'Read the number of image planes from the maximum value of the third aray index
+                                    Else 'Read the number of image planes from the maximum value of the third array index
                                         l_NumPlanes = "1 plane"
                                         If m_ImageArrayVariant.GetUpperBound(2) > 0 Then 'More than 1 plane
                                             l_NumPlanes = CStr(m_ImageArrayVariant.GetUpperBound(2) + 1) & " planes"
@@ -1444,7 +1444,7 @@ Friend Class CameraTester
                             If Not IsNumeric(Mid(m_LastExposureStartTime, l_i, 1)) Then l_FormatOK = False
                     End Select
                 Next
-                If l_FormatOK Then 'Passed format check so nopw try and read as a datetime to compare with expected value
+                If l_FormatOK Then 'Passed format check so now try and read as a date-time to compare with expected value
                     Try 'Confirm that it parses as a valid date and check for correct value
                         l_StartTime = Date.Parse(m_LastExposureStartTime)
                         If p_Start.Subtract(l_StartTime).TotalSeconds < 2.0 Then
@@ -1488,28 +1488,28 @@ Friend Class CameraTester
                         If TestStop() Then Exit Sub
                     Loop Until (Not m_Camera.IsPulseGuiding) Or (Now.Subtract(l_StartTime).TotalMilliseconds > 3000) 'Wait for up to 3 seconds
                     If Not m_Camera.IsPulseGuiding Then
-                        LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Asynchronous pulseguide found OK")
+                        LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Asynchronous pulse guide found OK")
                     Else
-                        LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Asynchronous pulseguide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds")
+                        LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds")
                     End If
                 Else
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Asynchronous pulseguide expected but IsPulseGuiding has returned FALSE")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Asynchronous pulse guide expected but IsPulseGuiding has returned FALSE")
                 End If
-            Else 'Assume synchronous pulseguide and that ispulseguideing is false
+            Else 'Assume synchronous pulse guide and that IsPulseGuiding is false
                 If Not m_Camera.IsPulseGuiding Then
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Synchronous pulseguide found OK")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Synchronous pulse guide found OK")
                 Else
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulseguide expected but IsPulseGuiding has returned TRUE")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulse guide expected but IsPulseGuiding has returned TRUE")
                 End If
             End If
         Else 'IsPulseGuiding is not supported so test for synchronous move
             Select Case l_EndTime.Subtract(l_StartTime).TotalMilliseconds - CAMERA_PULSE_DURATION
                 Case Is > CAMERA_PULSE_TOLERANCE 'Duration was more than 0.5 seconds longer than expected
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulseguide longer than expected " & (CAMERA_PULSE_DURATION) / 1000 & " seconds: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulse guide longer than expected " & (CAMERA_PULSE_DURATION) / 1000 & " seconds: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
                 Case Is < 20 'Duration was more than 20ms shorter than expected
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulseguide shorter than expected " & (CAMERA_PULSE_DURATION) / 1000 & " seconds: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Synchronous pulse guide shorter than expected " & (CAMERA_PULSE_DURATION) / 1000 & " seconds: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
                 Case Else 'Within acceptable tolerance
-                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Synchronous pulseguide found OK: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
+                    LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Synchronous pulse guide found OK: " & l_EndTime.Subtract(l_StartTime).TotalSeconds & " seconds")
             End Select
         End If
     End Sub
@@ -1598,7 +1598,7 @@ Friend Class CameraTester
         If m_CanStopExposure Then Try : m_Camera.StopExposure() : Catch : End Try
         If m_CanSetCCDTemperature Then Try : m_Camera.SetCCDTemperature = m_SetCCDTemperature : Catch : End Try
         Try : m_Camera.CoolerOn = m_CoolerOn : Catch : End Try
-        LogMsg("PostRunCheck", MessageLevel.msgOK, "Camera returned to intitial cooler temperature")
+        LogMsg("PostRunCheck", MessageLevel.msgOK, "Camera returned to initial cooler temperature")
     End Sub
 
 #End Region

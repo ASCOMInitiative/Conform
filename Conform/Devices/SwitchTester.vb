@@ -64,7 +64,7 @@
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the switch object (useful for retaining driver in memory to change flags)
                 Try : m_Switch.Connected = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_Switch) : Catch : End Try
                 m_Switch = Nothing
@@ -81,8 +81,8 @@
 
 #Region "Code"
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
 
         Select Case g_SwitchProgID
@@ -167,7 +167,7 @@
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
                 l_DriverAccessSwitch.Connected = False
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
         Catch ex As Exception
@@ -312,7 +312,7 @@
                     Status(StatusType.staStatus, "")
 
                 Else 'No valid value
-                    LogMsg("SwitchCheckMethods", MessageLevel.msgError, "Skipping further tests as thereis no valid value for MaxSwitch")
+                    LogMsg("SwitchCheckMethods", MessageLevel.msgError, "Skipping further tests as there is no valid value for MaxSwitch")
                 End If
             Case 2 'Platform 6 interface version 2
                 If m_CanReadMaxSwitch Then 'Have got a valid value
@@ -400,7 +400,7 @@
                                     Else
                                         LogMsg("MaxSwitchValue ", MessageLevel.msgInfo, "  Maximum: " & l_SwitchMaximum.ToString)
                                         LogMsg("MaxSwitchValue ", MessageLevel.msgIssue, "MaxSwitchValue is less or equal to MinSwitchValue, it must be greater!")
-                                        l_SwitchRange = BAD_SWITCH_VALUE ' Special value because the max or min values are bad
+                                        l_SwitchRange = BAD_SWITCH_VALUE ' Special value because the maximum or minimum values are bad
                                     End If
                                 Else ' Cannot compare because of a bad minimum value
                                     LogMsg("MaxSwitchValue ", MessageLevel.msgInfo, "  Maximum: " & l_SwitchMaximum.ToString)
@@ -660,7 +660,7 @@
                                         End Try
                                         WaitFor(SWITCH_WRITE_DELAY)
                                     Else ' Minimum value is bad so skip the SetSwitchValue test
-                                        LogMsg("SetSwitchValue ", MessageLevel.msgInfo, "  Skipping test becuase of an issue with retrieving the switch minimum value through GetSwitchMinimim")
+                                        LogMsg("SetSwitchValue ", MessageLevel.msgInfo, "  Skipping test because of an issue with retrieving the switch minimum value through GetSwitchMinimim")
                                     End If
 
                                     ' Try SetSwitchValue(MAXIMUM_VALUE)
@@ -714,10 +714,10 @@
                                         WaitFor(SWITCH_WRITE_DELAY)
 
                                     Else ' Minimum value is bad so skip the SetSwitchValue test
-                                        LogMsg("SetSwitchValue ", MessageLevel.msgInfo, "  Skipping test becuase of an issue with retrieving the switch minimum value through GetSwitchMinimim")
+                                        LogMsg("SetSwitchValue ", MessageLevel.msgInfo, "  Skipping test because of an issue with retrieving the switch minimum value through GetSwitchMinimim")
                                     End If
 
-                                    ' Test some positions of the multi-state switch between the minium and maximum values
+                                    ' Test some positions of the multi-state switch between the minimum and maximum values
                                     If l_GetSwitchValueOK And l_SetSwitchValueMinOK And l_SetSwitchValueMaxOK And IsGoodValue(l_SwitchRange) And IsGoodValue(l_SwitchStep) Then
 
                                         TestSetSwitchValue(i, 0.0, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep)
@@ -726,7 +726,7 @@
                                         TestSetSwitchValue(i, 0.75, l_SwitchMinimum, l_SwitchMaximum, l_SwitchRange, l_SwitchStep)
 
                                     Else
-                                        LogMsg("SetSwitchValue ", MessageLevel.msgWarning, "Skipping multistate tests because of earlier errors")
+                                        LogMsg("SetSwitchValue ", MessageLevel.msgWarning, "Skipping multi state tests because of earlier errors")
                                         LogMsg("GetSwitchValueOK ", MessageLevel.msgDebug, l_GetSwitchValueOK)
                                         LogMsg("SetSwitchValueMinOK ", MessageLevel.msgDebug, l_SetSwitchValueMinOK)
                                         LogMsg("SetSwitchValueMaxOK ", MessageLevel.msgDebug, l_SetSwitchValueMaxOK)
@@ -749,7 +749,7 @@
                                             LogMsg("SetSwitchValue ", MessageLevel.msgOK, "  Switch has been reset to half its range")
                                             WaitFor(SWITCH_WRITE_DELAY)
                                         Else ' Can't do anything because the switch driver is too broken
-                                            LogMsg("SetSwitchValue ", MessageLevel.msgWarning, "Switch can not be returned to its default state becuase of issues with GetSwitchValue, GetSwitchMinimum or GetSwitchMaximum")
+                                            LogMsg("SetSwitchValue ", MessageLevel.msgWarning, "Switch can not be returned to its default state because of issues with GetSwitchValue, GetSwitchMinimum or GetSwitchMaximum")
                                         End If
                                     End If
 
@@ -793,7 +793,7 @@
     End Sub
 
     Overrides Sub CheckPerformance()
-        'Maxswitch
+        'MaxSwitch
         If m_CanReadMaxSwitch Then 'Have got a valid value
             SwitchPerformanceTest(SwitchPropertyMethod.MaxSwitch, "MaxSwitch")
         Else

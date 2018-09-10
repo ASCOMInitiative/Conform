@@ -5,7 +5,7 @@ Public NotInheritable Class frmWarning
     End Sub
 
     Private Sub chkWarnAgree_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles chkWarnAgree.CheckedChanged
-        If chkWarnAgree.Checked = True Then ' User has agreed so enable the OK button and diable Exit
+        If chkWarnAgree.Checked = True Then ' User has agreed so enable the OK button and disable Exit
             btnWarnOK.Enabled = True
             btnWarnExit.Enabled = False
             g_Settings.WarningMessage = True ' Save the setting

@@ -7,7 +7,7 @@
     Private m_MaxIncrement, m_MaxStep, m_Position, m_PositionOrg As Integer
     Private m_StepSize, m_Temperature As Double
     Private m_TempCompTrueOK, m_TempCompFalseOK As Boolean ' Variable to confirm that TempComp can be successfully set to True
-    Private m_AbsolutePositionOK As Boolean = False ' Variable to confoirm that absolute position can be read OK
+    Private m_AbsolutePositionOK As Boolean = False ' Variable to confirm that absolute position can be read OK
 
 #If DEBUG Then
     Private m_Focuser As ASCOM.DeviceInterface.IFocuserV2
@@ -36,7 +36,7 @@
             If disposing Then
                 ' TODO: free other state (managed objects).
             End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining scopesim in memory to change flags
+            If True Then 'Should be True but make False to stop Conform from cleanly dropping the focuser object (useful for retaining it in memory to change flags
                 Try : m_Focuser.Link = False : Catch : End Try
                 Try : Marshal.ReleaseComObject(m_Focuser) : Catch : End Try
                 m_Focuser = Nothing
@@ -53,8 +53,8 @@
 
 #Region "Code"
     Overrides Sub CheckInitialise()
-        'Set the error type numbers acording to the standards adopted by individual authors.
-        'Unfortunatley these vary between drivers so I have to allow for these here in order to give meaningful
+        'Set the error type numbers according to the standards adopted by individual authors.
+        'Unfortunately these vary between drivers so I have to allow for these here in order to give meaningful
         'messages to driver authors!
 
         Select Case g_FocuserProgID
@@ -158,7 +158,7 @@
                 l_DriverAccessFocuser.Link = False
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully disconnected using driver access toolkit")
             Catch ex As Exception
-                LogMsg("AccessChecks", MessageLevel.msgError, "Error conecting to driver using driver access toolkit: " & ex.Message)
+                LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
                 LogMsg("AccessChecks", MessageLevel.msgDebug, "Full error: " & ex.ToString())
                 LogMsg("", MessageLevel.msgAlways, "")
             End Try
@@ -268,14 +268,14 @@
         End Try
 
         'Position - Optional
-        If m_Absolute Then 'Absolute focuser so this property shold be supported
+        If m_Absolute Then 'Absolute focuser so this property should be supported
             Try
                 m_AbsolutePositionOK = False
                 m_Position = m_Focuser.Position
                 Select Case m_Position 'Check that position is a valid value
                     Case Is < 0 'Lower than lowest position
                         LogMsg("", MessageLevel.msgWarning, "Position is < 0, actual value: " & m_Position.ToString)
-                    Case Is > m_MaxStep '> higest position
+                    Case Is > m_MaxStep '> highest position
                         LogMsg("", MessageLevel.msgWarning, "Position is > MaxStep, actual value: " & m_Position.ToString)
                     Case Else 'Valid value
                         LogMsg("Position", MessageLevel.msgOK, m_Position.ToString)
@@ -334,13 +334,13 @@
                 'Turn compensation on 
                 m_Focuser.TempComp = True
                 LogMsg("TempComp Write", MessageLevel.msgOK, "Successfully turned temperature compensation on")
-                m_TempCompTrueOK = True ' Set to true to indicate TempComp acn be successfully set to True
+                m_TempCompTrueOK = True ' Set to true to indicate TempComp can be successfully set to True
                 'Turn compensation off
                 m_Focuser.TempComp = False
                 LogMsg("TempComp Write", MessageLevel.msgOK, "Successfully turned temperature compensation off")
                 m_TempCompFalseOK = True
             Catch ex As Exception
-                HandleException("TempComp Write", MemberType.Property, Required.MustBeImplemented, ex, "Temerature compensation is available but")
+                HandleException("TempComp Write", MemberType.Property, Required.MustBeImplemented, ex, "Temperature compensation is available but")
             End Try
         Else 'Should raise an exception
             Try
@@ -400,7 +400,7 @@
 
         'Move with TempComp True (if supported) - Should throw an error
         Status(StatusType.staTest, "Focuser Move")
-        If m_TempCompTrueOK Then ' Can set TempComp to True so cofirm that exception is thrown on Move
+        If m_TempCompTrueOK Then ' Can set TempComp to True so confirm that exception is thrown on Move
             Select Case g_InterfaceVersion
                 Case 0, 1, 2 ' Original test method for IFocuserV2 and earlier devices
                     Try
@@ -471,7 +471,7 @@
             m_Focuser.Move(m_Position)
             l_EndTime = Now
             If l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000 Then 'Assume a synchronous call
-                'Confirm that ismoving is false
+                'Confirm that IsMoving is false
                 If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
                     LogMsg(testName, MessageLevel.msgIssue, "Synchronous move expected but focuser is moving after return from Focuser.Move")
                 Else

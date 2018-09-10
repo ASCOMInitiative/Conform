@@ -71,11 +71,11 @@ Friend Class ApplicationSettings
     Private Const DOME_SHUTTER_TIMEOUT As String = "Dome Shutter Timeout", DOME_SHUTTER_TMEOUT_DEFAULT As Double = 240.0 'Timeout for dome to open or close shutter
     Private Const DOME_AZIMUTH_TIMEOUT As String = "Dome Azimuth Timeout", DOME_AZIMUTH_TIMEOUT_DEFAULT As Double = 240.0 'Timeout for dome to move to azimuth
     Private Const DOME_ALTITUDE_TIMEOUT As String = "Dome Altitude Timeout", DOME_ALTITUDE_TIMEOUT_DEFAULT As Double = 240.0 'Timeout for dome to move to altitude
-    Private Const DOME_STABILISATION_WAIT As String = "Dome Stabilisation Wait", DOME_STABILISATION_WAIT_DEFAULT As Double = 10.0 'Time to wait for Dome to stabliise after a command
+    Private Const DOME_STABILISATION_WAIT As String = "Dome Stabilisation Wait", DOME_STABILISATION_WAIT_DEFAULT As Double = 10.0 'Time to wait for Dome to stabilise after a command
 
     'Switch device variables
     Private Const SWITCH_SET As String = "Switch Set", SWITCH_SET_DEFAULT As Boolean = False
-    Private Const SWITCH_READ_DELAY As String = "Switch Read Delay", SWITCH_READ_DELAY_DEFAULT As Integer = 500 ' Switch delay after after a set before undertaking a read (ms)
+    Private Const SWITCH_READ_DELAY As String = "Switch Read Delay", SWITCH_READ_DELAY_DEFAULT As Integer = 500 ' Switch delay after a set before undertaking a read (ms)
     Private Const SWITCH_WRITE_DELAY As String = "Switch Write Delay", SWITCH_WRITE_DELAY_DEFAULT As Integer = 3000 ' Switch write delay between changing states (ms)
     Private Const EXTENDED_SWITCH_NUMBER_TEST_RANGE As String = "Extended Switch Number Test Range", EXTENDED_SWITCH_NUMBER_TEST_RANGE_DEFAULT As Integer = 100 ' Switch write delay between changing states (ms)
 
