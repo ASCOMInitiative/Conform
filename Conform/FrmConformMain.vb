@@ -370,7 +370,6 @@
 
 #End Region
 
-' Always put new entries at the top to make it easier to transfer to the release notes text file!
 #Region "Platform 6.2 Changes"
 'Version 6.2.59
 'All          Improved error handling for common methods
@@ -394,7 +393,22 @@
 #End Region
 
 #Region "Platform 6.3 Changes"
-'Version 6.3.61
+
+'Version 6.3.60 - test version only
+#End Region
+
+' Always put new entries at the top to make it easier to transfer to the release notes text file!
+#Region "Platform 6.4 Changes"
+'Version 6.4.62 - Requires Platform 6.4
+'All                 Change all HTTP references to HTTPS
+'All                 Spelling corrections applied to application and comments
+'Focuser             Added tests to make sure that absolute focusers can reach positions 0 and MaxStep
+'Focuser             Added tests to make sure that absolute focusers gracefully fail when commanded outside their supported position range
+'Telescope           Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
+'Telescope           Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
+'ObservingConditions Add extended SupportedActions / Action tests specifically for aggregated drivers presented by the Observing Conditions Hub
+
+'Version 6.4.61
 'Camera              New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
 'Camera              Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
 'Camera              Revised exception handling for some properties and improved messaging
@@ -406,18 +420,6 @@
 'Telescope           Add check that no exception is thrown when calling TrackingRates.Dispose
 'Switch              The range of switch numbers that will be searched for valid switches is now configurable through the Options/Conformance Options menu
 'Switch              New configuration setting that will log a message before every driver call to aid debugging
-
-'Version 6.3.60 - test version only
-#End Region
-
-#Region "Platform 6.4 Changes"
-'Version 6.4.62
-'All                 Change all HTTP references to HTTPS
-'All                 Spelling corrections applied to application and comments
-'Telescope           Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
-'Telescope           Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
-'ObservingConditions Add extended SupportedActions / Action tests specially for aggregated drivers presented by the Observing Conditions Hub
-
 #End Region
 
 

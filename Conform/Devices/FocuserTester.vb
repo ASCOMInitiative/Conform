@@ -9,6 +9,9 @@
     Private m_TempCompTrueOK, m_TempCompFalseOK As Boolean ' Variable to confirm that TempComp can be successfully set to True
     Private m_AbsolutePositionOK As Boolean = False ' Variable to confirm that absolute position can be read OK
 
+    Private Const GOOD_MOVE_TOLERANCE As Integer = 2 ' ± Position tolerance within which a move will be considered to be OK
+    Private Const OUT_OF_RANGE_INCREMENT As Integer = 10 ' For absolute focusers, the position delta, below 0 or above maximum steps, to test that the focuser will not move to the specified position
+
 #If DEBUG Then
     Private m_Focuser As ASCOM.DeviceInterface.IFocuserV2
 #Else
@@ -428,6 +431,65 @@
                 Case Else
                     LogMsgError("Move - TempComp True", String.Format("Unknown interface version returned {0}, Move test with temperature compensation enabled skipped.", g_InterfaceVersion))
             End Select
+
+            ' For absolute focusers, test movement to the 0 and MaxStep limits, also that the focuser will gracefully stop at the limits if commanded to move beyond them
+            If m_Absolute Then
+                If m_TempCompFalseOK Then m_Focuser.TempComp = False ' Set temperature compensation off
+
+                ' Test movement to the 0 limit
+                Try
+                    Call MoveFocuserToPosition("Move - To 0", 0)
+                    Select Case m_Focuser.Position
+                        Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogMsg("Move - To 0", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
+                        Case Else
+                            LogMsg("Move - To 0", MessageLevel.msgInfo, String.Format("Move was within {0} counts of desired position", m_Focuser.Position))
+                    End Select
+                Catch ex As Exception
+                    HandleException("Move - To 0", MemberType.Method, Required.Mandatory, ex, "")
+                End Try
+
+                ' Test movement below the 0 limit
+                Try
+                    Call MoveFocuserToPosition("Move - Below 0", -OUT_OF_RANGE_INCREMENT)
+                    Select Case m_Focuser.Position
+                        Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogMsg("Move - Below 0", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
+                        Case Else
+                            LogMsg("Move - Below 0", MessageLevel.msgError, String.Format("Move was permitted below position 0: {0} ", m_Focuser.Position))
+                    End Select
+                Catch ex As Exception
+                    HandleException("Move - Below 0", MemberType.Method, Required.Mandatory, ex, "Move should fail gracefully by just moving to position 0; it should not throw an exception")
+                End Try
+
+                ' Test movement to the MaxSteps limit
+                Try
+                    Call MoveFocuserToPosition("Move - To MaxStep", m_MaxStep)
+                    Select Case m_Focuser.Position
+                        Case m_MaxStep - GOOD_MOVE_TOLERANCE To m_MaxStep + GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogMsg("Move - To MaxStep", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
+                        Case Else
+                            LogMsg("Move - To MaxStep", MessageLevel.msgInfo, String.Format("Move position: {0}, within {1} counts of desired position", m_Focuser.Position, m_Focuser.Position - m_MaxStep))
+                    End Select
+                Catch ex As Exception
+                    HandleException("Move - To MaxStep", MemberType.Method, Required.Mandatory, ex, "")
+                End Try
+
+                ' Test movement above the MaxStep limit
+                Try
+                    Call MoveFocuserToPosition("Move - Above Maxstep", m_MaxStep + OUT_OF_RANGE_INCREMENT)
+                    Select Case m_Focuser.Position
+                        Case m_MaxStep - GOOD_MOVE_TOLERANCE To m_MaxStep + GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogMsg("Move - Above Maxstep", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
+                        Case Else
+                            LogMsg("Move - Above Maxstep", MessageLevel.msgError, String.Format("Moved to {0}, {1} steps from MaxStep ", m_Focuser.Position, m_Focuser.Position - m_MaxStep))
+                    End Select
+                Catch ex As Exception
+                    HandleException("Move - Above Maxstep", MemberType.Method, Required.Mandatory, ex, "Move should fail gracefully by just moving to position MaxStep; it should not throw an exception")
+                End Try
+
+            End If
+
             'Restore original TempComp value
             Try : m_Focuser.TempComp = m_TempComp : Catch : End Try
 
@@ -439,7 +501,6 @@
     End Sub
 
     Private Sub MoveFocuser(testName As String)
-        Dim l_StartTime, l_EndTime As Date
         If m_Absolute Then 'This is an absolute focuser so position is an absolute value
             'Save the current absolute position
             m_PositionOrg = m_Focuser.Position
@@ -449,56 +510,27 @@
                 m_Position = m_PositionOrg - CInt(m_MaxStep / 10) 'Move by 1/10 of the maximum focus distance in
             End If
             'Apply the MaxIncrement check
-            If System.Math.Abs(m_Position - m_PositionOrg) > m_MaxIncrement Then m_Position = m_PositionOrg + m_MaxIncrement
+            If Math.Abs(m_Position - m_PositionOrg) > m_MaxIncrement Then m_Position = m_PositionOrg + m_MaxIncrement
         Else 'This is a relative focuser so position is the relative displacement
             m_Position = CInt(m_MaxIncrement / 10)
             'Apply the MaxIncrement check
             If m_Position > m_MaxIncrement Then m_Position = m_MaxIncrement
         End If
 
-        'Confirm that the focuser is not moving
-        If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
-            LogMsg(testName, MessageLevel.msgIssue, "Focuser is already moving before start of Move test, rest of test skipped")
-        Else 'Focuser not moving so proceed with the test
-            'Move the focuser
-            If m_Absolute Then
-                LogMsg(testName, MessageLevel.msgComment, "Moving to position: " & m_Position.ToString)
-            Else
-                LogMsg(testName, MessageLevel.msgComment, "Moving by: " & m_Position.ToString)
-            End If
-            Status(StatusType.staAction, "Moving to new position")
-            l_StartTime = Now
-            m_Focuser.Move(m_Position)
-            l_EndTime = Now
-            If l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000 Then 'Assume a synchronous call
-                'Confirm that IsMoving is false
-                If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
-                    LogMsg(testName, MessageLevel.msgIssue, "Synchronous move expected but focuser is moving after return from Focuser.Move")
-                Else
-                    LogMsg(testName, MessageLevel.msgOK, "Synchronous move found")
-                End If
-            Else 'Assume an asynchronous call
-                Status(StatusType.staStatus, "Waiting for asynchronous move to complete")
-                Do While (m_Focuser.IsMoving And (Not g_Stop))
-                    If m_AbsolutePositionOK Then Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " & m_Focuser.Position & " / " & m_Position)
-                    Application.DoEvents()
-                    WaitFor(500)
-                Loop
-                LogMsg(testName, MessageLevel.msgOK, "Asynchronous move found")
-            End If
+        MoveFocuserToPosition(testName, m_Position) ' Move the focuser to the new test position within the focuser's movement range
 
-            'Test outcome if absolute
-            If m_Absolute Then
-                Select Case m_Focuser.Position - m_Position
-                    Case -2 To +2 'OK if within a small tolerance of expected value
-                        LogMsg(testName, MessageLevel.msgOK, "Absolute move OK")
-                    Case Else
-                        LogMsg(testName, MessageLevel.msgInfo, "Move was within " & m_Focuser.Position - m_Position & " counts of desired position")
-                End Select
-            Else
-                LogMsg(testName, MessageLevel.msgOK, "Relative move OK")
-            End If
+        'Test outcome if absolute
+        If m_Absolute Then
+            Select Case m_Focuser.Position - m_Position
+                Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                    LogMsg(testName, MessageLevel.msgOK, "Absolute move OK")
+                Case Else
+                    LogMsg(testName, MessageLevel.msgInfo, "Move was within " & m_Focuser.Position - m_Position & " counts of desired position")
+            End Select
+        Else
+            LogMsg(testName, MessageLevel.msgOK, "Relative move OK")
         End If
+
         Status(StatusType.staStatus, "")
         Status(StatusType.staAction, "Returning to original position: " & m_PositionOrg)
         LogMsg(testName, MessageLevel.msgInfo, "Returning to original position: " & m_PositionOrg)
@@ -514,6 +546,46 @@
             Application.DoEvents()
             WaitFor(500)
         Loop
+    End Sub
+
+    Sub MoveFocuserToPosition(testName As String, newPosition As Integer)
+        Dim l_StartTime, l_EndTime As Date
+
+        'Confirm that the focuser is not moving
+        If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
+            LogMsg(testName, MessageLevel.msgIssue, "Focuser is already moving before start of Move test, rest of test skipped")
+        Else 'Focuser not moving so proceed with the test
+            'Move the focuser
+            If m_Absolute Then
+                LogMsg(testName, MessageLevel.msgComment, "Moving to position: " & newPosition.ToString)
+            Else
+                LogMsg(testName, MessageLevel.msgComment, "Moving by: " & newPosition.ToString)
+            End If
+
+            Status(StatusType.staAction, "Moving to new position")
+            l_StartTime = Now
+            m_Focuser.Move(newPosition) ' Move the focuser
+            l_EndTime = Now
+
+            If l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000 Then 'Move took more than 1 second so assume a synchronous call
+                'Confirm that IsMoving is false
+                If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
+                    LogMsg(testName, MessageLevel.msgIssue, "Synchronous move expected but focuser is moving after return from Focuser.Move")
+                Else
+                    LogMsg(testName, MessageLevel.msgComment, "Synchronous move found")
+                End If
+            Else 'Move took less than 1 second so assume an asynchronous call
+                Status(StatusType.staStatus, "Waiting for asynchronous move to complete")
+                Do While (m_Focuser.IsMoving And (Not g_Stop))
+                    If m_AbsolutePositionOK Then Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " & m_Focuser.Position & " / " & newPosition)
+                    Application.DoEvents()
+                    WaitFor(500)
+                Loop
+                LogMsg(testName, MessageLevel.msgComment, "Asynchronous move found")
+            End If
+
+        End If
+
     End Sub
 
     Overrides Sub CheckPerformance()
