@@ -92,7 +92,7 @@ Name: {app}\Conform.exe.config; Type: files
 Name: {app}; Type: dirifempty
 
 [PreCompile]
-Name: "C:\Users\Peter\Documents\Visual Studio Projects\Conform\BuildConform.cmd"; Flags: CmdPrompt
+Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
 [Code]
 const
