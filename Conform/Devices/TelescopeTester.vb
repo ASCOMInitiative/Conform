@@ -2134,11 +2134,18 @@ Friend Class TelescopeTester
                             ' Check that target coordinates are present and set correctly per the ASCOM Telescope specification
                             Try
                                 currentRA = telescopeDevice.TargetRightAscension
-                                If currentRA = syncRA Then
-                                    LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(syncRA)))
-                                Else
-                                    LogMsg(testName, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(currentRA), FormatRA(syncRA)))
-                                End If
+                                LogMsg(testName, MessageLevel.msgDebug, String.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", currentRA, syncRA))
+
+                                Dim raDifference As Double
+                                raDifference = RaDifferenceInSeconds(syncRA, currentRA)
+
+                                Select Case raDifference
+                                    Case Is <= SLEW_SYNC_OK_TOLERANCE  ' Within specified tolerance
+                                        LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(syncRA)))
+                                    Case Else ' Outside specified tolerance
+                                        LogMsg(testName, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(currentRA), FormatRA(syncRA)))
+                                End Select
+
                             Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
                                 LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
                             Catch ex As ASCOM.InvalidOperationException
@@ -2151,11 +2158,17 @@ Friend Class TelescopeTester
 
                             Try
                                 currentDec = telescopeDevice.TargetDeclination
-                                If currentDec = syncDEC Then
-                                    LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches expected Declination OK. ", FormatDec(currentDec)))
-                                Else
-                                    LogMsg(testName, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(currentDec), FormatDec(syncDEC)))
-                                End If
+                                LogMsg(testName, MessageLevel.msgDebug, String.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", currentDec, syncDEC))
+
+                                Dim decDifference As Double
+                                decDifference = Math.Round(Math.Abs(currentDec - syncDEC) * 60.0 * 60.0, 1, MidpointRounding.AwayFromZero) ' Dec difference is in arc seconds from degrees of Declination
+
+                                Select Case decDifference
+                                    Case Is <= SLEW_SYNC_OK_TOLERANCE ' Within specified tolerance
+                                        LogMsg(testName, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches the expected Declination OK. ", FormatDec(syncDEC)))
+                                    Case Else ' Outside specified tolerance
+                                        LogMsg(testName, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(currentDec), FormatDec(syncDEC)))
+                                End Select
                             Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
                                 LogMsg(testName, MessageLevel.msgError, "The driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
                             Catch ex As ASCOM.InvalidOperationException
@@ -2414,11 +2427,16 @@ Friend Class TelescopeTester
                         ' Check that the slews and syncs set the target coordinates correctly per the ASCOM Telescope specification
                         Try
                             actualRA = telescopeDevice.TargetRightAscension
-                            If actualRA = m_TargetRightAscension Then
-                                LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(m_TargetRightAscension)))
-                            Else
-                                LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)))
-                            End If
+                            LogMsg(p_Name, MessageLevel.msgDebug, String.Format("Current TargetRightAscension: {0}, Set TargetRightAscension: {1}", actualRA, m_TargetRightAscension))
+                            Dim raDifference As Double
+                            raDifference = RaDifferenceInSeconds(actualRA, m_TargetRightAscension)
+                            Select Case raDifference
+                                Case Is <= SLEW_SYNC_OK_TOLERANCE  ' Within specified tolerance
+                                    LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetRightAscension property {0} matches the expected RA OK. ", FormatRA(m_TargetRightAscension)))
+                                Case Else ' Outside specified tolerance
+                                    LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetRightAscension property {0} does not match the expected RA {1}", FormatRA(actualRA), FormatRA(m_TargetRightAscension)))
+                            End Select
+
                         Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
                             LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetRightAscension property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
                         Catch ex As ASCOM.InvalidOperationException
@@ -2431,11 +2449,15 @@ Friend Class TelescopeTester
 
                         Try
                             actualDec = telescopeDevice.TargetDeclination
-                            If actualDec = m_TargetDeclination Then
-                                LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches the expected Declination OK. ", FormatDec(m_TargetDeclination)))
-                            Else
-                                LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)))
-                            End If
+                            LogMsg(p_Name, MessageLevel.msgDebug, String.Format("Current TargetDeclination: {0}, Set TargetDeclination: {1}", actualDec, m_TargetDeclination))
+                            Dim decDifference As Double
+                            decDifference = Math.Round(Math.Abs(actualDec - m_TargetDeclination) * 60.0 * 60.0, 1, MidpointRounding.AwayFromZero) ' Dec difference is in arc seconds from degrees of Declination
+                            Select Case decDifference
+                                Case Is <= SLEW_SYNC_OK_TOLERANCE ' Within specified tolerance
+                                    LogMsg(p_Name, MessageLevel.msgOK, String.Format("The TargetDeclination property {0} matches the expected Declination OK. ", FormatDec(m_TargetDeclination)))
+                                Case Else ' Outside specified tolerance
+                                    LogMsg(p_Name, MessageLevel.msgError, String.Format("The TargetDeclination property {0} does not match the expected Declination {1}", FormatDec(actualDec), FormatDec(m_TargetDeclination)))
+                            End Select
                         Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
                             LogMsg(p_Name, MessageLevel.msgError, "The Driver did not set the TargetDeclination property as required by the Telescope specification, A ValueNotSet COM exception was thrown instead.")
                         Catch ex As ASCOM.InvalidOperationException
@@ -4112,10 +4134,7 @@ Friend Class TelescopeTester
         LogMsg(testName, MessageLevel.msgDebug, "Read Declination: " & FormatDec(actualDec))
 
         ' Check that we have actually arrived where we are expected to be
-        difference = Math.Abs(actualRA - expectedRA)
-        If difference > 23.0 Then difference = 24.0 - difference ' Deal with the cases where the two elements are on different sides of 24hrs
-        If difference < -23.0 Then difference = difference - 24.0
-        difference = Math.Round(Math.Abs(difference * 15.0 * 60.0 * 60.0), 1, MidpointRounding.AwayFromZero) ' RA difference is in arc seconds from hours of RA
+        difference = RaDifferenceInSeconds(actualRA, expectedRA)
 
         Select Case difference
             Case Is <= SLEW_SYNC_OK_TOLERANCE  ' Convert arc seconds to hours of RA
@@ -4135,6 +4154,21 @@ Friend Class TelescopeTester
         End Select
 
     End Sub
+
+    ''' <summary>
+    ''' Return the difference between two RAs (in hours) as seconds
+    ''' </summary>
+    ''' <param name="FirstRA">First RA (hours)</param>
+    ''' <param name="SecondRA">Second RA (hours)</param>
+    ''' <returns>Difference (seconds) between the supplied RAs</returns>
+    Private Function RaDifferenceInSeconds(FirstRA As Double, SecondRA As Double) As Double
+        RaDifferenceInSeconds = Math.Abs(FirstRA - SecondRA) ' Calculate the difference allowing for negative outcomes
+
+        If RaDifferenceInSeconds > 12.0 Then RaDifferenceInSeconds = 24.0 - RaDifferenceInSeconds ' Deal with the cases where the two elements are more than 12 hours apart going in the initial direction
+        RaDifferenceInSeconds = Math.Round(RaDifferenceInSeconds * 15.0 * 60.0 * 60.0, 1, MidpointRounding.AwayFromZero) ' RA difference is in arc seconds from hours of RA
+
+        Return RaDifferenceInSeconds
+    End Function
 
     Private Sub SyncScope(testName As String, canDoItName As String, testType As SlewSyncType, syncRA As Double, syncDec As Double)
         Select Case testType
