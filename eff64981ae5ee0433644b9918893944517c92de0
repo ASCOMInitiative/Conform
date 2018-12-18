@@ -1,1 +1,1 @@
-Fix for issue #1. Revise the Telescope.DestinationSideOfPier test to use an "above the horizon" target when the site is in the southern hemisphere.
+Fixes Issue #1.
