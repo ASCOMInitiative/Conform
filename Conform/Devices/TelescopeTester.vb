@@ -510,9 +510,9 @@ Friend Class TelescopeTester
             canReadAltitide = True 'Read successfully
             Select Case m_Altitude
                 Case Is < 0.0
-                    LogMsg("Altitude", MessageLevel.msgWarning, "Altitude is <0.0 degrees: " & Format(m_Altitude, "0.00"))
+                    LogMsg("Altitude", MessageLevel.msgWarning, "Altitude is <0.0 degrees: " & Format(m_Altitude, "0.00000000"))
                 Case Is > 90.0000001
-                    LogMsg("Altitude", MessageLevel.msgWarning, "Altitude is >90.0 degrees: " & Format(m_Altitude, "0.00"))
+                    LogMsg("Altitude", MessageLevel.msgWarning, "Altitude is >90.0 degrees: " & Format(m_Altitude, "0.00000000"))
                 Case Else
                     LogMsg("Altitude", MessageLevel.msgOK, Format(m_Altitude, "0.00"))
             End Select
@@ -3272,7 +3272,7 @@ Friend Class TelescopeTester
     End Sub
 
     Private Sub TelescopeOptionalMethodsTest(ByVal p_Type As OptionalMethodType, ByVal p_Name As String, ByVal p_CanTest As Boolean)
-        Dim l_ct As Integer, l_TestDec, l_TestRA As Double
+        Dim l_ct As Integer, l_TestDec, l_TestRAOffset As Double
 #If DEBUG Then
         Dim l_AxisRates As IAxisRates = Nothing
 #Else
@@ -3283,8 +3283,16 @@ Friend Class TelescopeTester
         LogMsg("TelescopeOptionalMethodsTest", MessageLevel.msgDebug, p_Type.ToString & " " & p_Name & " " & p_CanTest.ToString)
         If p_CanTest Then ' Confirm that an error is raised if the optional command is not implemented
             Try
-                l_TestDec = 45.0
-                l_TestRA = 3.0
+                ' Set the test declination value depending on whether the scope is in the northern or southern hemisphere
+                If m_SiteLatitude > 0.0 Then
+                    l_TestDec = 45.0 ' Positive for the northern hemisphere
+                Else
+                    l_TestDec = -45.0 ' Negative for the southern hemisphere
+                End If
+
+                l_TestRAOffset = 3.0 ' Set the test RA offset as 3 hours from local sider5eal time
+                LogMsg(p_Name, MessageLevel.msgDebug, String.Format("Test RA offset: {0}, Test declination: {1}", l_TestRAOffset, l_TestDec))
+
                 Select Case p_Type
                     Case OptionalMethodType.AbortSlew
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call AbortSlew method")
@@ -3292,16 +3300,21 @@ Friend Class TelescopeTester
                         LogMsg("AbortSlew", MessageLevel.msgOK, "AbortSlew OK when not slewing")
 
                     Case OptionalMethodType.DestinationSideOfPier
-                        m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRA)
+                        ' Get the DestinationSideOfPier for a target in the West i.e. for a German mount when the tube is on the East side of the pier
+                        m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -l_TestRAOffset)
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call DestinationSideOfPier method, RA: " & FormatRA(m_TargetRightAscension) & ", Declination: " & FormatDec(l_TestDec))
                         m_DestinationSideOfPierEast = telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec)
-                        LogMsg(p_Name, MessageLevel.msgDebug, "East: " & FormatRA(m_TargetRightAscension) & " " & FormatDec(l_TestDec) & " " & m_DestinationSideOfPier.ToString)
-                        m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRA)
+                        LogMsg(p_Name, MessageLevel.msgDebug, "German mount - scope on the pier's East side, target in the West : " & FormatRA(m_TargetRightAscension) & " " & FormatDec(l_TestDec) & " " & m_DestinationSideOfPierEast.ToString)
+
+                        ' Get the DestinationSideOfPier for a target in the East i.e. for a German mount when the tube is on the West side of the pier
+                        m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, l_TestRAOffset)
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call DestinationSideOfPier method, RA: " & FormatRA(m_TargetRightAscension) & ", Declination: " & FormatDec(l_TestDec))
                         m_DestinationSideOfPierWest = telescopeDevice.DestinationSideOfPier(m_TargetRightAscension, l_TestDec)
-                        LogMsg(p_Name, MessageLevel.msgDebug, "West: " & FormatRA(m_TargetRightAscension) & " " & FormatDec(l_TestDec) & " " & m_DestinationSideOfPier.ToString)
+                        LogMsg(p_Name, MessageLevel.msgDebug, "German mount - scope on the pier's West side, target in the East: " & FormatRA(m_TargetRightAscension) & " " & FormatDec(l_TestDec) & " " & m_DestinationSideOfPierWest.ToString)
+
+                        ' Make sure that we received two valid values i.e. that neither side returned PierSide.Unknown and that the two valid returned values are not the same i.e. we got one PierSide.PierEast and one PierSide.PierWest
                         If (m_DestinationSideOfPierEast = PierSide.pierUnknown) Or (m_DestinationSideOfPierWest = PierSide.pierUnknown) Then
-                            LogMsg(p_Name, MessageLevel.msgError, "Invalid SideOfPier value received, East: " & m_DestinationSideOfPierEast.ToString & ", West: " & m_DestinationSideOfPierWest.ToString)
+                            LogMsg(p_Name, MessageLevel.msgError, "Invalid SideOfPier value received, Target in West: " & m_DestinationSideOfPierEast.ToString & ", Target in East: " & m_DestinationSideOfPierWest.ToString)
                         Else
                             If m_DestinationSideOfPierEast = m_DestinationSideOfPierWest Then
                                 LogMsg(p_Name, MessageLevel.msgIssue, "Same value for DestinationSideOfPier received on both sides of the meridian: " & m_DestinationSideOfPierEast)

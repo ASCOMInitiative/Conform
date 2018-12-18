@@ -399,6 +399,9 @@
 
 ' Always put new entries at the top to make it easier to transfer to the release notes text file!
 #Region "Platform 6.4 Changes"
+'Version 6.4.63 - Requires Platform 6.4
+'Telescope           Fixed the DestinationSideOfPier test which used a "below the horizon" declination in the southern hemisphere
+
 'Version 6.4.62 - Requires Platform 6.4
 'All                 Change all HTTP references to HTTPS
 'All                 Spelling corrections applied to application and comments
