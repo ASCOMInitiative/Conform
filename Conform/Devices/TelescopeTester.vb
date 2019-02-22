@@ -1201,8 +1201,10 @@ Friend Class TelescopeTester
             LogMsg("TargetDeclination Read", MessageLevel.msgIssue, "Read before write should generate an error and didn't")
         Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
             LogMsg("TargetDeclination Read", MessageLevel.msgOK, "COM Not Set exception generated on read before write")
+        Catch ex As COMException When (ex.ErrorCode = ErrorCodes.InvalidOperationException)
+            LogMsg("TargetDeclination Read", MessageLevel.msgOK, "COM InvalidOperationException generated on read before write")
         Catch ex As ASCOM.InvalidOperationException
-            LogMsg("TargetDeclination Read", MessageLevel.msgOK, ".NET Not InvalidOperationException generated on read before write")
+            LogMsg("TargetDeclination Read", MessageLevel.msgOK, ".NET InvalidOperationException generated on read before write")
         Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
             LogMsg("TargetDeclination Read", MessageLevel.msgOK, ".NET Not Set exception generated on read before write")
         Catch ex As System.InvalidOperationException
@@ -1222,8 +1224,10 @@ Friend Class TelescopeTester
             LogMsg("TargetRightAscension Read", MessageLevel.msgIssue, "Read before write should generate an error and didn't")
         Catch ex As COMException When (ex.ErrorCode = ErrorCodes.ValueNotSet) Or (ex.ErrorCode = g_ExNotSet1) Or (ex.ErrorCode = g_ExNotSet2)
             LogMsg("TargetRightAscension Read", MessageLevel.msgOK, "COM Not Set exception generated on read before write")
+        Catch ex As COMException When (ex.ErrorCode = ErrorCodes.InvalidOperationException)
+            LogMsg("TargetDeclination Read", MessageLevel.msgOK, "COM InvalidOperationException generated on read before write")
         Catch ex As ASCOM.InvalidOperationException
-            LogMsg("TargetRightAscension Read", MessageLevel.msgOK, ".NET Not InvalidOperationException generated on read before write")
+            LogMsg("TargetRightAscension Read", MessageLevel.msgOK, ".NET InvalidOperationException generated on read before write")
         Catch ex As DriverException When (ex.Number = ErrorCodes.ValueNotSet) Or (ex.Number = g_ExNotSet1) Or (ex.Number = g_ExNotSet2)
             LogMsg("TargetRightAscension Read", MessageLevel.msgOK, ".NET Not Set exception generated on read before write")
         Catch ex As System.InvalidOperationException
@@ -1419,6 +1423,7 @@ Friend Class TelescopeTester
                     'TrackingRate Write - Optional
                     'We can read TrackingRate so now test trying to set each tracking rate in turn
                     Try
+                        LogMsgDebug("TrackingRate Write", "About to enumerate tracking rates object")
                         For Each l_DriveRate In l_TrackingRates
                             Application.DoEvents()
                             If TestStop() Then Exit Sub
@@ -1436,10 +1441,10 @@ Friend Class TelescopeTester
                             End Try
                         Next
                     Catch ex As System.NullReferenceException ' Catch issues in iterating over a new TrackingRates object after a previous TrackingRates object was disposed.
-                        LogMsgError("TrackingRate Write", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped")
-                        LogMsgInfo("TrackingRate Write", "This may indicate that the TrackingRates.Dispose method cleared a global variable shared by all TrackingRates instances.")
+                        LogMsgError("TrackingRate Write 1", "A NullReferenceException was thrown while iterating a new TrackingRates instance after a previous TrackingRates instance was disposed. TrackingRate.Write testing skipped")
+                        LogMsgInfo("TrackingRate Write 1", "This may indicate that the TrackingRates.Dispose method cleared a global variable shared by all TrackingRates instances.")
                     Catch ex As Exception
-                        HandleException("TrackingRate Write", MemberType.Property, Required.Mandatory, ex, "")
+                        HandleException("TrackingRate Write 1", MemberType.Property, Required.Mandatory, ex, "")
                     End Try
 
                     'Finally restore original TrackingRate

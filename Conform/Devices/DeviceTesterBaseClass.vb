@@ -251,7 +251,8 @@ Friend Class DeviceTesterBaseClass
                     i += 1
                     If Action.GetType.Name = "String" Then
                         Dim ActionString As String = CType(Action, String)
-
+                        Dim result As String
+                        Const TEST_PARAMETERS As String = "Conform test parameters"
                         Select Case ActionString
                             Case Is = ""
                                 LogMsg("SupportedActions", MessageLevel.msgError, "Supported action " & i & " is an empty string")
@@ -260,13 +261,37 @@ Friend Class DeviceTesterBaseClass
 
                                 ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
                                 If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
-                                    If ((ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:")) Or (ActionString.ToUpperInvariant.StartsWith("//SWITCHSIMULATOR:"))) Then
-                                        Dim result As String
+                                    If ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:") Then
                                         Try
-                                            result = Device.Action(ActionString, "")
-                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("{0} action gave result: {1}", ActionString, result))
+                                            If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
+                                            result = Device.Action(ActionString, TEST_PARAMETERS)
+                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("OC simulator action {0} gave result: {1}", ActionString, result))
                                         Catch ex1 As Exception
-                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling action {0}: {1}", ActionString, ex1.Message))
+                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message))
+                                        End Try
+                                    ElseIf ActionString.ToUpperInvariant.StartsWith("//ASCOM.SIMULATOR.OBSERVINGCONDITIONS:") Then
+                                        Try
+                                            If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
+                                            result = Device.Action(ActionString, TEST_PARAMETERS)
+                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("OC simulator action {0} gave result: {1}", ActionString, result))
+                                        Catch ex1 As Exception
+                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling OCH simulator action {0}: {1}", ActionString, ex1.Message))
+                                        End Try
+                                    ElseIf ActionString.ToUpperInvariant.StartsWith("//SWITCHSIMULATOR:") Then
+                                        Try
+                                            If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
+                                            result = Device.Action(ActionString, TEST_PARAMETERS)
+                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("Switch simulator action {0} gave result: {1}", ActionString, result))
+                                        Catch ex1 As Exception
+                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message))
+                                        End Try
+                                    ElseIf ActionString.ToUpperInvariant.StartsWith("//ASCOM.SIMULATOR.SWITCH:") Then
+                                        Try
+                                            If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
+                                            result = Device.Action(ActionString, TEST_PARAMETERS)
+                                            LogMsg("SupportedActions", MessageLevel.msgOK, String.Format("Switch simulator action {0} gave result: {1}", ActionString, result))
+                                        Catch ex1 As Exception
+                                            LogMsg("SupportedActions", MessageLevel.msgError, String.Format("Exception calling switch simulator action {0}: {1}", ActionString, ex1.Message))
                                         End Try
                                     End If
                                 End If

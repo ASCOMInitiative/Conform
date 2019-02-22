@@ -204,6 +204,10 @@ Module GlobalVarsAndCode
         LogMsg(p_Test, MessageLevel.msgOK, p_Msg)
     End Sub
 
+    Friend Sub LogMsgDebug(ByVal p_Test As String, ByVal p_Msg As String)
+        LogMsg(p_Test, MessageLevel.msgDebug, p_Msg)
+    End Sub
+
     Friend Sub LogMsgInfo(ByVal p_Test As String, ByVal p_Msg As String)
         LogMsg(p_Test, MessageLevel.msgInfo, p_Msg)
     End Sub
@@ -211,9 +215,11 @@ Module GlobalVarsAndCode
     Friend Sub LogMsgIssue(ByVal p_Test As String, ByVal p_Msg As String)
         LogMsg(p_Test, MessageLevel.msgIssue, p_Msg)
     End Sub
+
     Friend Sub LogMsgError(ByVal p_Test As String, ByVal p_Msg As String)
         LogMsg(p_Test, MessageLevel.msgError, p_Msg)
     End Sub
+
     Friend Sub LogMsgWarning(ByVal p_Test As String, ByVal p_Msg As String)
         LogMsg(p_Test, MessageLevel.msgWarning, p_Msg)
     End Sub

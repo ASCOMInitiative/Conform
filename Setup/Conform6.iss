@@ -42,6 +42,7 @@ SetupLogging=true
 ShowLanguageDialog=auto
 SolidCompression=true
 UninstallDisplayIcon={app}\Conform.exe
+UsedUserAreasWarning=no
 VersionInfoCompany=ASCOM Initiative
 VersionInfoCopyright=Peter Simpson
 VersionInfoDescription=Tool to validate ASCOM drivers
