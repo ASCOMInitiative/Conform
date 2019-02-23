@@ -1968,7 +1968,6 @@ Friend Class TelescopeTester
     End Sub
     Public Overrides Sub CheckPerformance()
         Status(StatusType.staTest, "Performance") 'Clear status messages
-        LogMsg("Transactions", MessageLevel.msgAlways, "per second: <1=Rather low, 1-2=OK, 2-10=Good, >10=Rather high")
         TelescopePerformanceTest(PerformanceType.tstPerfAltitude, "Altitude") : If TestStop() Then Exit Sub
         If g_InterfaceVersion > 1 Then
             TelescopePerformanceTest(PerformanceType.tstPerfAtHome, "AtHome") : If TestStop() Then Exit Sub
