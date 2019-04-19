@@ -4,7 +4,7 @@ Friend Class SafetyMonitorTester
 
 #Region "Variables and Constants"
     Private m_CanIsGood, m_CanEmergencyShutdown As Boolean
-    Private m_IsSafe, m_IsGood, m_EmergencyShutdown, m_Connected As Boolean
+    Private m_IsSafe, m_IsGood As Boolean
     Private m_Description, m_DriverInfo, m_DriverVersion As String
 
 #If DEBUG Then
@@ -185,25 +185,7 @@ Friend Class SafetyMonitorTester
             Select Case p_Type
                 Case RequiredProperty.propIsSafe
                     m_IsSafe = m_SafetyMonitor.IsSafe
-                    If Not m_Connected Then 'Check that value is false
-                        If Not m_IsSafe Then
-                            LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
-                        Else
-                            LogMsg(p_Name, MessageLevel.msgIssue, "IsSafe is True when not connected, IsSafe should be False")
-                        End If
-                    Else ' We are connected so test whether emergency shutdown is true, if so IsSafes should be false
-                        If m_CanEmergencyShutdown Then
-                            If m_EmergencyShutdown Then 'EmergencyShutdown is true so IsSafe should be false
-                                If Not m_IsSafe Then
-                                    LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
-                                Else
-                                    LogMsg(p_Name, MessageLevel.msgIssue, "IsSafe is True when EmergencyShutdown is true, IsSafe should be False")
-                                End If
-                            Else 'Any value is OK
-                                LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
-                            End If
-                        End If
-                    End If
+                    LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
                 Case Else
                     LogMsg(p_Name, MessageLevel.msgError, "RequiredPropertiesTest: Unknown test type " & p_Type.ToString)
             End Select
