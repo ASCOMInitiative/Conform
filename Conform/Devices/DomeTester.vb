@@ -211,7 +211,7 @@ Friend Class DomeTester
             LogMsg("CreateDevice", MessageLevel.msgDebug, "Successfully created driver")
         End If
 #End If
-            g_Stop = False
+        g_Stop = False
     End Sub
     Overrides Property Connected() As Boolean
         Get
@@ -384,6 +384,7 @@ Friend Class DomeTester
 
     Private Sub DomeSlewToAltitude(ByVal p_Name As String, ByVal p_Altitude As Double)
         Dim l_StartTime As Date
+
         Status(StatusType.staAction, "Slew to " & p_Altitude & " degrees")
         m_Dome.SlewToAltitude(p_Altitude)
         If m_CanReadSlewing Then 'Can read slewing so make sure dome is at rest
@@ -566,11 +567,13 @@ Friend Class DomeTester
                     'Methods
                 Case DomePropertyMethod.CloseShutter
                     If m_CanSetShutter Then 'CloseShutter should work OK
-                        DomeShutterTest(ShutterState.shutterClosed, p_Name)
-                        Call DomeStabliisationWait()
+                        Try
+                            DomeShutterTest(ShutterState.shutterClosed, p_Name)
+                            Call DomeStabliisationWait()
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True")
+                        End Try
                     Else 'CloseShutter should throw an exception
-                        '2.1.5 next line changed because close shutter was never tested
-                        'DomeShutterTest(ShutterState.shutterClosed, p_Name)
                         m_Dome.CloseShutter()
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetShutter is false but CloseShutter did not raise an exception")
                     End If
@@ -587,39 +590,47 @@ Friend Class DomeTester
                     If m_CanFindHome Then
                         Status(StatusType.staTest, p_Name)
                         Status(StatusType.staAction, "Waiting for movement to stop")
-                        m_Dome.FindHome()
-                        If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
-                            If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Home did not raise an exception")
-                        End If
-                        If m_CanReadSlewing Then 'Make sure dome is at rest
-                            Do
-                                WaitFor(SLEEP_TIME)
-                                Application.DoEvents()
-                                Status(StatusType.staStatus, "Slewing Status: " & m_Dome.Slewing)
-                            Loop Until Not m_Dome.Slewing Or TestStop()
-                        End If
-                        If Not TestStop() Then 'Only do remaining tests if stop hasn't been pressed
-                            If m_CanReadAtHome Then 'Can read AtHome so confirm that it 
-                                If m_Dome.AtHome Then 'Dome shows as homed - hooray!
-                                    LogMsg(p_Name, MessageLevel.msgOK, "Dome homed successfully")
-                                Else 'Home completed but apparently dome isn't homed!
-                                    LogMsg(p_Name, MessageLevel.msgError, "Home command completed but AtHome is false")
-                                End If
-                            Else
-                                LogMsg(p_Name, MessageLevel.msgOK, "Can't read AtHome so assume that dome has homed successfully")
+                        Try
+                            m_Dome.FindHome()
+                            If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
+                                If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Home did not raise an exception")
                             End If
+                            If m_CanReadSlewing Then 'Make sure dome is at rest
+                                Do
+                                    WaitFor(SLEEP_TIME)
+                                    Application.DoEvents()
+                                    Status(StatusType.staStatus, "Slewing Status: " & m_Dome.Slewing)
+                                Loop Until Not m_Dome.Slewing Or TestStop()
+                            End If
+                            If Not TestStop() Then 'Only do remaining tests if stop hasn't been pressed
+                                If m_CanReadAtHome Then 'Can read AtHome so confirm that it 
+                                    If m_Dome.AtHome Then 'Dome shows as homed - hooray!
+                                        LogMsg(p_Name, MessageLevel.msgOK, "Dome homed successfully")
+                                    Else 'Home completed but apparently dome isn't homed!
+                                        LogMsg(p_Name, MessageLevel.msgError, "Home command completed but AtHome is false")
+                                    End If
+                                Else
+                                    LogMsg(p_Name, MessageLevel.msgOK, "Can't read AtHome so assume that dome has homed successfully")
+                                End If
+                                Call DomeStabliisationWait()
+                            End If
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanFindHome is True")
                             Call DomeStabliisationWait()
-                        End If
-                    Else 'CanFindHome is false so FindHome should throw an exception
+                        End Try
+                    Else 'CanFindHome is false so FindHome should throw a not implemented exception
                         m_Dome.FindHome()
                         LogMsg(p_Name, MessageLevel.msgError, "CanFindHome is false but FindHome did not throw an exception")
                     End If
                 Case DomePropertyMethod.OpenShutter
-                    If m_CanSetShutter Then
-                        DomeShutterTest(ShutterState.shutterOpen, p_Name)
-                    Else
-                        '2.1.5 Next line changed to ensure that an open shutter is tried
-                        'DomeShutterTest(ShutterState.shutterOpen, p_Name)
+                    If m_CanSetShutter Then 'OpenShutter should work OK
+                        Try
+                            DomeShutterTest(ShutterState.shutterOpen, p_Name)
+                            Call DomeStabliisationWait()
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True")
+                        End Try
+                    Else 'OpenShutter should throw an exception
                         m_Dome.OpenShutter()
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetShutter is false but OpenShutter did not raise an exception")
                     End If
@@ -628,30 +639,35 @@ Friend Class DomeTester
                     If m_CanPark Then 'Should be able to issue the Park command
                         Status(StatusType.staTest, p_Name)
                         Status(StatusType.staAction, "Waiting for movement to stop")
-                        m_Dome.Park()
-                        If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
-                            If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Park did not raise an exception")
-                        End If
-                        If m_CanReadSlewing Then 'Make sure dome is at rest
-                            Do
-                                WaitFor(SLEEP_TIME)
-                                Application.DoEvents()
-                                Status(StatusType.staStatus, "Slewing Status: " & m_Dome.Slewing)
-                            Loop Until Not m_Dome.Slewing Or TestStop()
-                        End If
-                        If Not TestStop() Then 'Only do remain tests if stop hasn't been pressed
-                            If m_CanReadAtPark Then 'Can read at park so confirm that it 
-                                If m_Dome.AtPark Then 'Dome shows as parked - hooray!
-                                    LogMsg(p_Name, MessageLevel.msgOK, "Dome parked successfully")
-                                Else 'Park completed but apparently dome isn't parked!
-                                    LogMsg(p_Name, MessageLevel.msgError, "Park command completed but AtPark is false")
-                                End If
-                            Else
-                                LogMsg(p_Name, MessageLevel.msgOK, "Can't read AtPark so assume that dome has parked successfully")
+                        Try
+                            m_Dome.Park()
+                            If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
+                                If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Park did not raise an exception")
                             End If
-                        End If
-                        Call DomeStabliisationWait()
-                    Else 'Park command should raise an error
+                            If m_CanReadSlewing Then 'Make sure dome is at rest
+                                Do
+                                    WaitFor(SLEEP_TIME)
+                                    Application.DoEvents()
+                                    Status(StatusType.staStatus, "Slewing Status: " & m_Dome.Slewing)
+                                Loop Until Not m_Dome.Slewing Or TestStop()
+                            End If
+                            If Not TestStop() Then 'Only do remain tests if stop hasn't been pressed
+                                If m_CanReadAtPark Then 'Can read at park so confirm that it 
+                                    If m_Dome.AtPark Then 'Dome shows as parked - hooray!
+                                        LogMsg(p_Name, MessageLevel.msgOK, "Dome parked successfully")
+                                    Else 'Park completed but apparently dome isn't parked!
+                                        LogMsg(p_Name, MessageLevel.msgError, "Park command completed but AtPark is false")
+                                    End If
+                                Else
+                                    LogMsg(p_Name, MessageLevel.msgOK, "Can't read AtPark so assume that dome has parked successfully")
+                                End If
+                            End If
+                            Call DomeStabliisationWait()
+                        Catch ex As Exception
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanPark is True")
+                            Call DomeStabliisationWait()
+                        End Try
+                    Else 'Park command should throw a not implemented exception
                         m_Dome.Park()
                         LogMsg(p_Name, MessageLevel.msgError, "CanPark is false but Park did not raise an exception")
                     End If
@@ -660,10 +676,8 @@ Friend Class DomeTester
                         Try
                             m_Dome.SetPark()
                             LogMsg(p_Name, MessageLevel.msgOK, "SetPark issued OK")
-                        Catch ex As COMException
-                            LogMsg(p_Name, MessageLevel.msgError, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
                         Catch ex As Exception
-                            LogMsg(p_Name, MessageLevel.msgError, EX_NET & ex.Message)
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetPark is True")
                         End Try
                     Else 'Can't set park so should raise an error
                         m_Dome.SetPark()
@@ -677,8 +691,12 @@ Friend Class DomeTester
 #Else
                         For l_SlewAngle = 0 To 90 Step 15
 #End If
-                            DomeSlewToAltitude(p_Name, l_SlewAngle)
-                            If TestStop() Then Exit Sub
+                            Try
+                                DomeSlewToAltitude(p_Name, l_SlewAngle)
+                                If TestStop() Then Exit Sub
+                            Catch ex As Exception
+                                HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAltitude is True")
+                            End Try
                         Next
                         'Test out of range values -10 and 100 degrees
                         If m_CanSetAltitude Then 'Can set altitude so check out of range values
@@ -708,24 +726,31 @@ Friend Class DomeTester
 #Else
                         For l_SlewAngle = 0 To 315 Step 45
 #End If
-                            DomeSlewToAzimuth(p_Name, l_SlewAngle)
-                            If TestStop() Then Exit Sub
+                            Try
+                                DomeSlewToAzimuth(p_Name, l_SlewAngle)
+                                If TestStop() Then Exit Sub
+                            Catch ex As Exception
+                                HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetAzimuth is True")
+                            End Try
                         Next
-                        'Test out of range values -10 and 370 degrees
-                        Try
-                            DomeSlewToAzimuth(p_Name, DOME_ILLEGAL_AZIMUTH_LOW)
-                            LogMsg(p_Name, MessageLevel.msgError, "No exception generated when slewing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees")
-                        Catch ex As Exception
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees", "COM invalid value exception correctly raised for slew to " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees")
-                        End Try
-                        If TestStop() Then Exit Sub
-                        Try
-                            DomeSlewToAzimuth(p_Name, DOME_ILLEGAL_AZIMUTH_HIGH)
-                            LogMsg(p_Name, MessageLevel.msgError, "No exception generated when slewing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees")
-                        Catch ex As Exception
-                            HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees", "COM invalid value exception correctly raised for slew to " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees")
-                        End Try
-                        If TestStop() Then Exit Sub
+
+                        If m_CanSetAzimuth Then
+                            'Test out of range values -10 and 370 degrees
+                            Try
+                                DomeSlewToAzimuth(p_Name, DOME_ILLEGAL_AZIMUTH_LOW)
+                                LogMsg(p_Name, MessageLevel.msgError, "No exception generated when slewing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees")
+                            Catch ex As Exception
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees", "COM invalid value exception correctly raised for slew to " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees")
+                            End Try
+                            If TestStop() Then Exit Sub
+                            Try
+                                DomeSlewToAzimuth(p_Name, DOME_ILLEGAL_AZIMUTH_HIGH)
+                                LogMsg(p_Name, MessageLevel.msgError, "No exception generated when slewing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees")
+                            Catch ex As Exception
+                                HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "slew to " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees", "COM invalid value exception correctly raised for slew to " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees")
+                            End Try
+                            If TestStop() Then Exit Sub
+                        End If
                     Else 'SlewToAzimuth should throw an exception
                         m_Dome.SlewToAzimuth(45.0)
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetAzimuth is false but SlewToAzimuth did not throw an exception")
@@ -795,12 +820,14 @@ Friend Class DomeTester
     End Sub
     Private Sub DomeShutterTest(ByVal p_RequiredShutterState As ShutterState, ByVal p_Name As String)
         Dim l_MsgBoxResult As MsgBoxResult, l_ShutterState As ShutterState
+
         If FrmConformMain.chkDomeShutter.Checked Then 'Shutter tests are allowed
             Status(StatusType.staTest, p_Name)
             If m_CanReadShutterStatus Then 'Can read shutter status so use it
-                l_ShutterState = m_Dome.ShutterStatus
-                l_ShutterState = CType(l_ShutterState, ShutterState)
-                Select Case l_ShutterState 'Make sure we are in the required state to start the test
+                l_ShutterState = CType(m_Dome.ShutterStatus, ShutterState)
+
+                'Make sure we are in the required state to start the test
+                Select Case l_ShutterState
                     Case ShutterState.shutterClosed
                         If p_RequiredShutterState = ShutterState.shutterClosed Then 'Testing ShutterClose
                             'Wrong state, get to the required state
@@ -866,6 +893,8 @@ Friend Class DomeTester
                     Case Else
                         LogMsg("DomeShutterTest", MessageLevel.msgError, "Unexpected shutter status: " & l_ShutterState.ToString)
                 End Select
+
+                ' Now test that we can get to the required state
                 If p_RequiredShutterState = ShutterState.shutterClosed Then 'Testing ShutterClose
                     'Shutter is now open so close it
                     Status(StatusType.staAction, "Closing shutter")
@@ -881,8 +910,7 @@ Friend Class DomeTester
                         LogMsg(p_Name, MessageLevel.msgOK, "Shutter closed successfully")
                     End If
                     Call DomeStabliisationWait()
-                Else
-                    'Shutter is now closed so open it
+                Else 'Shutter is now closed so test that we can open it
                     Status(StatusType.staAction, "Opening shutter")
                     m_Dome.OpenShutter()
                     Status(StatusType.staAction, "Waiting for shutter to open")
@@ -918,6 +946,7 @@ Friend Class DomeTester
             LogMsg("DomeSafety", MessageLevel.msgComment, "Open shutter check box is unchecked so shutter test bypassed")
         End If
     End Sub
+
     Private Function DomeShutterWait(ByVal p_RequiredStatus As ShutterState) As Boolean
         'Wait for shutter to reach required stats or user presses stop or timeout occurs
         'Returns true if required state is reached
