@@ -536,9 +536,15 @@ Friend Class CameraTester
             End Try
         End If
 
+        m_ImageArray = Nothing
+        m_ImageArrayVariant = Nothing
+        GC.Collect()
+
         If m_ImageReady Then 'ImageReady is incorrectly flagged so don't know what to expect!
             Try
-                m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
+                Dim ImageArrayVariantObject As Object
+                ImageArrayVariantObject = m_Camera.ImageArrayVariant
+                m_ImageArrayVariant = CType(ImageArrayVariantObject, Integer(,))
                 LogMsg("ImageArrayVariant", MessageLevel.msgError, "No image has been taken but ImageArray has not generated an exception")
             Catch ex As Exception
                 LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
@@ -551,6 +557,11 @@ Friend Class CameraTester
                 LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
             End Try
         End If
+        Try : Marshal.ReleaseComObject(m_ImageArray) : Catch : End Try
+        Try : Marshal.ReleaseComObject(m_ImageArrayVariant) : Catch : End Try
+        m_ImageArray = Nothing
+        m_ImageArrayVariant = Nothing
+        GC.Collect()
 
         m_IsPulseGuiding = CameraPropertyTestBoolean(CamPropertyType.IsPulseGuiding, "IsPulseGuiding", False) : If TestStop() Then Exit Sub
         If m_IsPulseGuiding Then LogMsg("IsPulseGuiding", MessageLevel.msgError, "Camera is showing pulse guiding underway although no PulseGuide command has been issued!")
@@ -1327,9 +1338,15 @@ Friend Class CameraTester
                             LogMsg("StartExposure", MessageLevel.msgError, EX_NET & "exception when reading ImageArray" & ex.ToString)
                         End Try
 
+                        m_ImageArray = Nothing
+                        m_ImageArrayVariant = Nothing
+                        GC.Collect()
+
                         'Check image array variant dimensions
+                        Dim imageArrayObject As Array
                         Try
-                            m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Array)
+                            imageArrayObject = m_Camera.ImageArrayVariant
+                            m_ImageArrayVariant = CType(imageArrayObject, Array)
                             If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
                                 If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
                                     If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
