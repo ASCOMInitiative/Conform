@@ -1447,6 +1447,24 @@ Friend Class TelescopeTester
                         HandleException("TrackingRate Write 1", MemberType.Property, Required.Mandatory, ex, "")
                     End Try
 
+                    ' Attempt to write an invalid high tracking rate
+                    Try
+                        If g_Settings.DisplayMethodCalls Then LogMsg("TrackingRate Write", MessageLevel.msgComment, "About to set TrackingRate property to invalid value (5)")
+                        telescopeDevice.TrackingRate = 5
+                        LogMsg("TrackingRate Write", MessageLevel.msgIssue, "No error generated when TrackingRate is set to an invalid value (5)")
+                    Catch ex As Exception
+                        HandleInvalidValueExceptionAsOK("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (5)")
+                    End Try
+
+                    ' Attempt to write an invalid low tracking rate
+                    Try
+                        If g_Settings.DisplayMethodCalls Then LogMsg("TrackingRate Write", MessageLevel.msgComment, "About to set TrackingRate property to invalid value (-1)")
+                        telescopeDevice.TrackingRate = -1
+                        LogMsg("TrackingRate Write", MessageLevel.msgIssue, "No error generated when TrackingRate is set to an invalid value (-1)")
+                    Catch ex As Exception
+                        HandleInvalidValueExceptionAsOK("TrackingRate Write", MemberType.Property, Required.Optional, ex, "", "Invalid Value exception generated as expected when TrackingRate is set to an invalid value (-1)")
+                    End Try
+
                     'Finally restore original TrackingRate
                     Try
                         If g_Settings.DisplayMethodCalls Then LogMsg("TrackingRate Write", MessageLevel.msgComment, "About to set TrackingRate property to " & l_TrackingRate.ToString())
