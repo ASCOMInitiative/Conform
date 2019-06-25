@@ -1,167 +1,39 @@
-6.4.62.0
+6.4.64.0
+Version 6.4.64.0 - This version requires Platform 6.4
+  All - The performance results message has been revised to leave it to driver authors to decide acceptable performance rates for their driver and hardware.
+  Camera - Improved memory management when cameras return large image arrays
+  Dome - Issues are now reported when CanXXX properties return true but the associated XXX methods throw exceptions.
+  ObservingConditions - Improve Observing Condition Hub action pass-through tests
+  SafetyMonitor - Bug fix: Driver now passes when it is connected and returns IsSafe = true.
+  Telescope - Bug fix: Telescope.TargetRightAscensionRate and Telescope.TargetDeclinationRate tests will now accept COM InvalidOperationExceptions as valid responses.
+  Telescope - Improve logging when enumerating the TrackingRates object
+  Telescope - Telescope.TrackingRate Set has additional tests for conditions that the driver should reject with an InvalidValueException.
+            1) Setting a value lower than the smallest DriveRates enum value
+            2) Setting a value higher than its largest DriveRates enum value
+
+Version 6.4.63.0 - This version requires Platform 6.4
+  Telescope - Bug fix: Revise the Telescope.DestinationSideOfPier test to use an "above the horizon" target when the site is in the southern hemisphere. 
+              This fixes the issue that Conform caused some drivers to return PierSide.Unknown in the Telescope.DestinationSideOfPier test.
+
 Version 6.4.62.0 - This version requires Platform 6.4
-All - Change all HTTP references to HTTPS
-All - Spelling corrections applied to application and comments
-Focuser - Added tests to make sure that absolute focusers can reach positions 0 and MaxStep
-Focuser - Added tests to make sure that absolute focusers gracefully fail when commanded outside their supported position range
-Telescope - Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
-Telescope - Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
-ObservingConditions - Add extended SupportedActions / Action tests specifically for aggregated drivers presented by the Observing Conditions Hub
+  All - Change all HTTP references to HTTPS
+  All - Spelling corrections applied to application and comments
+  Focuser - Added tests to make sure that absolute focusers can reach positions 0 and MaxStep
+  Focuser - Added tests to make sure that absolute focusers gracefully fail when commanded outside their supported position range
+  Telescope - Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
+  Telescope - Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
+  ObservingConditions - Add extended SupportedActions / Action tests specifically for aggregated drivers presented by the Observing Conditions Hub
 
 Version 6.4.61.0 - This version requires Platform 6.4
-Camera - New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
-Camera - Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
-Camera - Revised exception handling for some properties and improved messaging
-Focuser - Move tests revised to match new IFocuserV3 behaviour introduced in Platform 6.4
-ObservingConditions - Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
-Telescope - New configuration setting that will log a message before every driver call to aid debugging
-Telescope - TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
-Telescope - Add check that no exception is thrown when calling AxisRates.Dispose
-Telescope - Add check that no exception is thrown when calling Rate.Dispose
-Telescope - Add check that no exception is thrown when calling TrackingRates.Dispose
-Switch - The range of switch numbers that wil be searched for valid switches is now configurable through the Options/Conformance Options menu
-Switch - New configuration setting that will log a message before every driver call to aid debugging
-
-Version 6.2.59 - This version requires Platform 6.2
-All - Improved error handling for common methods
-All - Extended function name width to 34 characters to accommodate longer names
-Focuser - Removed incorrect error message in StepSize test that was introduced when refactoring exception handling.
-Focuser - Corrected reported test name when reading TempComp if temperature compensation write is not implemented.
-Focuser - Corrected reported test name when moving the focuser during the TempComp write test
-Rotator - Added extra debug logging to facilitate issue resolution
-Telescope - Sync - Added separate test enable flags for SyncToCoordinates and SyncToTarget
-Telescope - Sync - Improved, comprehensive test sequence to confirm that sync fully works
-Telescope - Sync - Telescope now slews to a known test position before commencing tests
-
-Version 6.2.58.0 - This version requires Platform 6.2
-All - Up leveled numbering for platform 6.2
-All - Changed version number format to PlatformMajor.PlatformMinor.ConformVersion.BetaVersion. BetaVersion will be 0 for production versions.
-All - Consistent handling for not implemented and invalid value exceptions throughout the tester. 
-All - More guidance for authors when inappropriate exceptions are thrown
-All - Support for parsing error messages to determine intent has  been removed - use of inappropriate exceptions now count as issues
-All - Now reports when PropertyNotImplementedException is used instead of MethodNotImplementedException and vice versa
-All - New configuration option: Conform can now test use either late bound COM or DriverAccess to test drivers
-All - New configuration option: Conform can now enable / disable testing of SideOfPier Read and Write independently
-Camera - Added tests for the new ICameraV2 properties
-ObsCond - Added ObservingConditions v1 interface tests
-Rotator - Now properly handles rotators where returned posiitons are slightly less than the requested position
-Telescope - Increased resolution of UTCDate information to include 3 decimal places.
-Telescope - Fixed SideOfPier tests to work reliably in both hemispheres
-Telescope - Reinstated test for ASCOM convention that German Equatorial mounts will return SideOfPier as pierWest when observing at hour angles from -6.0 to 0.0
-Telescope - Reinstated test for ASCOM convention that German Equatorial mounts will return SideOfPier as pierEast when observing at hour angles from 0.0 to +6.0
-Telescope - Reinstated test for ASCOM convention that German Equatorial mounts will return DestinationSideOfPier as pierWest at hour angles from -6.0 to 0.0
-Telescope - Reinstated test for ASCOM convention that German Equatorial mounts will return DestinationSideOfPier as pierEast at hour angles from 0.0 to +6.0
-Telescope - Improved messaging for SideOfPier test results
-Telescope - Added tests to confirm that slew and sync methods reject bad coordinates
-Telescope - Formatting consistency improvements for RA and Dec, Altitude and Azimuth values
-Telescope - Sync information made easier to read
-Telescope - TrackingRate Read is now required to be implemented per the specification, TrackingRate Write remains optional
-Video - Added tests for IVideo
-Video - Improved tests for Video image array compliance with the published interface standard
-
-Version 6.1.0.52 - This version of Conform requires Platform 6.1
-
-All - Fix to suppress Windows "Application has stopped working" dialogues due to errors occuring in driver unmanaged code DLLs
-SafetyMonitor - Added safety monitors as testable device types
-Switch - Added tests for ISwitchV2
-
-Version 6.0.0.50 - This version of Conform requires Platform 6
-
-Rotator - Increased Position test tolerance. A Move is now flagged as OK if the reported position is within 1 step of the required position
-
-Version 6.0.0.49 - This version of Conform requires Platform 6
-
-Telescope- Added test for whether interface V1 drivers can unpark the scope, fixes issue in MountSafety when mounts do not support unparking
-Telescope - Made SideOfPier Write test more realistic by tracking through the Meridian before attempting to flip the scope
-Focuser - Added better status messaging during asynchronous focuser moves
-
-Version 6.0.0.48 - This version of Conform requires Platform 6
-
-Camera - Revised testing of ICameraV2.BayerOffset to match specification
-Camera - Improve error reporting for PercentCompleted
-Camera - Moved SensorType test ahead of BayerOffset tests so that expected BayerOfset responses are known in advance
-Telescope - Revised DestinationSideOfPier test to just check that returned values are different for both sides of the meridian
-
-Version 6.0.0.47 - This version of Conform requires Platform 6
-
-Camera - Fixed crash when ReadoutModes was not present
-
-Version 6.0.0.46 - This version of Conform requires Platform 6
-
-Camera - Added tests for the new ICameraV2 properties
-
-Version 6.0.0.45 - This version of Conform requires Platform 6
-
-Rotator - Rotator.Halt was incorrectly expecting a PropertyNotImplementedException, it now checks for MethodNotImplementedException
-Camera - Allow for BinX and BinY to throw InvalidValueExceptions within the range 1 to MaxBin if these bin values are not supported.
-
-Version 6.0.0.44 - This version of Conform requires Platform 6
-
-Telescope - Allow for possibility that TargetRA and TargetDEC may throw not implemented exceptions when testing SlewToTarget
-Telescope - Allow for possibility that TargetRA and TargetDEC may throw not implemented exceptions when testing SyncToTarget
-
-Version 6.0.0.43 - This version of Conform requires Platform 6
-
-All - Added test for System.InvalidOperationException, now provides message advising to use ASCOM.InvalidOperationException
-All - Removed infintie loop bug in releasing .NET in-process drivers
-Telescope - Added support for ServoCAT.Telescope invlaid value COM exception number
-Telescope - Added extra debug information for SyncToCoordinates and SyncToTarget
-Telescope - AxisRates: Improved testing of enumerator methods and associated debug diagnostics
-Telescope - Corrected MoveAxis test names in Conform display
-Telescope - TrackingRates: Improved debug level diagnostic messages
-
-Version 6.0.0.38 - This version of Conform requires Platform 6
-
-All - Added tests for Platform 5 and Platform 6 interfaces
-All - Now uses DriverAccess to access devices
-All - Can now configure Conform to run as 32bit on a 64bit OS 
-All - Moved the Debug option to the "General" options tab
-All - Will now report non-string types returned in the SupportedActions ArrayList as errors
-All - The "first time" safety warning message has been updated to encompass all device types not just
-      telescope
-All - Conform no longer attempts to interpret state from the returned error message. The original behaviour
-      can be enabled through a configuration option. See version 3.0.0.15 description
-Camera - Added test for description > 68 characters to ensure compatibility with FITS headers
-Camera - Fixed bug that could fail LastExposure tests for in-process camera drivers
-Camera - Widened tolerance on LastExposure check; within 2% of expected is now OK
-Camera - The ASCOM Camera specification was revised to state that StopExposure should not throw an exception
-         if there is no exposure is in progress. Conform now tests for this revised behaviour.
-Camera - SetCCDTemperature now reports the ability to set temperature outside the range -280C to +100C as
-         Issues rather than Errors
-FilterWheel - Added pre-run check to ensure the filter wheel is stationary before tests start
-Telescope - Added InvalidOperation exception as OK when target declination and target right ascension 
-            are read without first having been set
-Telescope - Improved diagnostics if TrackingRates is not correctly implemented.
-Telescope - Fixed incorrect message when returned RA is out of valid range
-Telescope - Added extra test to check whether commands can unpark the scope when they should not.
-Telescope - Added test for IsPulseGuiding stuck on
-Telescope - Fixed issue in SiderealTime test when PC and scope clocks are close to 00:00:00
-Telescope - Moved time check to pre-run checks section
-Telescope - Added support for testing Telescope Interface V1 drivers
-Telescope - Fixed SyncToAltAz so that it wont try to use Azimuth and Altitude properties if these are not
-            implemented
-Telescope - Added better reporting if a driver returns a null object for AxisRates(Axis)
-Telescope - Failure to retain tracking state after MoveAxis was shown as OK, now shows as an Issue
-
-Version 3.0.0.17
-
-Dome - Fixed exceptions in post test safety checks when Dome.CanPark and Dome.CanSetShutter were False
-
-Version 3.0.0.16
-
-Camera - Fixed bug that flagged all attampts at early binding as errors
-Focuser - Fixed acceptance of incorrect exception when moving focuser with temperature compensation active
-Focuser - ASCOM.InvalidOperationException is now accepted as OK
-Focuser - ASCOM.InvalidValueException is no longer accepted as OK
-Installer - Moved to Inno Setup 5.3.7 Unicode
-
-Version 3.0.0.15
-
-Exceptions - Exceptions that use words like "not supported" are accepted as "not implemented" exceptions
-Focuser - Now restores the original TempComp value
-Focuser - Added delay between successive create attempts to allow previous instances to clean up properly
-Focuser - Added missing test that Move should throw an exception when TempComp is set to True
-Focuser - Will now accept .NET InvalidValueException thrown by Move when TempComp is true
-Telescope - Added test for ablility to set tracking before trying to set it in three places
-Telescope - Added skip of SideOfPier tests if SideOfPier can not be read
-Startup - Fixed internationalisation issue. Decimal separator of "," caused a startup exception
+  Camera - New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
+  Camera - Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
+  Camera - Revised exception handling for some properties and improved messaging
+  Focuser - Move tests revised to match new IFocuserV3 behaviour introduced in Platform 6.4
+  ObservingConditions - Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
+  Telescope - New configuration setting that will log a message before every driver call to aid debugging
+  Telescope - TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
+  Telescope - Add check that no exception is thrown when calling AxisRates.Dispose
+  Telescope - Add check that no exception is thrown when calling Rate.Dispose
+  Telescope - Add check that no exception is thrown when calling TrackingRates.Dispose
+  Switch - The range of switch numbers that will be searched for valid switches is now configurable through the Options/Conformance Options menu
+  Switch - New configuration setting that will log a message before every driver call to aid debugging
