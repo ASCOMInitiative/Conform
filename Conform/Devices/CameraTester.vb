@@ -27,6 +27,7 @@ Friend Class CameraTester
     Private m_Gains, m_ReadoutModes As ArrayList
     Private m_SensorName As String
     Private m_SensorType As SensorType, m_CanReadSensorType As Boolean = False
+    Private sw As Stopwatch = New Stopwatch()
 
 #If DEBUG Then
     Private m_Camera As ASCOM.DriverAccess.Camera
@@ -1310,7 +1311,11 @@ Friend Class CameraTester
 
                         'Check image array dimensions
                         Try
+                            If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "About to call ImageArray method")
+                            sw.Restart()
                             m_ImageArray = CType(m_Camera.ImageArray, Array)
+                            sw.Stop()
+                            If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "Call completed in " & sw.ElapsedMilliseconds & "ms")
                             If (m_ImageArray.GetLength(0) = p_NumX) And (m_ImageArray.GetLength(1) = p_NumY) Then
                                 If m_ImageArray.GetType.ToString = "System.Int32[,]" Or m_ImageArray.GetType.ToString = "System.Int32[,,]" Then
                                     If m_ImageArray.Rank = 2 Then 'Single plane image be definition
@@ -1345,8 +1350,15 @@ Friend Class CameraTester
                         'Check image array variant dimensions
                         Dim imageArrayObject As Array
                         Try
+                            If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "About to call ImageArrayVariant method")
+                            sw.Restart()
                             imageArrayObject = m_Camera.ImageArrayVariant
+                            sw.Stop()
+                            If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "Call completed in " & sw.ElapsedMilliseconds & "ms")
+                            sw.Restart()
                             m_ImageArrayVariant = CType(imageArrayObject, Array)
+                            sw.Stop()
+                            If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "Conversion to Array completed in " & sw.ElapsedMilliseconds & "ms")
                             If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
                                 If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
                                     If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
