@@ -836,11 +836,12 @@ Public Class FrmConformMain
 
     ' Options menu
     Private Sub SelectDriverToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SelectDriverToolStripMenuItem.Click
-        Dim l_Chooser As ASCOM.Utilities.Chooser, l_NewProgID As String = ""
-        l_Chooser = New ASCOM.Utilities.Chooser With {
-            .DeviceType = m_CurrentDeviceType.ToString 'Select the correct device type
-            }
+        Dim l_Chooser As ASCOM.Utilities.Chooser = Nothing, l_NewProgID As String = ""
+
         Try
+            l_Chooser = New ASCOM.Utilities.Chooser
+            l_Chooser.DeviceType = m_CurrentDeviceType.ToString 'Select the correct device type
+
             Select Case m_CurrentDeviceType
                 Case DeviceType.Camera
                     l_NewProgID = l_Chooser.Choose(g_CameraProgID)
