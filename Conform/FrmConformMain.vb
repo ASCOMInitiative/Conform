@@ -1130,6 +1130,12 @@ Public Class FrmConformMain
         Dim OK As Boolean = False
         Dim Assemblies As Assembly(), AppDom As AppDomain
 
+        ' Define a handler for unhandled exceptions.
+        AddHandler currentDomain.UnhandledException, AddressOf MYExnHandler
+
+        ' Define a handler for unhandled exceptions for threads behind forms.
+        AddHandler Application.ThreadException, AddressOf MYThreadHandler
+
         Try
 #If Not DEBUG Then
             SpecialTestsToolStripMenuItem.Visible = False 'Hide the special tests menu in release version
@@ -1252,6 +1258,23 @@ Public Class FrmConformMain
         chkDomeShutter.Top = BtnCheckConformance.Top - 3 * l_ButtonSpace
         chkSwitchSet.Left = BtnCheckConformance.Left
         chkSwitchSet.Top = BtnCheckConformance.Top - 3 * l_ButtonSpace
+    End Sub
+
+    ' Get the your application's application domain.
+    Dim currentDomain As AppDomain = AppDomain.CurrentDomain
+
+    Private Sub MYExnHandler(ByVal sender As Object,
+       ByVal e As UnhandledExceptionEventArgs)
+        Dim EX As Exception
+        EX = e.ExceptionObject
+        LogMsg("MYExnHandler", MessageLevel.msgWarning, EX.ToString())
+    End Sub
+
+    Private Sub MYThreadHandler(ByVal sender As Object,
+     ByVal e As Threading.ThreadExceptionEventArgs)
+        LogMsg("MYThreadHandler", MessageLevel.msgWarning, e.Exception.ToString())
+
+        Console.WriteLine(e.Exception.StackTrace)
     End Sub
 #End Region
 
