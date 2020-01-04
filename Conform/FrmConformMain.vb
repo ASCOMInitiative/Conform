@@ -1390,6 +1390,9 @@ Public Class FrmConformMain
         LogMsg("CheckForUpdates", MessageLevel.msgInfo, "This version of Conform is:           " & l_Version)
 
         Try
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault ' Specify use of the latest secure transport mechanics
+
 #If DEBUG Then
             l_WebRequest = WebRequest.Create(UPDATE_CHECK_FILE_DEBUG) 'URI of the test update version file
             l_UpdateFileURI = New Uri(UPDATE_CHECK_FILE_DEBUG)
