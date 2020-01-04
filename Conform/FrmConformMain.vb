@@ -1105,14 +1105,18 @@ Public Class FrmConformMain
 
 #Region "New, Finalize, Form Load and Form Event handlers"
     Public Sub New()
-        ' This call is required by the Windows Form Designer.
         Try
+            ' Add handlers for unhandled application and thread exceptions.
+            AddHandler currentDomain.UnhandledException, AddressOf UnhandledExceptionHandler
+            AddHandler Application.ThreadException, AddressOf UnhandledThreadExceptionHandler
 
+            ' Change to the required bitness executable if necessary
             ChangeBitnessIfNeeded()
 
+            ' This call is required by the Windows Form Designer.
             InitializeComponent()
 
-            ' Add any initialization after the InitializeComponent() call.
+            ' Create components
             g_Util = New ASCOM.Utilities.Util
         Catch ex As Exception
             MsgBox("Conform:New Exception " & ex.ToString)
@@ -1129,12 +1133,6 @@ Public Class FrmConformMain
         Dim FileVersion As System.Version = Nothing
         Dim OK As Boolean = False
         Dim Assemblies As Assembly(), AppDom As AppDomain
-
-        ' Define a handler for unhandled exceptions.
-        AddHandler currentDomain.UnhandledException, AddressOf MYExnHandler
-
-        ' Define a handler for unhandled exceptions for threads behind forms.
-        AddHandler Application.ThreadException, AddressOf MYThreadHandler
 
         Try
 #If Not DEBUG Then
@@ -1263,18 +1261,12 @@ Public Class FrmConformMain
     ' Get the your application's application domain.
     Dim currentDomain As AppDomain = AppDomain.CurrentDomain
 
-    Private Sub MYExnHandler(ByVal sender As Object,
-       ByVal e As UnhandledExceptionEventArgs)
-        Dim EX As Exception
-        EX = e.ExceptionObject
-        LogMsg("MYExnHandler", MessageLevel.msgWarning, EX.ToString())
+    Private Sub UnhandledExceptionHandler(ByVal sender As Object, ByVal e As UnhandledExceptionEventArgs)
+        LogMsg("UnhandledException", MessageLevel.msgWarning, e.ExceptionObject.ToString())
     End Sub
 
-    Private Sub MYThreadHandler(ByVal sender As Object,
-     ByVal e As Threading.ThreadExceptionEventArgs)
-        LogMsg("MYThreadHandler", MessageLevel.msgWarning, e.Exception.ToString())
-
-        Console.WriteLine(e.Exception.StackTrace)
+    Private Sub UnhandledThreadExceptionHandler(ByVal sender As Object, ByVal e As Threading.ThreadExceptionEventArgs)
+        LogMsg("UnhandledThreadException", MessageLevel.msgWarning, e.Exception.ToString())
     End Sub
 #End Region
 
