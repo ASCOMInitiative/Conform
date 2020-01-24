@@ -107,7 +107,7 @@ Friend Class DeviceTesterBaseClass
 
         'Dim m_Configuration, SC() As String
         Dim m_Connected As Boolean
-        Dim l_HasInterfaceVersion As Boolean = False
+        Dim l_HasInterfaceVersion As Boolean
 
         LogMsg("Common Driver Methods", MessageLevel.msgAlways, "")
         Device = p_DeviceObject 'CType(DeviceObject, IAscomDriverV1)

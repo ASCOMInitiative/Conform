@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationSettings.vb" />
+    <Compile Include="Devices\CoverCalibrator Tester.vb" />
     <Compile Include="Devices\ObservingConditionsTester.vb" />
     <Compile Include="Devices\SideOfPierResults.vb" />
     <Compile Include="Devices\VideoTester.vb" />

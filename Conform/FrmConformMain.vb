@@ -538,6 +538,9 @@ Public Class FrmConformMain
             Case DeviceType.SafetyMonitor
                 g_CurrentProgID = g_SafetyMonitorProgID
                 l_TestDevice = New SafetyMonitorTester
+            Case DeviceType.CoverCalibrator
+                g_CurrentProgID = g_CoverCalibratorProgID
+                l_TestDevice = New CoverCalibratorTester
             Case Else
                 LogMsg("Conform:ConformanceCheck", MessageLevel.msgError, "Unknown device type: " & m_CurrentDeviceType.ToString & ". You need to add it to the ConformanceCheck subroutine")
         End Select
@@ -903,6 +906,12 @@ Public Class FrmConformMain
                         g_Settings.DeviceSafetyMonitor = l_NewProgID 'Only update settings if OK pressed
                         g_SafetyMonitorProgID = l_NewProgID
                     End If
+                Case DeviceType.CoverCalibrator
+                    l_NewProgID = l_Chooser.Choose(g_CoverCalibratorProgID)
+                    If l_NewProgID <> "" Then
+                        g_Settings.DeviceCoverCalibrator = l_NewProgID 'Only update settings if OK pressed
+                        g_CoverCalibratorProgID = l_NewProgID
+                    End If
                 Case Else
                     LogMsg("SelectDriverToolStripMenuItem_Click", MessageLevel.msgError, "Invalid device type: " & m_CurrentDeviceType.ToString & " You need to add the device to the SelectDriverToolStripMenuItem_Click subroutine")
             End Select
@@ -949,6 +958,10 @@ Public Class FrmConformMain
     End Sub
     Private Sub MnuTestCamera_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles mnuTestCamera.Click
         m_CurrentDeviceType = DeviceType.Camera
+        SetDeviceType()
+    End Sub
+    Private Sub MnuTestCoverCalibrator_Click(sender As Object, e As EventArgs) Handles mnuTestCoverCalibrator.Click
+        m_CurrentDeviceType = DeviceType.CoverCalibrator
         SetDeviceType()
     End Sub
     Private Sub MnuTestTelescope_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles mnuTestTelescope.Click
@@ -1283,6 +1296,7 @@ Public Class FrmConformMain
         mnuTestSafetyMonitor.Checked = False
         mnuTestVideoCamera.Checked = False
         mnuTestObservingConditions.Checked = False
+        mnuTestCoverCalibrator.Checked = False
 
         'Set the appropriate new flag
         Select Case m_CurrentDeviceType
@@ -1355,6 +1369,12 @@ Public Class FrmConformMain
                 mnuTestVideoCamera.Checked = True
                 g_CurrentProgID = g_Settings.DeviceVideo
                 g_VideoCameraProgID = g_CurrentProgID
+                chkDomeShutter.Visible = False 'Make the dome shutter control invisible
+                chkSwitchSet.Visible = False
+            Case DeviceType.CoverCalibrator
+                mnuTestCoverCalibrator.Checked = True
+                g_CurrentProgID = g_Settings.DeviceCoverCalibrator
+                g_CoverCalibratorProgID = g_CurrentProgID
                 chkDomeShutter.Visible = False 'Make the dome shutter control invisible
                 chkSwitchSet.Visible = False
         End Select

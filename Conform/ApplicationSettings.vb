@@ -40,6 +40,7 @@ Friend Class ApplicationSettings
 
     Private Const DEVICE_CAMERA As String = "Device Camera", DEVICE_CAMERA_DEFAULT As String = "CCDSimulator.Camera"
     Private Const DEVICE_VIDEO As String = "Device Video Camera", DEVICE_VIDEO_DEFAULT As String = "ASCOM.Simulator.Video"
+    Private Const DEVICE_COVER_CALIBRATOR As String = "Device Cover Calibrator", DEVICE_COVER_CALIBRATOR_DEFAULT As String = "ASCOM.Simulator.CoverCalibrator"
     Private Const DEVICE_DOME As String = "Device Dome", DEVICE_DOME_DEFAULT As String = "DomeSim.Dome"
     Private Const DEVICE_FILTER_WHEEL As String = "Device Filter Wheel", DEVICE_FILTER_WHEEL_DEFAULT As String = "FilterWheelSim.FilterWheel"
     Private Const DEVICE_FOCUSER As String = "Device Focuser", DEVICE_FOCUSER_DEFAULT As String = "FocusSim.Focuser"
@@ -536,6 +537,14 @@ Friend Class ApplicationSettings
         End Get
         Set(ByVal value As String)
             SetName(m_SettingsKey, DEVICE_VIDEO, value.ToString)
+        End Set
+    End Property
+    Property DeviceCoverCalibrator() As String
+        Get
+            Return GetString(DEVICE_COVER_CALIBRATOR, DEVICE_COVER_CALIBRATOR_DEFAULT)
+        End Get
+        Set(ByVal value As String)
+            SetName(m_SettingsKey, DEVICE_COVER_CALIBRATOR, value.ToString)
         End Set
     End Property
     Property DeviceDome() As String

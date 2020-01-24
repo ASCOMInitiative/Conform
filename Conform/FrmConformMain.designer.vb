@@ -69,6 +69,7 @@ Partial Class FrmConformMain
         Me.chkDomeShutter = New System.Windows.Forms.CheckBox()
         Me.dlgValidation = New System.Windows.Forms.OpenFileDialog()
         Me.chkSwitchSet = New System.Windows.Forms.CheckBox()
+        Me.mnuTestCoverCalibrator = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.StatusStrip.SuspendLayout()
         Me.SuspendLayout()
@@ -112,7 +113,7 @@ Partial Class FrmConformMain
         '
         'OptionsToolStripMenuItem
         '
-        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SelectDriverToolStripMenuItem, Me.DriverSetupToolStripMenuItem, Me.ConformanceOptionsToolStripMenuItem, Me.ToolStripSeparator1, Me.mnuTestTelescope, Me.mnuTestDome, Me.mnuTestCamera, Me.mnuTestVideoCamera, Me.mnuTestFocuser, Me.mnuTestFilterWheel, Me.mnuTestObservingConditions, Me.mnuTestRotator, Me.mnuTestSwitch, Me.mnuTestSafetyMonitor})
+        Me.OptionsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SelectDriverToolStripMenuItem, Me.DriverSetupToolStripMenuItem, Me.ConformanceOptionsToolStripMenuItem, Me.ToolStripSeparator1, Me.mnuTestTelescope, Me.mnuTestDome, Me.mnuTestCamera, Me.mnuTestCoverCalibrator, Me.mnuTestFocuser, Me.mnuTestFilterWheel, Me.mnuTestObservingConditions, Me.mnuTestRotator, Me.mnuTestSwitch, Me.mnuTestSafetyMonitor, Me.mnuTestVideoCamera})
         Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
         Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
         Me.OptionsToolStripMenuItem.Text = "Options"
@@ -224,31 +225,31 @@ Partial Class FrmConformMain
         '
         Me.SpecialTestsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuTelescopeSideOfPierToolStripMenuItem, Me.mnuTelescopeDestinationSideOfPierToolStripMenuItem, Me.mnuTelescopeFlipRangeToolStripMenuItem, Me.mnuTelescopeCommandsToolStripMenuItem})
         Me.SpecialTestsToolStripMenuItem.Name = "SpecialTestsToolStripMenuItem"
-        Me.SpecialTestsToolStripMenuItem.Size = New System.Drawing.Size(85, 20)
+        Me.SpecialTestsToolStripMenuItem.Size = New System.Drawing.Size(84, 20)
         Me.SpecialTestsToolStripMenuItem.Text = "Special Tests"
         '
         'mnuTelescopeSideOfPierToolStripMenuItem
         '
         Me.mnuTelescopeSideOfPierToolStripMenuItem.Name = "mnuTelescopeSideOfPierToolStripMenuItem"
-        Me.mnuTelescopeSideOfPierToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.mnuTelescopeSideOfPierToolStripMenuItem.Size = New System.Drawing.Size(243, 22)
         Me.mnuTelescopeSideOfPierToolStripMenuItem.Text = "Telescope SideOfPier"
         '
         'mnuTelescopeDestinationSideOfPierToolStripMenuItem
         '
         Me.mnuTelescopeDestinationSideOfPierToolStripMenuItem.Name = "mnuTelescopeDestinationSideOfPierToolStripMenuItem"
-        Me.mnuTelescopeDestinationSideOfPierToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.mnuTelescopeDestinationSideOfPierToolStripMenuItem.Size = New System.Drawing.Size(243, 22)
         Me.mnuTelescopeDestinationSideOfPierToolStripMenuItem.Text = "Telescope DestinationSideOfPier"
         '
         'mnuTelescopeFlipRangeToolStripMenuItem
         '
         Me.mnuTelescopeFlipRangeToolStripMenuItem.Name = "mnuTelescopeFlipRangeToolStripMenuItem"
-        Me.mnuTelescopeFlipRangeToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.mnuTelescopeFlipRangeToolStripMenuItem.Size = New System.Drawing.Size(243, 22)
         Me.mnuTelescopeFlipRangeToolStripMenuItem.Text = "Telescope SideOfPier Tests"
         '
         'mnuTelescopeCommandsToolStripMenuItem
         '
         Me.mnuTelescopeCommandsToolStripMenuItem.Name = "mnuTelescopeCommandsToolStripMenuItem"
-        Me.mnuTelescopeCommandsToolStripMenuItem.Size = New System.Drawing.Size(244, 22)
+        Me.mnuTelescopeCommandsToolStripMenuItem.Size = New System.Drawing.Size(243, 22)
         Me.mnuTelescopeCommandsToolStripMenuItem.Text = "TelescopeCommands"
         '
         'HelpToolStripMenuItem
@@ -383,7 +384,13 @@ Partial Class FrmConformMain
         Me.chkSwitchSet.Text = "Set Switches"
         Me.chkSwitchSet.UseVisualStyleBackColor = True
         '
-        'frmConformMain
+        'mnuTestCoverCalibrator
+        '
+        Me.mnuTestCoverCalibrator.Name = "mnuTestCoverCalibrator"
+        Me.mnuTestCoverCalibrator.Size = New System.Drawing.Size(222, 22)
+        Me.mnuTestCoverCalibrator.Text = "Check Cover Calibrator"
+        '
+        'FrmConformMain
         '
         Me.AcceptButton = Me.BtnCheckConformance
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -404,7 +411,7 @@ Partial Class FrmConformMain
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.KeyPreview = True
         Me.MainMenuStrip = Me.MenuStrip1
-        Me.Name = "frmConformMain"
+        Me.Name = "FrmConformMain"
         Me.Text = "ASCOM Conformance Checker"
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
@@ -460,4 +467,5 @@ Partial Class FrmConformMain
     Friend WithEvents chkSwitchSet As System.Windows.Forms.CheckBox
     Friend WithEvents mnuTestVideoCamera As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents mnuTestObservingConditions As ToolStripMenuItem
+    Friend WithEvents mnuTestCoverCalibrator As ToolStripMenuItem
 End Class

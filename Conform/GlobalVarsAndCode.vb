@@ -32,6 +32,7 @@ Module GlobalVarsAndCode
         Switch = 7
         SafetyMonitor = 8
         Video = 9
+        CoverCalibrator = 10
     End Enum
     Enum SpecialTests
         TelescopeSideOfPier
@@ -119,6 +120,7 @@ Module GlobalVarsAndCode
     Friend g_CurrentProgID As String
     Friend g_TelescopeProgID As String
     Friend g_ObservingConditionsProgID As String = ""
+    Friend g_CoverCalibratorProgID As String
 
     'Status update class
     Friend g_Status As Stat = New Stat
