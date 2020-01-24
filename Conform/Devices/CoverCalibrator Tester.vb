@@ -188,6 +188,8 @@ Friend Class CoverCalibratorTester
     Public Overrides Sub CheckProperties()
         Dim brightness As Integer
 
+        If TestStop() Then Exit Sub
+
         calibratorStateOk = RequiredPropertiesTest(RequiredProperty.CalibratorState, "CalibratorState")
         coverStateOk = RequiredPropertiesTest(RequiredProperty.CoverState, "CoverState")
 
@@ -218,6 +220,8 @@ Friend Class CoverCalibratorTester
         Else
             LogMsg("MaxBrightness", MessageLevel.msgIssue, $"Test skipped because CalibratorState returned an exception")
         End If
+
+        If TestStop() Then Exit Sub
 
         If calibratorStateOk Then ' It is OK to test Brightness 
             brightnessOk = False ' Assume a bad value
@@ -263,12 +267,13 @@ Friend Class CoverCalibratorTester
             End If
         End If
 
-
     End Sub
 
     Public Overrides Sub CheckMethods()
         Dim startTime As DateTime
         g_Status.Clear()  'Clear status messages
+
+        If TestStop() Then Exit Sub
 
         ' Test OpenCover
         If coverStateOk Then
@@ -292,6 +297,7 @@ Friend Class CoverCalibratorTester
                         ' Wait until the cover is no longer moving
                         Do Until Not (coverCalibratorDevice.CoverState = CoverStatus.Moving)
                             WaitFor(10)
+                            If TestStop() Then Exit Sub
                         Loop
                         If coverCalibratorDevice.CoverState = CoverStatus.Open Then ' Successful outcome
                             asynchronousOpenTime = DateTime.Now.Subtract(startTime).TotalSeconds
@@ -314,6 +320,8 @@ Friend Class CoverCalibratorTester
             LogMsg("OpenCover", MessageLevel.msgIssue, $"Test skipped because CoverState returned an exception")
         End If
 
+        If TestStop() Then Exit Sub
+
         ' Test CloseCover
         If coverStateOk Then
             Try
@@ -335,6 +343,7 @@ Friend Class CoverCalibratorTester
                         ' Wait until the cover is no longer moving
                         Do Until Not (coverCalibratorDevice.CoverState = CoverStatus.Moving)
                             WaitFor(10)
+                            If TestStop() Then Exit Sub
                         Loop
                         If coverCalibratorDevice.CoverState = CoverStatus.Closed Then ' Successful outcome
                             asynchronousCloseTime = DateTime.Now.Subtract(startTime).TotalSeconds
@@ -357,6 +366,8 @@ Friend Class CoverCalibratorTester
         Else
             LogMsg("CloseCover", MessageLevel.msgIssue, $"Test skipped because CoverState returned an exception")
         End If
+
+        If TestStop() Then Exit Sub
 
         ' Test HaltCover
         If coverStateOk Then
@@ -405,8 +416,8 @@ Friend Class CoverCalibratorTester
                     Catch ex As Exception
                         If coverState = CoverStatus.NotPresent Then ' There is no cover capability so expect a MethodNotImplementedException
                             HandleException("HaltCover", MemberType.Method, Required.MustNotBeImplemented, ex, "CoverStatus is 'NotPresent'")
-                        Else ' The device does have cover capability so test accordingly
-                            HandleException("HaltCover", MemberType.Method, Required.MustBeImplemented, ex, "CoverStatus indicates the device has cover capability")
+                        Else ' The device does have cover capability so it may implement Halt functionality at its discretion
+                            HandleException("HaltCover", MemberType.Method, Required.Optional, ex, "")
                         End If
                     End Try
                 End If
@@ -425,39 +436,73 @@ Friend Class CoverCalibratorTester
             LogMsg("HaltCover", MessageLevel.msgIssue, $"Test skipped because CoverState returned an exception")
         End If
 
+        If TestStop() Then Exit Sub
+
         ' Test CalibratorOn
         If calibratorStateOk Then ' CalibratorState returned a value
             If Not calibratorState = CalibratorStatus.NotPresent Then ' Calibrator is present so test accordingly
                 If maxBrightnessOk And brightnessOk Then ' OK to test different brightness levels
 
                     TestCalibratorOn(-1) ' Test for invalid value -1
+                    If TestStop() Then Exit Sub
 
                     TestCalibratorOn(0) ' Test for zero brightness
+                    If TestStop() Then Exit Sub
 
                     Select Case maxBrightness
                         Case 1 ' Simple on/ off device
                             TestCalibratorOn(1)
+                            If TestStop() Then Exit Sub
+
                         Case 2 ' Two brightness level device
                             TestCalibratorOn(1)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(2)
+                            If TestStop() Then Exit Sub
+
                         Case 3 ' Three brightness level device
                             TestCalibratorOn(1)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(2)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(3)
+                            If TestStop() Then Exit Sub
+
                         Case 4 ' Four brightness level device
                             TestCalibratorOn(1)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(2)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(3)
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(4)
+                            If TestStop() Then Exit Sub
+
                         Case Else ' Devices with more than 4 brightness levels (we only test four brightness levels in these devices)
                             TestCalibratorOn(Math.Ceiling(((maxBrightness + 1.0) / 4.0) - 1.0)) ' Round up to ensure that this value is least 1 so there is some level of brightness
-                            TestCalibratorOn(((maxBrightness + 1) / 2) - 1)
+                            If TestStop() Then Exit Sub
+
+                            TestCalibratorOn(Math.Floor(((maxBrightness + 1.0) / 2.0) - 1.0))
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(Math.Floor(((maxBrightness + 1.0) * 3.0 / 4.0) - 1.0)) ' Round down to ensure that this value is different to the maxBrightness value
+                            If TestStop() Then Exit Sub
+
                             TestCalibratorOn(maxBrightness)
+                            If TestStop() Then Exit Sub
+
                     End Select
 
                     If maxBrightness < Integer.MaxValue Then ' MaxBrightness is less than the largest possible four byte integer value
                         TestCalibratorOn(maxBrightness + 1) ' Test for invalid value of MaxBrightness + 1
+                        If TestStop() Then Exit Sub
+
                     Else ' MaxBrightness is equal to the largest possible four byte integer value
                         LogMsg("CalibratorOn", MessageLevel.msgInfo, $"Test of a high invalid brightness value skipped because MaxBrightness is set to the largest positive integer value.")
                     End If
@@ -466,6 +511,8 @@ Friend Class CoverCalibratorTester
                 End If
             Else ' Calibrator is not present so just test once to make sure that it generates a MethodNotImplementedException
                 TestCalibratorOn(1)
+                If TestStop() Then Exit Sub
+
             End If
         Else ' CalibratorState threw an exception
             LogMsg("CalibratorOn", MessageLevel.msgIssue, $"Brightness tests skipped because the CoverState property returned an invalid value or threw an exception.")
@@ -501,6 +548,7 @@ Friend Class CoverCalibratorTester
                         ' Wait until the cover is no longer moving
                         Do Until Not (coverCalibratorDevice.CalibratorState = CalibratorStatus.NotReady)
                             WaitFor(10)
+                            If TestStop() Then Exit Sub
                         Loop
                         If coverCalibratorDevice.CalibratorState = CalibratorStatus.Off Then ' Successful outcome
                             LogMsg("CalibratorOff", MessageLevel.msgOK, $"CalibratorOff was successful. The asynchronous action took {asynchronousCloseTime.ToString("0.0")} seconds")
@@ -578,6 +626,7 @@ Friend Class CoverCalibratorTester
                     ' Wait until the cover is no longer moving
                     Do Until Not (coverCalibratorDevice.CalibratorState = CalibratorStatus.NotReady)
                         WaitFor(10)
+                        If TestStop() Then Exit Sub
                     Loop
 
                     If (requestedBrightness < 0) Or (requestedBrightness > maxBrightness) Then ' The supplied brightness value is invalid so should have thrown an exception

@@ -159,17 +159,6 @@ Module GlobalVarsAndCode
         Application.DoEvents()
         Thread.Sleep(10)
         Application.DoEvents()
-        'Thread.Sleep(10)
-        'Application.DoEvents()
-        'Thread.Sleep(10)
-        'Application.DoEvents()
-        'Thread.Sleep(10)
-        'Application.DoEvents()
-        'Thread.Sleep(10)
-        'Application.DoEvents()
-        'Thread.Sleep(10)
-        'Application.DoEvents()
-        'Thread.Sleep(10)
         TestStop = g_Stop
     End Function
 
