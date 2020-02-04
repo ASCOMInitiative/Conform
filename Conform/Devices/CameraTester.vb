@@ -1218,7 +1218,7 @@ Friend Class CameraTester
     Private Sub CameraExposure(ByVal p_Description As String, ByVal p_BinX As Integer, ByVal p_BinY As Integer, ByVal p_StartX As Integer, ByVal p_StartY As Integer,
                                ByVal p_NumX As Integer, ByVal p_NumY As Integer, ByVal p_Duration As Double, ByVal p_ExpectedErrorMessage As String)
         Dim l_NumPlanes, l_VariantType, l_PercentCompletedMessage As String
-        Dim l_ExposeOK As Boolean 'Flag to determine whether we were successful or something failed
+        Dim l_ExposeOK, imageReadyTooEarly As Boolean 'Flag to determine whether we were successful or something failed
         Dim l_StartTime, l_StartTimeUTC, l_EndTime As Date
         Dim l_PercentCompleted As Short
 
@@ -1238,11 +1238,16 @@ Friend Class CameraTester
                 m_Camera.NumY = p_NumY
                 Try
                     Status(StatusType.staAction, "Start " & p_Duration.ToString & " second synchronous exposure")
+
+                    ' Initiate exposure
                     l_StartTime = Now
                     l_StartTimeUTC = Date.UtcNow
                     m_Camera.StartExposure(p_Duration, True)
+
                     If p_ExpectedErrorMessage = "" Then 'Not expecting an error and didn't get one
                         l_EndTime = Now
+
+                        ' Test whether we have a synchronous or asynchronous camera
                         If m_Camera.ImageReady And (m_Camera.CameraState = CameraStates.cameraIdle) Then 'Probably a synchronous camera
                             If l_EndTime.Subtract(l_StartTime).TotalSeconds >= p_Duration Then 'Is a synchronous camera
                                 LogMsg("StartExposure", MessageLevel.msgOK, "Synchronous exposure found OK: " & p_Duration & " seconds")
@@ -1252,14 +1257,23 @@ Friend Class CameraTester
                             End If
                         Else 'Assume asynchronous
                             Status(StatusType.staAction, "Waiting for exposure to start")
-                            Do 'Wait for exposing state
+
+                            ' Test whether ImageReady is being set too early i.e. before the camera has returned to idle
+                            imageReadyTooEarly = CType(m_Camera.ImageReady, Boolean)
+
+                            'Wait for exposing state
+                            Do
                                 WaitFor(CAMERA_SLEEP_TIME)
                                 If TestStop() Then Exit Sub
                             Loop Until (m_Camera.CameraState = CameraStates.cameraExposing) Or (m_Camera.CameraState = CameraStates.cameraError)
 
+                            ' Test whether ImageReady is being set too early i.e. before the camera has returned to idle
+                            imageReadyTooEarly = imageReadyTooEarly Or CType(m_Camera.ImageReady, Boolean)
+
+                            'Wait for the exposing state to finish
                             l_StartTime = Now
                             l_StartTimeUTC = Date.UtcNow
-                            Do 'Wait for state following exposing
+                            Do
                                 l_PercentCompletedMessage = "Not present in a V1 driver" ' Initialise PercentCompleted message
                                 If m_Camera.InterfaceVersion > 1 Then
                                     Try
@@ -1285,17 +1299,19 @@ Friend Class CameraTester
                                 Status(StatusType.staAction, "Waiting for " & p_Duration.ToString & " second exposure to complete: " & Int(Now.Subtract(l_StartTime).TotalSeconds) & ",   PercentComplete: " & l_PercentCompletedMessage)
                                 WaitFor(CAMERA_SLEEP_TIME)
                                 If TestStop() Then Exit Sub
-                            Loop Until (m_Camera.CameraState <> CameraStates.cameraExposing) Or (m_Camera.CameraState = CameraStates.cameraError)
+                            Loop Until (m_Camera.CameraState <> CameraStates.cameraExposing)
 
+                            'Wait for camera to become idle
                             l_EndTime = Now
                             Status(StatusType.staAction, "Waiting for camera idle state, reading/downloading image")
-                            Do 'Wait for image to become ready
+                            Do
                                 WaitFor(CAMERA_SLEEP_TIME)
                                 If TestStop() Then Exit Sub
                             Loop Until (m_Camera.CameraState = CameraStates.cameraIdle) Or (m_Camera.CameraState = CameraStates.cameraError)
 
+                            'Wait for image to become ready
                             Status(StatusType.staAction, "Waiting for image ready")
-                            Do 'Wait for image to become ready
+                            Do
                                 WaitFor(CAMERA_SLEEP_TIME)
                                 If TestStop() Then Exit Sub
                             Loop Until (m_Camera.ImageReady) Or (m_Camera.CameraState = CameraStates.cameraError)
@@ -1307,17 +1323,25 @@ Friend Class CameraTester
                                 LogMsg("StartExposure", MessageLevel.msgError, "Camera state is CameraError")
                             End If
                         End If
-                        l_ExposeOK = True 'Camera exposed OK and didn't generate an exception
+
+                        ' Display a warning if ImageReady was set too early
+                        If imageReadyTooEarly Then LogMsg("StartExposure", MessageLevel.msgIssue, "ImageReady was set True before the camera completed its exposure.")
+
+                        'Camera exposed OK and didn't generate an exception
+                        l_ExposeOK = True
 
                         'Check image array dimensions
                         Try
+                            ' Retrieve the image array
                             If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "About to call ImageArray method")
                             sw.Restart()
                             m_ImageArray = CType(m_Camera.ImageArray, Array)
                             sw.Stop()
                             If g_Settings.DisplayMethodCalls Then LogMsg("StartExposure", MessageLevel.msgComment, "Call completed in " & sw.ElapsedMilliseconds & "ms")
-                            If (m_ImageArray.GetLength(0) = p_NumX) And (m_ImageArray.GetLength(1) = p_NumY) Then
-                                If m_ImageArray.GetType.ToString = "System.Int32[,]" Or m_ImageArray.GetType.ToString = "System.Int32[,,]" Then
+
+                            ' Examine the returned array
+                            If (m_ImageArray.GetLength(0) = p_NumX) And (m_ImageArray.GetLength(1) = p_NumY) Then ' Image array dimensions match expected dimensions
+                                If m_ImageArray.GetType.ToString = "System.Int32[,]" Or m_ImageArray.GetType.ToString = "System.Int32[,,]" Then ' Element types match the expected int32 type
                                     If m_ImageArray.Rank = 2 Then 'Single plane image be definition
                                         l_NumPlanes = "1 plane"
                                     Else 'Read the number of image planes from the maximum value of the third array index
@@ -1327,13 +1351,13 @@ Friend Class CameraTester
                                         End If
                                     End If
                                     LogMsg("ImageArray", MessageLevel.msgOK, "Successfully read 32 bit integer array (" & l_NumPlanes & ") " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1) & " pixels")
-                                Else
+                                Else ' Element types DO NOT match the expected int32 type
                                     LogMsg("ImageArray", MessageLevel.msgError, "Expected 32 bit integer array, actually got: " & m_ImageArray.GetType.ToString)
                                 End If
-                            Else
-                                If (m_ImageArray.GetLength(0) = p_NumY) And (m_ImageArray.GetLength(1) = p_NumX) Then
+                            Else ' Image array dimensions DO NOT match expected dimensions
+                                If (m_ImageArray.GetLength(0) = p_NumY) And (m_ImageArray.GetLength(1) = p_NumX) Then ' Dimension values are swapped
                                     LogMsg("ImageArray", MessageLevel.msgError, "Camera image dimensions swapped, expected values: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1))
-                                Else
+                                Else ' Dimension values are just wrong
                                     LogMsg("ImageArray", MessageLevel.msgError, "Camera image does not have the expected dimensions of: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1))
                                 End If
                             End If
