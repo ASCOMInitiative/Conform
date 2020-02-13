@@ -135,8 +135,13 @@ Friend Class CameraTester
             End If
             Try : m_Camera.Connected = False : Catch : End Try
             Try : m_Camera.Dispose() : Catch : End Try
-            Try : Marshal.ReleaseComObject(m_Camera) : Catch : End Try
+            'Try : Marshal.ReleaseComObject(m_Camera) : Catch : End Try
+
+            ReleaseCOMObjects("Camera Dispose", m_Camera)
+
             m_Camera = Nothing
+            m_ImageArray = Nothing
+            m_ImageArrayVariant = Nothing
             GC.Collect()
 
             ' TODO: free your own state (unmanaged objects).
@@ -1413,6 +1418,11 @@ Friend Class CameraTester
                         Catch ex As Exception
                             LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_NET & "exception when reading ImageArrayVariant" & ex.ToString)
                         End Try
+
+                        ' Release large image objects from memory
+                        m_ImageArrayVariant = Nothing
+                        imageArrayObject = Nothing
+                        GC.Collect()
                     Else 'Expecting an error and didn't get one!
                         LogMsg("StartExposure", MessageLevel.msgComment, "Test: " & p_ExpectedErrorMessage)
                         LogMsg("StartExposure", MessageLevel.msgError, "Expected an exception and didn't get one - BinX:" & p_BinX &

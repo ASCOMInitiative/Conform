@@ -718,7 +718,7 @@ Friend Class DeviceTesterBaseClass
 
         Try
             ObjectType = ObjectToRelease.GetType
-            LogMsg("ReleaseCOMObjects", MessageLevel.msgDebug, "  Unmarshalling " & ObjectType.Name)
+            LogMsg("ReleaseCOMObjects", MessageLevel.msgDebug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}")
         Catch ex1 As Exception
             LogMsg("ReleaseCOMObjects", MessageLevel.msgDebug, "  GetType Exception: " & ex1.Message)
         End Try
