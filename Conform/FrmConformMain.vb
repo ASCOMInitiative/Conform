@@ -777,7 +777,9 @@ Public Class FrmConformMain
                 End If
             End If
         End If
-
+        ' Clear down the test device and release memory
+        l_TestDevice = Nothing
+        GC.Collect()
 #If DEBUG Then
         LogMsg("", MessageLevel.msgAlways, "")
         LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Conformance check subroutine finished")
@@ -1197,9 +1199,10 @@ Public Class FrmConformMain
             Else ' Get the platform version details
                 Using Reg As New Utilities.RegistryAccess
                     Dim RegKey As RegistryKey
-                    RegKey = Reg.OpenSubKey(Registry.LocalMachine, "SOFTWARE\ASCOM\Platform", False, Utilities.RegistryAccess.RegWow64Options.KEY_WOW64_32KEY)
+                    RegKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\ASCOM\Platform")
                     LogMsg("Start-up", MessageLevel.msgAlways, RegKey.GetValue("Platform Name", "Platform Name not found!").ToString() & " " & RegKey.GetValue("Platform Version", "Platform Version not found!").ToString)
                     RegKey.Close()
+                    RegKey.Dispose()
                 End Using
             End If
 
@@ -1606,10 +1609,13 @@ Public Class FrmConformMain
         If ASCOM.Utilities.ApplicationBits = Utilities.Bitness.Bits64 Then ' Check the 32bit registry on a 64bit system if we haven't found an executable yet
             If String.IsNullOrEmpty(FindDriverExecutable) Then ' We are on a 64bit OS and haven't yet found an executable
                 LogMsg("FindDriverExecutable", MessageLevel.msgDebug, "We are a 64bit application and an executable has not yet been found, looking in 32bit registry")
-                Dim Reg As New ASCOM.Utilities.RegistryAccess
+                'Using Reg As ASCOM.Utilities.RegistryAccess = New ASCOM.Utilities.RegistryAccess
                 Dim Rkey As RegistryKey
-                Rkey = Reg.OpenSubKey(Registry.ClassesRoot, "", False, Utilities.RegistryAccess.RegWow64Options.KEY_WOW64_32KEY)
+                Rkey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32)
                 FindDriverExecutable = FindDriverInRegistry(Rkey)
+                Rkey.Close()
+                Rkey.Dispose()
+                'End Using
             End If
         End If
 
