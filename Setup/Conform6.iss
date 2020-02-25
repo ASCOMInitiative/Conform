@@ -97,7 +97,7 @@ Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
 [Code]
 const
-   REQUIRED_PLATFORM_VERSION = 6.2;    // Set this to the minimum required ASCOM Platform version for this application
+   REQUIRED_PLATFORM_VERSION = 6.5;    // Set this to the minimum required ASCOM Platform version for this application
 
 //
 // Function to return the ASCOM Platform's version number as a double.
