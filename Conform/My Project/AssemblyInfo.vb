@@ -11,10 +11,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("Conform")> 
-<Assembly: AssemblyDescription("ASCOM Conformance Checker." & vbcrlf & vbcrlf & "This tool confirms conformance of an ASCOM driver to the relevant ASCOM specification." & vbcrlf & vbcrlf & "Please report issues on the Yahoo ASCOM_Talk forum, thanks - Peter.")> 
+<Assembly: AssemblyDescription("ASCOM Conformance Checker." & vbcrlf & vbcrlf & "This tool confirms conformance of an ASCOM driver to the relevant ASCOM specification." & vbcrlf & vbcrlf & "Please report issues on ASCOM's Groups.io Help forum, thanks - Peter.")> 
 <Assembly: AssemblyCompany("Peter Simpson")> 
 <Assembly: AssemblyProduct("Conform")>
-<Assembly: AssemblyCopyright("Copyright © Peter Simpson 2018")>
+<Assembly: AssemblyCopyright("Copyright © Peter Simpson 2020")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
