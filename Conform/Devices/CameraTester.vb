@@ -132,23 +132,18 @@ Friend Class CameraTester
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         If Not Me.disposedValue Then
             If disposing Then
+
+                Try : DisposeAndReleaseObject("Camera", m_Camera) : Catch : End Try
+
+                m_Camera = Nothing
+                m_ImageArray = Nothing
+                m_ImageArrayVariant = Nothing
+                GC.Collect()
             End If
-            Try : m_Camera.Connected = False : Catch : End Try
-            Try : m_Camera.Dispose() : Catch : End Try
-            'Try : Marshal.ReleaseComObject(m_Camera) : Catch : End Try
-
-            ReleaseCOMObjects("Camera Dispose", m_Camera)
-
-            m_Camera = Nothing
-            m_ImageArray = Nothing
-            m_ImageArrayVariant = Nothing
-            GC.Collect()
-
-            ' TODO: free your own state (unmanaged objects).
-            ' TODO: set large fields to null.
         End If
+
         MyBase.Dispose(disposing)
-        Me.disposedValue = True
+        disposedValue = True
     End Sub
 #End Region
 

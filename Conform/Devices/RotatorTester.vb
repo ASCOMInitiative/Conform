@@ -47,21 +47,17 @@ Friend Class RotatorTester
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         If Not Me.disposedValue Then
             If disposing Then
-                ' TODO: free other state (managed objects).
-            End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the rotator object (useful for retaining driver in memory to change flags)
-                Try : m_Rotator.Connected = False : Catch : End Try
-                Try : m_Rotator.Dispose() : Catch : End Try
-                Try : Marshal.ReleaseComObject(m_Rotator) : Catch : End Try
-                m_Rotator = Nothing
-                GC.Collect()
-            End If
+                If True Then 'Should be True but make False to stop Conform from cleanly dropping the rotator object (useful for retaining driver in memory to change flags)
+                    Try : DisposeAndReleaseObject("Rotator", m_Rotator) : Catch : End Try
 
-            ' TODO: free your own state (unmanaged objects).
-            ' TODO: set large fields to null.
+                    m_Rotator = Nothing
+                    GC.Collect()
+                End If
+            End If
         End If
+
         MyBase.Dispose(disposing)
-        Me.disposedValue = True
+        disposedValue = True
     End Sub
 #End Region
 

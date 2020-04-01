@@ -85,17 +85,14 @@ Friend Class DomeTester
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         If Not Me.disposedValue Then
             If disposing Then
-                ' TODO: free other state (managed objects).
-            End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the Dome object (useful for retaining driver in memory to change flags
-                Try : m_Dome.Connected = False : Catch : End Try
-                Try : Marshal.ReleaseComObject(m_Dome) : Catch : End Try
-                m_Dome = Nothing
-                GC.Collect()
+                If True Then 'Should be True but make False to stop Conform from cleanly dropping the Dome object (useful for retaining driver in memory to change flags
+                    Try : DisposeAndReleaseObject("Dome", m_Dome) : Catch : End Try
+
+                    m_Dome = Nothing
+                    GC.Collect()
+                End If
             End If
 
-            ' TODO: free your own state (unmanaged objects).
-            ' TODO: set large fields to null.
         End If
         MyBase.Dispose(disposing)
         Me.disposedValue = True

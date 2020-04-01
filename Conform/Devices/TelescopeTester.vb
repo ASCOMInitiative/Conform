@@ -167,29 +167,22 @@ Friend Class TelescopeTester
         LogMsg("Dispose", MessageLevel.msgDebug, "Disposing of Telescope driver: " & disposing.ToString & " " & disposedValue.ToString)
         If Not Me.disposedValue Then
             If disposing Then
-                ' TODO: free other state (managed objects).
-            End If
-            If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
-                Try : telescopeDevice.Connected = False : Catch : End Try
-#If DEBUG Then
-                Try : telescopeDevice.Dispose() : Catch : End Try
-                Try : Marshal.ReleaseComObject(telescopeDevice) : Catch : End Try
-#Else
-                Try : telescopeDevice.Dispose() : Catch : End Try
-#End If
-                Try : Marshal.ReleaseComObject(g_DeviceObject) : Catch : End Try
+                If True Then 'Should be True but make False to stop Conform from cleanly dropping the telescope object (useful for retaining driver in memory to change flags)
 
-                telescopeDevice = Nothing
-                g_DeviceObject = Nothing
-                GC.Collect()
+                    Try : DisposeAndReleaseObject("Telescope Device", telescopeDevice) : Catch : End Try
+
+                    telescopeDevice = Nothing
+                    g_DeviceObject = Nothing
+                    GC.Collect()
+                End If
             End If
 
-            ' TODO: free your own state (unmanaged objects).
-            ' TODO: set large fields to null.
         End If
+
         MyBase.Dispose(disposing)
-        Me.disposedValue = True
+        disposedValue = True
     End Sub
+
 #End Region
 
 #Region "Code"
@@ -4367,14 +4360,14 @@ Friend Class TelescopeTester
             End If
 
             'Clean up
-            'Try : l_ITelescope.Dispose() : Catch : End Try
-            Try : l_DeviceObject.Dispose() : Catch : End Try
-            Try : ReleaseCOMObjects("AccessChecks", l_ITelescope) : Catch : End Try
-            Try : ReleaseCOMObjects("AccessChecks", l_DeviceObject) : Catch : End Try
+            Try : DisposeAndReleaseObject("Telescope V1", l_ITelescope) : Catch : End Try
+            Try : DisposeAndReleaseObject("Telescope V3", l_DeviceObject) : Catch : End Try
             l_DeviceObject = Nothing
             l_ITelescope = Nothing
+
             GC.Collect()
             GC.WaitForPendingFinalizers()
+
             WaitForAbsolute(DEVICE_DESTROY_WAIT, "TestEarlyBinding waiting for Telescope Object to Dispose")
         Catch ex As Exception
             LogMsg("Telescope:TestEarlyBinding.EX1", MessageLevel.msgError, ex.ToString)
