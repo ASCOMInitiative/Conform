@@ -432,7 +432,8 @@ Friend Class DomeTester
         Loop Until Not m_Dome.Slewing Or TestStop() Or (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut)
         Status(StatusType.staStatus, "")
         If (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut) Then
-            LogMsg("DomeWaitForSlew", MessageLevel.msgError, "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options")
+            LogMsg("DomeWaitForSlew", MessageLevel.msgError, "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options.")
+            LogMsg("DomeWaitForSlew", MessageLevel.msgInfo, "Another cause of time-outs is if your Slewing Property logic is inverted or is not operating correctly.")
         End If
     End Sub
     Private Sub DomeMandatoryTest(ByVal p_Type As DomePropertyMethod, ByVal p_Name As String)
@@ -498,7 +499,7 @@ Friend Class DomeTester
                     'Confirm that slaved is false
                     If m_CanReadSlaved Then 'Check it is false
                         If m_Dome.Slaved Then 'Should not be showing slaved after AbortSlew
-                            LogMsg("AbortSlew", MessageLevel.msgError, "Slaved property is true after AbortSlew")
+                            LogMsg("AbortSlew", MessageLevel.msgError, "Slaved property Is true after AbortSlew")
                         Else ' Not slaved so fine
                             LogMsg("AbortSlew", MessageLevel.msgOK, "AbortSlew command issued successfully")
                         End If
