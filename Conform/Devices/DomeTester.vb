@@ -270,8 +270,14 @@ Friend Class DomeTester
         If Not TestStop() Then
             'Get into a consistent state
             Try
+                m_Slewing = m_Dome.Slewing ' Try to read the Slewing property
+                If m_Slewing Then
+                    LogMsg("DomeSafety", MessageLevel.msgInfo, $"The Slewing property is true at device start-up. This could be by design or possibly Slewing logic is inverted?") ' Display a message if slewing is True
+                End If
                 DomeWaitForSlew(g_Settings.DomeAzimuthTimeout) 'Wait for slewing to finish
             Catch ex As Exception
+                LogMsg("DomeSafety", MessageLevel.msgWarning, $"The Slewing property threw an exception and should not have: {ex.Message}") ' Display a warning message because Slewing should not throw an exception!
+                LogMsg("DomeSafety", MessageLevel.msgDebug, $"{ex}") ' Log the full message in debug mode
             End Try
             If FrmConformMain.chkDomeShutter.Checked Then
                 LogMsg("DomeSafety", MessageLevel.msgComment, "Attempting to open shutter as some tests may fail if it is closed...")
@@ -430,6 +436,7 @@ Friend Class DomeTester
             Application.DoEvents()
             Status(StatusType.staStatus, "Slewing Status: " & m_Dome.Slewing & ", Timeout: " & Format(Now.Subtract(l_StartTime).TotalSeconds, "#0") & "/" & p_TimeOut & ", press stop to abandon wait")
         Loop Until Not m_Dome.Slewing Or TestStop() Or (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut)
+
         Status(StatusType.staStatus, "")
         If (Now.Subtract(l_StartTime).TotalSeconds > p_TimeOut) Then
             LogMsg("DomeWaitForSlew", MessageLevel.msgError, "Timed out waiting for Dome slew, consider increasing time-outs in Options/Conform Options.")
