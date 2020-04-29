@@ -20,7 +20,7 @@ Friend Class CameraTester
     Private m_CanPulseGuide As Boolean
     Private m_Description As String
     Private m_IsPulseGuiding As Boolean
-    'ICamera V2 properties
+    'ICameraV2 properties
     Private m_BayerOffsetX, m_BayerOffsetY, m_Gain, m_GainMax, m_GainMin, m_PercentCompleted, m_ReadoutMode As Short
     Private m_ExposureMax, m_ExposureMin, m_ExposureResolution As Double
     Private m_FastReadout, m_CanReadGain, m_CanReadGainMax, m_CanReadGainMin, m_CanReadGains, m_CanReadReadoutModes As Boolean
@@ -28,6 +28,13 @@ Friend Class CameraTester
     Private m_SensorName As String
     Private m_SensorType As SensorType, m_CanReadSensorType As Boolean = False
     Private sw As Stopwatch = New Stopwatch()
+
+    'ICameraV3 properties
+    Private m_Offset, m_OffsetMax, m_OffsetMin As Integer
+    Private m_CanReadOffset, m_CanReadOffsetMax, m_CanReadOffsetMin, m_CanReadOffsets, m_CanReadPulseGuideStatus As Boolean
+    Private m_Offsets As ArrayList
+    Private m_SubExposureDuration As Double
+    'Private m_PulseGuideStatus As PulseGuideState
 
 #If DEBUG Then
     Private m_Camera As ASCOM.DriverAccess.Camera
@@ -117,6 +124,9 @@ Friend Class CameraTester
         ReadoutModes = 39
         SensorName = 40
         SensorType = 41
+
+        ' ICameraV3 Properties
+        SubExposureDuration = 42
 
     End Enum
 
@@ -379,6 +389,9 @@ Friend Class CameraTester
 
     Overrides Sub CheckProperties()
         Dim l_BinX, l_BinY, l_MaxBinX, l_MaxBinY As Integer
+
+#Region "ICameraV1 Properties"
+
         'Basic read tests
         m_MaxBinX = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, 10)) : If TestStop() Then Exit Sub
         m_MaxBinY = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, 10)) : If TestStop() Then Exit Sub
@@ -639,7 +652,10 @@ Friend Class CameraTester
         m_StartY = CameraPropertyTestInteger(CamPropertyType.StartY, "StartY Read", 0, m_CameraYSize - 1) : If TestStop() Then Exit Sub
         CameraPropertyWriteTest(CamPropertyType.StartY, "StartY", CInt(m_CameraYSize / 2))
 
-        ' Test ICameraV2 Properties
+#End Region
+
+#Region "ICameraV2 Properties"
+
         If m_Camera.InterfaceVersion > 1 Then ' Only for ICameraV2 and later
             ' SensorType - Mandatory
             ' This must be tested before BayerOffset because BayerOffset is mandatory for colour and optional for monochrome cameras
@@ -739,16 +755,6 @@ Friend Class CameraTester
                 HandleInvalidOperationExceptionAsOK("GainMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperationException correctly thrown")
             End Try
 
-            If m_CanReadGainMin Xor m_CanReadGainMax Then
-                If m_CanReadGainMin Then
-                    LogMsg("GainMinMax", MessageLevel.msgError, "Can read GainMin but GainMax threw an exception")
-                Else
-                    LogMsg("GainMinMax", MessageLevel.msgError, "Can read GainMax but GainMin threw an exception")
-                End If
-            Else
-                LogMsg("GainMinMax", MessageLevel.msgOK, "Both GainMin and GainMax are readable or both throw exceptions")
-            End If
-
             ' Gains Read - Optional
             Try
                 m_CanReadGains = False
@@ -769,8 +775,8 @@ Friend Class CameraTester
             End If
 
             ' Gain Read - Optional 
-            m_CanReadGain = False ' Set default value to indicate can't read gain
             Try
+                m_CanReadGain = False ' Set default value to indicate can't read gain
                 m_Gain = m_Camera.Gain
                 m_CanReadGain = True ' Flag that we can read Gain OK
                 If m_CanReadGains Then
@@ -782,6 +788,31 @@ Friend Class CameraTester
             Catch ex As Exception
                 HandleException("Gain Read", MemberType.Property, Required.Optional, ex, "")
             End Try
+
+            ' Now check that gain property groups are implemented to handle the three gain modes: NotImplemented, Gain Index (Gain + Gains) and Gain Value (Gain + GainMin + GainMax)
+            If Not m_CanReadGain And Not m_CanReadGains And Not m_CanReadGainMin And Not m_CanReadGainMax Then ' We are in Not Implemented mode so all is OK
+                LogMsgOK("Gain Read", "All four gain properties throw exceptions - the driver is in ""Gain Not Implemented"" mode.")
+            Else ' Test for Gain Index and Gain Value modes
+                If m_CanReadGain Then ' Can read Gain so the driver could be in either Gain Index or Gain Value mode
+                    ' Test for Gain Index mode
+                    If (m_CanReadGain And m_CanReadGains And Not m_CanReadGainMin And Not m_CanReadGainMax) Then ' We are in Gain Index mode so all is OK
+                        LogMsgOK("Gain Read", "Gain and Gains can be read while GainMin and GainMax throw exceptions - the driver is in ""Gain Index"" mode.")
+                    Else ' Test for Gain Value mode
+                        If (m_CanReadGain And Not m_CanReadGains And m_CanReadGainMin And m_CanReadGainMax) Then ' We are in Gain Value mode so all is OK
+                            LogMsgOK("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains throws an exception - the driver is in ""Gain Value"" mode.")
+                        Else ' Bad combination of properties - this is not a valid mode
+                            LogMsgError("Gain Read", $"Unable to determine whether the driver is in ""Gain Not Implemented"", ""Gain Index"" or ""Gain Value"" mode. Please check the interface specification.")
+                            LogMsgInfo("Gain Read", $"Gain threw an exception: {m_CanReadGain}, Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.")
+                            LogMsgInfo("Gain Read", $"""Gain Not Implemented"" mode: Gain, Gains, GainMin and GainMax must all throw exceptions.")
+                            LogMsgInfo("Gain Read", $"""Gain Index"" mode: Gain and Gains must work while GainMin and GainMax must throw exceptions.")
+                            LogMsgInfo("Gain Read", $"""Gain Value"" mode: Gain, GainMin and GainMax must work while Gains must throw an exception.")
+                        End If
+                    End If
+                Else ' Can not read gain but can read at least one of the other gain properties, this is a misconfiguration
+                    LogMsgError("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.")
+                    LogMsgInfo("Gain Read", $"Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.")
+                End If
+            End If
 
             ' PercentCompleted Read - Optional - corrected to match the specification
             Try
@@ -833,6 +864,145 @@ Friend Class CameraTester
             m_SensorName = CameraPropertyTestString(CamPropertyType.SensorName, "SensorName Read", 250, True)
 
         End If
+
+#End Region
+
+#Region "ICameraV3 Properties"
+
+        If m_Camera.InterfaceVersion > 2 Then ' Only for ICameraV3 and later
+            ' OffsetMin Read - Optional
+            Try
+                m_CanReadOffsetMin = False
+                m_OffsetMin = m_Camera.OffsetMin
+                'Successfully retrieved a value
+                m_CanReadOffsetMin = True
+                LogMsg("OffsetMin Read", MessageLevel.msgOK, m_OffsetMin.ToString)
+            Catch ex As Exception
+                HandleInvalidOperationExceptionAsOK("OffsetMin Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperationException correctly thrown")
+            End Try
+
+            ' OffsetMax Read - Optional
+            Try
+                m_CanReadOffsetMax = False
+                m_OffsetMax = m_Camera.OffsetMax
+                'Successfully retrieved a value
+                m_CanReadOffsetMax = True
+                LogMsg("OffsetMax Read", MessageLevel.msgOK, m_OffsetMax.ToString)
+            Catch ex As Exception
+                HandleInvalidOperationExceptionAsOK("OffsetMax Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperationException correctly thrown")
+            End Try
+
+            ' Offsets Read - Optional
+            Try
+                m_CanReadOffsets = False
+                m_Offsets = m_Camera.Offsets
+                'Successfully retrieved a value
+                m_CanReadOffsets = True
+                For Each Offset As String In m_Offsets
+                    LogMsg("Offsets Read", MessageLevel.msgOK, Offset.ToString)
+                Next
+            Catch ex As Exception
+                HandleInvalidOperationExceptionAsOK("Offsets Read", MemberType.Property, Required.Optional, ex, "", "InvalidOperationException correctly thrown")
+            End Try
+
+            If m_CanReadOffsetMax And m_CanReadOffsetMin And m_CanReadOffsets Then ' Both OffsetMin/Max and Offsets are enabled but only one mechanic should be used
+                LogMsg("Offsets", MessageLevel.msgError, "OffsetMin, OffsetMax and Offsets are all readable. Only one of OffsetMin/Max as a pair or Offsets should be used, the other should throw a PropertyNotImplementedException")
+            Else ' Only one mechanic is active or no mechanic is active so no action
+
+            End If
+
+            ' Offset Read - Optional 
+            Try
+                m_CanReadOffset = False ' Set default value to indicate can't read offset
+                m_Offset = m_Camera.Offset
+                m_CanReadOffset = True ' Flag that we can read Offset OK
+                If m_CanReadOffsets Then
+                    LogMsg("Offset Read", MessageLevel.msgOK, m_Offset & " " & m_Offsets(0).ToString)
+                Else
+                    LogMsg("Offset Read", MessageLevel.msgOK, m_Offset.ToString)
+                End If
+
+            Catch ex As Exception
+                HandleException("Offset Read", MemberType.Property, Required.Optional, ex, "")
+            End Try
+
+            ' Now check that offset property groups are implemented to handle the three offset modes: NotImplemented, Offset Index (Offset + Offsets) and Offset Value (Offset + OffsetMin + OffsetMax)
+            If Not m_CanReadOffset And Not m_CanReadOffsets And Not m_CanReadOffsetMin And Not m_CanReadOffsetMax Then ' We are in Not Implemented mode so all is OK
+                LogMsgOK("Offset Read", "All four offset properties throw exceptions - the driver is in ""Offset Not Implemented"" mode.")
+            Else ' Test for Offset Index and Offset Value modes
+                If m_CanReadOffset Then ' Can read Offset so the driver could be in either Offset Index or Offset Value mode
+                    ' Test for Offset Index mode
+                    If (m_CanReadOffset And m_CanReadOffsets And Not m_CanReadOffsetMin And Not m_CanReadOffsetMax) Then ' We are in Offset Index mode so all is OK
+                        LogMsgOK("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax throw exceptions - the driver is in ""Offset Index"" mode.")
+                    Else ' Test for Offset Value mode
+                        If (m_CanReadOffset And Not m_CanReadOffsets And m_CanReadOffsetMin And m_CanReadOffsetMax) Then ' We are in Offset Value mode so all is OK
+                            LogMsgOK("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets throws an exception - the driver is in ""Offset Value"" mode.")
+                        Else ' Bad combination of properties - this is not a valid mode
+                            LogMsgError("Offset Read", $"Unable to determine whether the driver is in ""Offset Not Implemented"", ""Offset Index"" or ""Offset Value"" mode. Please check the interface specification.")
+                            LogMsgInfo("Offset Read", $"Offset threw an exception: {m_CanReadOffset}, Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.")
+                            LogMsgInfo("Offset Read", $"""Offset Not Implemented"" mode: Offset, Offsets, OffsetMin and OffsetMax must all throw exceptions.")
+                            LogMsgInfo("Offset Read", $"""Offset Index"" mode: Offset and Offsets must work while OffsetMin and OffsetMax must throw exceptions.")
+                            LogMsgInfo("Offset Read", $"""Offset Value"" mode: Offset, OffsetMin and OffsetMax must work while Offsets must throw an exception.")
+                        End If
+                    End If
+                Else ' Can not read offset but can read at least one of the other offset properties, this is a misconfiguration
+                    LogMsgError("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.")
+                    LogMsgInfo("Offset Read", $"Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.")
+                End If
+            End If
+
+            ' SubExposureDuration Read - Optional 
+            m_SubExposureDuration = CameraPropertyTestDouble(CamPropertyType.SubExposureDuration, "SubExposureDuration", Double.Epsilon, Double.MaxValue, False) : If TestStop() Then Exit Sub
+
+            ' SubExposureDuration Write - Optional 
+            Try
+                m_Camera.SubExposureDuration = m_SubExposureDuration
+                LogMsg("SubExposureDuration write", MessageLevel.msgOK, $"Successfully wrote {m_SubExposureDuration}")
+            Catch ex As Exception
+                HandleException("SubExposureDuration write", MemberType.Property, Required.Optional, ex, "")
+            End Try
+
+            ' PulseGuideStatus - Mandatory
+            'Try
+            '    m_CanReadPulseGuideStatus = False ' Initialise to failure
+            '    m_PulseGuideStatus = m_Camera.PulseGuideStatus
+            '    LogMsg("PulseGuideStatus", MessageLevel.msgOK, m_PulseGuideStatus.ToString())
+            '    m_CanReadPulseGuideStatus = True ' Record a successful PulseGuideStatus read
+
+            '    Select Case m_PulseGuideStatus
+            '        Case PulseGuideState.NotImplemented
+            '            If Not m_CanPulseGuide Then
+            '                LogMsgOK("PulseGuideStatus", "CanPulseGuide is False and PulseGuideStatus returned ""NotImplemented""")
+            '            Else
+            '                LogMsgError("PulseGuideStatus", "CanPulseGuide is True but PulseGuideStatus returned ""NotImplemented""")
+            '            End If
+
+            '        Case PulseGuideState.Inactive
+            '            If m_CanPulseGuide Then ' Can pulse guide
+            '                If Not m_IsPulseGuiding Then ' Can pulse guide but not pulse guiding right now
+            '                    LogMsgOK("PulseGuideStatus", "CanPulseGuide is True and PulseGuideStatus returned ""Inactive""")
+            '                Else ' IsPulseGuiding shows a guide as in progress even though it has not been initiated by Conform by PulseGuideStatus returns Inactive - The two methods are giving different answers
+            '                    LogMsgError("PulseGuideStatus", $"IsPulseGuiding is True but PulseGuideStatus returned ""Inactive""")
+            '                End If
+            '            Else ' Can not pulse guide but state is reported as inactive
+            '                LogMsgError("PulseGuideStatus", $"CanPulseGuide is False but PulseGuideStatus returned ""Inactive"" rather than ""NotImplemented""")
+            '            End If
+
+            '        Case PulseGuideState.Active
+            '            LogMsgError("PulseGuideStatus", $"Conform has not initiated a PulseGuide but PulseGuideStatus returned ""Active"".")
+
+            '        Case PulseGuideState.Error
+            '            LogMsgError("PulseGuideStatus", $"PulseGuideStatus returned an ""Error"" status.")
+
+            '    End Select
+
+            'Catch ex As Exception
+            '    HandleException("PulseGuideStatus", MemberType.Property, Required.Mandatory, ex, "")
+            'End Try
+
+        End If
+#End Region
+
     End Sub
     Private Function CameraPropertyTestCameraState(ByVal p_Type As CamPropertyType, ByVal p_Name As String) As CameraStates
         Try
@@ -970,6 +1140,8 @@ Friend Class CameraTester
                     CameraPropertyTestDouble = m_Camera.ExposureMin
                 Case CamPropertyType.ExposureResolution
                     CameraPropertyTestDouble = m_Camera.ExposureResolution
+                Case CamPropertyType.SubExposureDuration
+                    CameraPropertyTestDouble = m_Camera.SubExposureDuration
                 Case Else
                     LogMsg(p_Name, MessageLevel.msgError, "CameraPropertyTestDouble: Unknown test type - " & p_Type.ToString)
             End Select
@@ -1533,20 +1705,41 @@ Friend Class CameraTester
     End Sub
     Private Sub CameraPulseGuideTest(ByVal p_Direction As GuideDirections)
         Dim l_StartTime, l_EndTime As Date
+        'Dim pulseGuideStatus As PulseGuideState
+
         l_StartTime = Now
         Status(StatusType.staAction, "Start " & CAMERA_PULSE_DURATION / 1000 & " second pulse guide " & p_Direction.ToString)
         m_Camera.PulseGuide(p_Direction, CAMERA_PULSE_DURATION) 'Start a 2 second pulse
         l_EndTime = Now
+
         If m_IsPulseGuidingSupported Then ' IsPulseGuiding is supported so go ahead and use it
             If l_EndTime.Subtract(l_StartTime).TotalMilliseconds < (CAMERA_PULSE_DURATION - 500) Then 'If less than 1.5 seconds then assume we have returned early
-                If m_Camera.IsPulseGuiding Then
+                If m_Camera.IsPulseGuiding Then ' IsPulseGuiding is true
+
+                    '' Confirm correct operation of PulseGuideStatus
+                    'pulseGuideStatus = m_Camera.PulseGuideStatus
+                    'If pulseGuideStatus = PulseGuideState.Active Then
+                    '    LogMsgOK("PulseGuide " & p_Direction.ToString, "PulseGuideStatus returns ""Active"" when IsPulseGuiding returns True.")
+                    'Else
+                    '    LogMsgError("PulseGuide " & p_Direction.ToString, $"PulseGuideStatus returns ""{pulseGuideStatus}"" rather than ""Active""when IsPulseGuiding returns True.")
+                    'End If
+
                     Do
                         WaitFor(SLEEP_TIME)
                         Application.DoEvents()
                         If TestStop() Then Exit Sub
                     Loop Until (Not m_Camera.IsPulseGuiding) Or (Now.Subtract(l_StartTime).TotalMilliseconds > 3000) 'Wait for up to 3 seconds
+
                     If Not m_Camera.IsPulseGuiding Then
                         LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgOK, "Asynchronous pulse guide found OK")
+
+                        '' Confirm correct operation of PulseGuideStatus
+                        'pulseGuideStatus = m_Camera.PulseGuideStatus
+                        'If pulseGuideStatus = PulseGuideState.Inactive Then
+                        '    LogMsgOK("PulseGuide " & p_Direction.ToString, "PulseGuideStatus returns ""Inactive"" when IsPulseGuiding returns False.")
+                        'Else
+                        '    LogMsgError("PulseGuide " & p_Direction.ToString, $"PulseGuideStatus returns ""{pulseGuideStatus}"" rather than ""InActive""when IsPulseGuiding returns False.")
+                        'End If
                     Else
                         LogMsg("PulseGuide " & p_Direction.ToString, MessageLevel.msgIssue, "Asynchronous pulse guide expected but IsPulseGuiding is TRUE beyond expected time of 2 seconds")
                     End If
