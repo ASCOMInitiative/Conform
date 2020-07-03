@@ -307,7 +307,7 @@ Friend Class RotatorTester
                 End If
 
             Catch ex As Exception
-                HandleException("MechanicalPosition", MemberType.Property, Required.MustBeImplemented, ex, "CanSync is True")
+                HandleException("MechanicalPosition", MemberType.Property, Required.Mandatory, ex, "")
             End Try
 
         End If
