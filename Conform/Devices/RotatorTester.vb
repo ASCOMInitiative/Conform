@@ -15,7 +15,7 @@ Friend Class RotatorTester
     Private m_TargetPosition, m_RotatorStepSize, m_RotatorPosition, mechanicalPosition As Single
     Private m_Reverse As Boolean
     Private m_LastMoveWasAsync As Boolean
-    Private canSync, canReadMechanicalPosition As Boolean
+    Private canReadMechanicalPosition As Boolean
 
 #If DEBUG Then
     Private m_Rotator As ASCOM.DeviceInterface.IRotatorV3
@@ -190,16 +190,6 @@ Friend Class RotatorTester
         Catch ex As Exception
             HandleException("CanReverse", MemberType.Property, Required.Mandatory, ex, "")
         End Try
-
-        ' Test CanSync that was added in IRotatorV3
-        If g_InterfaceVersion >= 3 Then
-            Try
-                canSync = m_Rotator.CanSync
-                LogMsg("CanSync", MessageLevel.msgOK, canSync.ToString)
-            Catch ex As Exception
-                HandleException("CanSync", MemberType.Property, Required.Mandatory, ex, "")
-            End Try
-        End If
 
     End Sub
 
@@ -386,42 +376,33 @@ Friend Class RotatorTester
 
         ' Sync - Mandatory if CanSync is true - introduced in IRotatorV3
         If g_InterfaceVersion >= 3 Then ' Test for Sync method
-            If canSync Then ' Sync must be implemented
-                Try
-                    If canReadMechanicalPosition And canReadPosition Then ' Test new IRotaotrV3 methods
+            Try
+                If canReadMechanicalPosition And canReadPosition Then ' Test new IRotaotrV3 methods
 
-                        ' MoveMechanical
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 45.0, "") : If TestStop() Then Exit Sub
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 135.0, "") : If TestStop() Then Exit Sub
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 225.0, "") : If TestStop() Then Exit Sub
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 315.0, "") : If TestStop() Then Exit Sub
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0, "movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
-                        RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0, "movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
+                    ' MoveMechanical
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 45.0, "") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 135.0, "") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 225.0, "") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 315.0, "") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0, "movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0, "movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
 
-                        RotatorSynctest(90.0F, 90.0F) ' Make sure that the rotator can be synced to its mechanical position
-                        RotatorSynctest(120.0F, 90.0F) ' Test sync to a positive offset
-                        RotatorSynctest(60.0F, 90.0F) ' Test sync to a negative offset
+                    RotatorSynctest(90.0F, 90.0F) ' Make sure that the rotator can be synced to its mechanical position
+                    RotatorSynctest(120.0F, 90.0F) ' Test sync to a positive offset
+                    RotatorSynctest(60.0F, 90.0F) ' Test sync to a negative offset
 
-                        RotatorSynctest(00.0F, 00.0F) ' Test sync to zero
-                        RotatorSynctest(30.0F, 00.0F) ' Test sync to a positive offset
-                        RotatorSynctest(330.0F, 00.0F) ' Test sync to a negative offset that is through zero
+                    RotatorSynctest(00.0F, 00.0F) ' Test sync to zero
+                    RotatorSynctest(30.0F, 00.0F) ' Test sync to a positive offset
+                    RotatorSynctest(330.0F, 00.0F) ' Test sync to a negative offset that is through zero
 
-                    Else ' Just select an arbitrary sync angle
+                Else ' Just select an arbitrary sync angle
 
-                    End If
+                End If
 
-                Catch ex As Exception
-                    HandleException("Sync", MemberType.Method, Required.MustBeImplemented, ex, "CanSync is True")
-                End Try
+            Catch ex As Exception
+                HandleException("Sync", MemberType.Method, Required.MustBeImplemented, ex, "CanSync is True")
+            End Try
 
-            Else ' Sync must not be implemented
-                Try
-                    m_Rotator.Sync(0.0F)
-                    LogMsgError("Sync", "CanSync is false but Sync did not throw a MethodNotImplementedException.")
-                Catch ex As Exception
-                    HandleException("Sync", MemberType.Method, Required.MustNotBeImplemented, ex, "CanSync is False")
-                End Try
-            End If
         End If
 
     End Sub
