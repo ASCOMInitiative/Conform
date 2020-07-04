@@ -784,6 +784,33 @@ Friend Class DeviceTesterBaseClass
     End Function
 
     ''' <summary>
+    ''' Test a supplied exception for whether it is a NotImplemented type
+    ''' </summary>
+    ''' <param name="deviceException">The exception sent by the driver</param>
+    ''' <returns>True if the exception is a NotImplemented type</returns>
+    ''' <remarks>Different tests are applied for COM and .NET exceptions</remarks>
+    Protected Function IsNotImplementedException(deviceException As Exception) As Boolean
+        Dim COMException As COMException
+
+        IsNotImplementedException = False ' Set false default value
+
+        Try
+            If (TypeOf deviceException Is COMException) Then ' This is a COM exception so test whether the error code indicates that it is a not implemented exception
+                COMException = CType(deviceException, COMException)
+                If (COMException.ErrorCode = g_ExNotImplemented) Or (COMException.ErrorCode = ErrorCodes.NotImplemented) Then ' This is a not implemented exception
+                    IsNotImplementedException = True
+                End If
+            End If
+            If (TypeOf deviceException Is ASCOM.NotImplementedException) Then
+                IsNotImplementedException = True
+            End If
+        Catch ex As Exception
+            LogMsg("IsNotImplementedException", MessageLevel.msgWarning, "Unexpected exception: " & ex.ToString())
+        End Try
+    End Function
+
+
+    ''' <summary>
     ''' Test a supplied exception for whether it is a PropertyNotImplementedException type
     ''' </summary>
     ''' <param name="deviceException">The exception sent by the driver</param>

@@ -1,5 +1,7 @@
 ﻿'Base class from which particular device testers are derived
 'Put all common elements in here
+Imports System.Runtime.Serialization.Formatters
+
 Friend Class RotatorTester
     Inherits DeviceTesterBaseClass
 
@@ -217,7 +219,7 @@ Friend Class RotatorTester
 
     End Sub
     Overrides Sub CheckProperties()
-        'IsMoving - Optional
+        'IsMoving - Optional (V1,V2), Mandatory (V3)
         Try
             m_CanReadIsMoving = False
             m_IsMoving = m_Rotator.IsMoving
@@ -230,20 +232,24 @@ Friend Class RotatorTester
                 LogMsg("IsMoving", MessageLevel.msgOK, m_IsMoving.ToString)
             End If
         Catch ex As Exception
-            HandleException("IsMoving", MemberType.Property, Required.Optional, ex, "")
+            If g_InterfaceVersion < 3 Then
+                HandleException("IsMoving", MemberType.Property, Required.Optional, ex, "")
+            Else
+                HandleException("IsMoving", MemberType.Property, Required.Mandatory, ex, "")
+            End If
         End Try
         If TestStop() Then Exit Sub
 
-        'Position - Optional
-        m_RotatorPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.Position, "Position", 0.0, 360.0) : If TestStop() Then Exit Sub
+        'Position - Optional (V1,V2), Mandatory (V3)
+        m_RotatorPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.Position, "Position", 0.0, 360.0, Required.Mandatory) : If TestStop() Then Exit Sub
 
-        'TargetPosition - Optional
-        m_TargetPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.TargetPosition, "TargetPosition", 0.0, 360.0) : If TestStop() Then Exit Sub
+        'TargetPosition - Optional (V1,V2), Mandatory (V3)
+        m_TargetPosition = RotatorPropertyTestSingle(RotatorPropertyMethod.TargetPosition, "TargetPosition", 0.0, 360.0, Required.Mandatory) : If TestStop() Then Exit Sub
 
-        'StepSize - Optional
-        m_RotatorStepSize = RotatorPropertyTestSingle(RotatorPropertyMethod.StepSize, "StepSize", 0.0, 360.0) : If TestStop() Then Exit Sub 'Reverse Read (Boolean)
+        'StepSize - Optional (V1,V2 and V3)
+        m_RotatorStepSize = RotatorPropertyTestSingle(RotatorPropertyMethod.StepSize, "StepSize", 0.0, 360.0, Required.Optional) : If TestStop() Then Exit Sub
 
-        'Reverse Read - Optional if CanReverse is False, Mandatory if CanReverse is True
+        'Reverse Read - Optional if CanReverse is False, Mandatory if CanReverse is True (V1,V2), Mandatory (V3)
         Try
             m_Reverse = m_Rotator.Reverse
             If m_CanReverse Then
@@ -252,15 +258,19 @@ Friend Class RotatorTester
                 LogMsg("Reverse Read", MessageLevel.msgError, "CanReverse is false but no exception generated")
             End If
         Catch ex As Exception
-            If m_CanReverse Then
-                HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True")
-            Else
-                HandleException("Reverse Read", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False")
+            If g_InterfaceVersion < 3 Then ' Can be optional in IRotatorV1 and V2
+                If m_CanReverse Then
+                    HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True")
+                Else
+                    HandleException("Reverse Read", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False")
+                End If
+            Else ' Mandatory in IRotatorV3
+                HandleException("Reverse Read", MemberType.Property, Required.Mandatory, ex, "")
             End If
         End Try
         If TestStop() Then Exit Sub
 
-        'Reverse Write (Boolean)
+        'Reverse Write - Optional if CanReverse is False, Mandatory if CanReverse is True (V1,V2), Mandatory (V3)
         Try
             If m_Reverse Then 'Try and set reverse to the opposite state
                 m_Rotator.Reverse = False
@@ -276,10 +286,14 @@ Friend Class RotatorTester
                 LogMsg("Reverse Write", MessageLevel.msgError, "CanReverse is false but no exception generated")
             End If
         Catch ex As Exception
-            If m_CanReverse Then
-                HandleException("Reverse Read", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True")
-            Else
-                HandleException("Reverse Read", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False")
+            If g_InterfaceVersion < 3 Then ' Can be optional in IRotatorV1 and V2
+                If m_CanReverse Then
+                    HandleException("Reverse Write", MemberType.Property, Required.MustBeImplemented, ex, "when CanReverse is True")
+                Else
+                    HandleException("Reverse Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when CanReverse is False")
+                End If
+            Else ' Mandatory in IRotatorV3
+                HandleException("Reverse Write", MemberType.Property, Required.Mandatory, ex, "")
             End If
         End Try
 
@@ -313,7 +327,16 @@ Friend Class RotatorTester
         End If
 
     End Sub
-    Private Function RotatorPropertyTestSingle(ByVal p_Type As RotatorPropertyMethod, ByVal p_Name As String, ByVal p_Min As Single, ByVal p_Max As Single) As Single
+    Private Function RotatorPropertyTestSingle(ByVal p_Type As RotatorPropertyMethod, ByVal p_Name As String, ByVal p_Min As Single, ByVal p_Max As Single, ByVal requiredIRotatorV3State As Required) As Single
+        Dim requiredState As Required
+
+        ' Handle properties that were optional in IRotatorV1 and IRotoatorV2 but may have become mandatory in IRotatorV3
+        If g_InterfaceVersion < 3 Then
+            requiredState = Required.Optional ' Default optional state for early versions
+        Else
+            requiredState = requiredIRotatorV3State ' Use the supplied required state for this specific property
+        End If
+
         Try
             RotatorPropertyTestSingle = 0.0
             Select Case p_Type
@@ -342,7 +365,7 @@ Friend Class RotatorTester
                     LogMsg(p_Name, MessageLevel.msgOK, RotatorPropertyTestSingle.ToString)
             End Select
         Catch ex As Exception
-            HandleException(p_Name, MemberType.Property, Required.Optional, ex, "")
+            HandleException(p_Name, MemberType.Property, requiredState, ex, "")
         End Try
     End Function
 
@@ -350,7 +373,7 @@ Friend Class RotatorTester
 
         LogMsg("CheckMethods", MessageLevel.msgDebug, "Rotator is connected: " & m_Rotator.Connected.ToString)
 
-        ' Halt - Optional
+        ' Halt - Optional (V1,V2 and V3)
         Try
             m_Rotator.Halt()
             LogMsg("Halt", MessageLevel.msgOK, "Halt command successful")
@@ -359,33 +382,45 @@ Friend Class RotatorTester
         End Try
         If TestStop() Then Exit Sub
 
-        ' MoveAbsolute - Optional
+        ' MoveAbsolute - Optional (V1,V2), Mandatory (V3)
         RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 45.0, "") : If TestStop() Then Exit Sub
         RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 135.0, "") : If TestStop() Then Exit Sub
         RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 225.0, "") : If TestStop() Then Exit Sub
         RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 315.0, "") : If TestStop() Then Exit Sub
-        RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", -405.0, "movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
-        RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 405.0, "movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
+        RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", -405.0, "Movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
+        RotatorMoveTest(RotatorPropertyMethod.MoveAbsolute, "MoveAbsolute", 405.0, "Movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
 
-        ' Move - Optional
+        ' Move - Optional (V1,V2), Mandatory (V3)
         RelativeMoveTest(10.0) : If TestStop() Then Exit Sub
         RelativeMoveTest(40.0) : If TestStop() Then Exit Sub
         RelativeMoveTest(130.0) : If TestStop() Then Exit Sub
-        RotatorMoveTest(RotatorPropertyMethod.Move, "Move", -375.0, "movement to large negative angle -375 degrees") : If TestStop() Then Exit Sub
-        RotatorMoveTest(RotatorPropertyMethod.Move, "Move", 375.0, "movement to large positive angle 375 degrees") : If TestStop() Then Exit Sub
+        RotatorMoveTest(RotatorPropertyMethod.Move, "Move", -375.0, "Movement to large negative angle -375 degrees") : If TestStop() Then Exit Sub
+        RotatorMoveTest(RotatorPropertyMethod.Move, "Move", 375.0, "Movement to large positive angle 375 degrees") : If TestStop() Then Exit Sub
 
-        ' Sync - Mandatory if CanSync is true - introduced in IRotatorV3
-        If g_InterfaceVersion >= 3 Then ' Test for Sync method
+        ' Test the new IRotatorV3 methods
+        If g_InterfaceVersion >= 3 Then
+            ' Test the MoveMechanical method
             Try
-                If canReadMechanicalPosition And canReadPosition Then ' Test new IRotaotrV3 methods
+                If canReadMechanicalPosition And canReadPosition Then
 
-                    ' MoveMechanical
                     RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 45.0, "") : If TestStop() Then Exit Sub
                     RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 135.0, "") : If TestStop() Then Exit Sub
                     RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 225.0, "") : If TestStop() Then Exit Sub
                     RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 315.0, "") : If TestStop() Then Exit Sub
-                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0, "movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
-                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0, "movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", -405.0, "Movement to large negative angle -405 degrees") : If TestStop() Then Exit Sub
+                    RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "MoveMechanical", 405.0, "Movement to large positive angle 405 degrees") : If TestStop() Then Exit Sub
+
+                Else ' Message saying we are skipping tests because we can't read required properties
+                    LogMsgInfo("MoveMechanical", "Skipping tests because either the MechanicalPosition or Position property cannot be read.")
+                End If
+
+            Catch ex As Exception
+                HandleException("MoveMechanical", MemberType.Method, Required.Mandatory, ex, "")
+            End Try
+
+            ' Test the Sync method
+            Try
+                If canReadMechanicalPosition And canReadPosition Then ' Test new IRotaotrV3 methods
 
                     RotatorSynctest(90.0F, 90.0F) ' Make sure that the rotator can be synced to its mechanical position
                     RotatorSynctest(120.0F, 90.0F) ' Test sync to a positive offset
@@ -395,12 +430,12 @@ Friend Class RotatorTester
                     RotatorSynctest(30.0F, 00.0F) ' Test sync to a positive offset
                     RotatorSynctest(330.0F, 00.0F) ' Test sync to a negative offset that is through zero
 
-                Else ' Just select an arbitrary sync angle
-
+                Else ' Message saying we are skipping tests because we can't read required properties
+                    LogMsgInfo("Sync", "Skipping tests because either the MechanicalPosition or Position property cannot be read.")
                 End If
 
             Catch ex As Exception
-                HandleException("Sync", MemberType.Method, Required.MustBeImplemented, ex, "CanSync is True")
+                HandleException("Sync", MemberType.Method, Required.Mandatory, ex, "")
             End Try
 
         End If
@@ -424,7 +459,7 @@ Friend Class RotatorTester
                 LogMsgIssue("Sync", $"Rotator Position is more than {ROTATOR_POSITION_TOLERANCE} different from requested position {SyncAngle}.")
             End If
         Catch ex As Exception
-            HandleException("Sync", MemberType.Method, Required.MustBeImplemented, ex, "CanSync is true")
+            HandleException("Sync", MemberType.Method, Required.Mandatory, ex, "")
         End Try
 
     End Sub
@@ -434,7 +469,9 @@ Friend Class RotatorTester
         Dim l_OKLimit, l_PositionOffset As Double
 
         LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Start value, position: " & p_Value.ToString("0.000") & " " & m_Rotator.Position.ToString("0.000"))
-        Try 'Move to requested position
+
+        Try
+            'Move to requested position
             Select Case p_type
                 Case RotatorPropertyMethod.Move
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Reading rotator start position: " & canReadPosition)
@@ -457,7 +494,9 @@ Friend Class RotatorTester
                 Case Else
                     LogMsg(p_Name, MessageLevel.msgError, "RotatorMoveTest: Unknown test type - " & p_type.ToString)
             End Select
+
             RotatorWait(p_type, p_Name, p_Value, l_RotatorStartPosition)
+
             If m_LastMoveWasAsync Then 'Asynchronous move
                 Select Case p_type
                     Case RotatorPropertyMethod.Move
@@ -474,7 +513,7 @@ Friend Class RotatorTester
                             LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous move successful")
                         End If
                 End Select
-            Else 'Sync move
+            Else 'Synchronous move
                 If canReadPosition Then
                     LogMsg(p_Name, MessageLevel.msgOK, "Synchronous move successful to: " & m_Rotator.Position & " degrees")
                 Else
@@ -490,10 +529,16 @@ Friend Class RotatorTester
                     l_OKLimit = ROTATOR_OK_TOLERANCE
                 End If
                 LogMsg(p_Name & "1", MessageLevel.msgDebug, "Position, value, start, tolerance: " & m_Rotator.Position.ToString("0.000") & " " & p_Value.ToString("0.000") & " " & l_RotatorStartPosition.ToString("0.000") & " " & l_OKLimit.ToString("0.000"))
-                If m_Rotator.Position < 0.0 Then LogMsg(p_Name, MessageLevel.msgInfo, "Rotator supports angles < 0.0")
-                If m_Rotator.Position > 360.0 Then LogMsg(p_Name, MessageLevel.msgInfo, "Rotator supports angles > 360.0")
 
-                ' Get the relvant position value
+                rotatorPosition = m_Rotator.Position
+                If g_InterfaceVersion < 3 Then ' Interface V1 and V2 behaviour
+                    If rotatorPosition < 0.0 Then LogMsg(p_Name, MessageLevel.msgInfo, "Rotator supports angles < 0.0")
+                    If rotatorPosition > 360.0 Then LogMsg(p_Name, MessageLevel.msgInfo, "Rotator supports angles > 360.0")
+                Else ' Interface V3 behaviour (Position must be 0..359.99999...)
+                    If rotatorPosition < 0.0 Or rotatorPosition >= 360.0 Then LogMsg(p_Name, MessageLevel.msgError, $"Rotator position {rotatorPosition:0.000} is outside the valid range: 0.0 to 359.99999...")
+                End If
+
+                ' Get the relevant position value
                 If p_type = RotatorPropertyMethod.MoveMechanical Then ' Use the MechanicalPosition property
                     rotatorPosition = m_Rotator.MechanicalPosition
                 Else ' Use the Position property for all other methods
@@ -519,29 +564,26 @@ Friend Class RotatorTester
                 End Select
 
             End If
-        Catch ex As COMException
-            If p_ExpectErrorMsg <> "" Then
-                LogMsg(p_Name, MessageLevel.msgOK, "Exception thrown as expected on " & p_ExpectErrorMsg)
-            Else
-                If ex.ErrorCode = g_ExNotImplemented Or ex.ErrorCode = ErrorCodes.NotImplemented Then
-                    LogMsg(p_Name, MessageLevel.msgOK, NOT_IMP_COM)
+        Catch ex As Exception
+            If p_ExpectErrorMsg = "" Then ' Test for normal behaviour
+                If g_InterfaceVersion < 3 Then
+                    HandleException(p_Name, MemberType.Method, Required.Optional, ex, "")
                 Else
-                    ExTest(p_Name, ex.Message, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
+                    HandleException(p_Name, MemberType.Method, Required.Mandatory, ex, "")
+                End If
+            Else ' This is expected to fail because a bad position was used
+                If IsInvalidValueException(p_Name, ex) Then ' Test for an InvalidValueException and handle if found
+                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, True, ex, "", p_ExpectErrorMsg)
+                Else ' Some other type of exception occurred
+                    If g_InterfaceVersion < 3 Then
+                        HandleException(p_Name, MemberType.Method, Required.Optional, ex, "")
+                    Else
+                        HandleException(p_Name, MemberType.Method, Required.Mandatory, ex, "")
+                    End If
                 End If
             End If
-        Catch ex As PropertyNotImplementedException
-            If p_ExpectErrorMsg <> "" Then
-                LogMsg(p_Name, MessageLevel.msgOK, "Exception thrown as expected on " & p_ExpectErrorMsg)
-            Else
-                LogMsg(p_Name, MessageLevel.msgOK, NOT_IMP_NET)
-            End If
-        Catch ex As Exception
-            If p_ExpectErrorMsg <> "" Then
-                LogMsg(p_Name, MessageLevel.msgOK, "Exception thrown as expected on " & p_ExpectErrorMsg)
-            Else
-                ExTest(p_Name, ex.Message, EX_NET & ex.Message)
-            End If
         End Try
+
         Status(StatusType.staAction, "")
         Status(StatusType.staStatus, "")
         Status(StatusType.staTest, "")
@@ -559,9 +601,9 @@ Friend Class RotatorTester
                     If canReadPosition Then 'Only do this if position doesn't generate an exception
                         Select Case p_type
                             Case RotatorPropertyMethod.Move
-                                Status(StatusType.staStatus, System.Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & p_value & " relative")
+                                Status(StatusType.staStatus, Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & p_value & " relative")
                             Case RotatorPropertyMethod.MoveAbsolute
-                                Status(StatusType.staStatus, System.Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & System.Math.Abs(p_value - p_RotatorStartPosition) & " absolute")
+                                Status(StatusType.staStatus, Math.Abs(m_Rotator.Position - p_RotatorStartPosition) & "/" & Math.Abs(p_value - p_RotatorStartPosition) & " absolute")
                         End Select
                     End If
                     Application.DoEvents()
