@@ -1,39 +1,13 @@
-6.4.64.0
-Version 6.4.64.0 - This version requires Platform 6.4
-  All - The performance results message has been revised to leave it to driver authors to decide acceptable performance rates for their driver and hardware.
-  Camera - Improved memory management when cameras return large image arrays
-  Dome - Issues are now reported when CanXXX properties return true but the associated XXX methods throw exceptions.
-  ObservingConditions - Improve Observing Condition Hub action pass-through tests
-  SafetyMonitor - Bug fix: Driver now passes when it is connected and returns IsSafe = true.
-  Telescope - Bug fix: Telescope.TargetRightAscensionRate and Telescope.TargetDeclinationRate tests will now accept COM InvalidOperationExceptions as valid responses.
-  Telescope - Improve logging when enumerating the TrackingRates object
-  Telescope - Telescope.TrackingRate Set has additional tests for conditions that the driver should reject with an InvalidValueException.
-            1) Setting a value lower than the smallest DriveRates enum value
-            2) Setting a value higher than its largest DriveRates enum value
-
-Version 6.4.63.0 - This version requires Platform 6.4
-  Telescope - Bug fix: Revise the Telescope.DestinationSideOfPier test to use an "above the horizon" target when the site is in the southern hemisphere. 
-              This fixes the issue that Conform caused some drivers to return PierSide.Unknown in the Telescope.DestinationSideOfPier test.
-
-Version 6.4.62.0 - This version requires Platform 6.4
-  All - Change all HTTP references to HTTPS
-  All - Spelling corrections applied to application and comments
-  Focuser - Added tests to make sure that absolute focusers can reach positions 0 and MaxStep
-  Focuser - Added tests to make sure that absolute focusers gracefully fail when commanded outside their supported position range
-  Telescope - Confirm that Slewing is False when RightAScensionRate and DeclinationRate are non-zero 
-  Telescope - Confirm that SlewToCoordinates, SlewToCoordinatesAsync and SyncToCoordinates set the TargetRightAScension and TargetDeclination properties
-  ObservingConditions - Add extended SupportedActions / Action tests specifically for aggregated drivers presented by the Observing Conditions Hub
-
-Version 6.4.61.0 - This version requires Platform 6.4
-  Camera - New Conform configuration options to override the camera supplied MaxBinX and MaxBinY values
-  Camera - Camera.PercentCompleted is now tested as having an optional implementation, in line with the published specification
-  Camera - Revised exception handling for some properties and improved messaging
-  Focuser - Move tests revised to match new IFocuserV3 behaviour introduced in Platform 6.4
-  ObservingConditions - Added test to confirm that Wind direction is reported as 0.0 when wind speed is reported as 0.0
-  Telescope - New configuration setting that will log a message before every driver call to aid debugging
-  Telescope - TargetRightAscension - Messages now report the target RA rather than the RA that the telescope actually reported
-  Telescope - Add check that no exception is thrown when calling AxisRates.Dispose
-  Telescope - Add check that no exception is thrown when calling Rate.Dispose
-  Telescope - Add check that no exception is thrown when calling TrackingRates.Dispose
-  Switch - The range of switch numbers that will be searched for valid switches is now configurable through the Options/Conformance Options menu
-  Switch - New configuration setting that will log a message before every driver call to aid debugging
+6.5.7500.22515
+Version 6.5.7500.22515 - This version requires Platform 6.5
+  All - Improved exception handling when creating drivers
+  All - Fixed version check that failed because ascom-standards web site has moved to HTTPS only
+  All - Version numbering revised so that it is  unique to each build
+  All - Drivers are now correctly released at the end of each conformance test
+  Camera - Added test for Camera.ImageReady returning True during an asynchronous exposure
+  Camera - Memory management improved to support large images
+  Camera - Added support for new ICameraV3 members
+  CoverCalibrator - Added support for this new type of device
+  Dome - Added test for inverted "Dome.Slewing behaviour
+  Dome - Added test for Dome.Slewing returning True when the driver is created
+  Rotator - Added support for new IRotatorV3 members and behaviour
