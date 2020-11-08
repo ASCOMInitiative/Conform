@@ -869,7 +869,6 @@ Friend Class CameraTester
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMax + 1} which is higher than the maximum value.")
                         End Try
-                        MsgBox("WAITING")
                     Case Else
                         LogMsgError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}")
                 End Select
@@ -1062,7 +1061,6 @@ Friend Class CameraTester
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMax + 1} which is higher than the maximum value.")
                         End Try
-                        MsgBox("WAITING")
                     Case Else
                         LogMsgError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}")
                 End Select
