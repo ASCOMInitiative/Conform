@@ -34,7 +34,8 @@ Friend Class CameraTester
     Private m_CanReadOffset, m_CanReadOffsetMax, m_CanReadOffsetMin, m_CanReadOffsets, m_CanReadPulseGuideStatus As Boolean
     Private m_Offsets As ArrayList
     Private m_SubExposureDuration As Double
-    'Private m_PulseGuideStatus As PulseGuideState
+    Private m_OffsetMode As GainOffsetMode = GainOffsetMode.Unknown
+    Private m_GainMode As GainOffsetMode = GainOffsetMode.Unknown
 
 #If DEBUG Then
     Private m_Camera As ASCOM.DriverAccess.Camera
@@ -129,7 +130,11 @@ Friend Class CameraTester
         SubExposureDuration = 42
 
     End Enum
-
+    Private Enum GainOffsetMode
+        Unknown = 0
+        IndexMode = 1
+        ValueMode = 2
+    End Enum
 #End Region
 
 #Region "New and Dispose"
@@ -571,6 +576,7 @@ Friend Class CameraTester
                 LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
             End Try
         End If
+
         Try : Marshal.ReleaseComObject(m_ImageArray) : Catch : End Try
         Try : Marshal.ReleaseComObject(m_ImageArrayVariant) : Catch : End Try
         m_ImageArray = Nothing
@@ -796,9 +802,11 @@ Friend Class CameraTester
                 If m_CanReadGain Then ' Can read Gain so the driver could be in either Gain Index or Gain Value mode
                     ' Test for Gain Index mode
                     If (m_CanReadGain And m_CanReadGains And Not m_CanReadGainMin And Not m_CanReadGainMax) Then ' We are in Gain Index mode so all is OK
+                        m_GainMode = GainOffsetMode.IndexMode
                         LogMsgOK("Gain Read", "Gain and Gains can be read while GainMin and GainMax throw exceptions - the driver is in ""Gain Index"" mode.")
                     Else ' Test for Gain Value mode
                         If (m_CanReadGain And Not m_CanReadGains And m_CanReadGainMin And m_CanReadGainMax) Then ' We are in Gain Value mode so all is OK
+                            m_GainMode = GainOffsetMode.ValueMode
                             LogMsgOK("Gain Read", "Gain, GainMin and GainMax can be read OK while Gains throws an exception - the driver is in ""Gain Value"" mode.")
                         Else ' Bad combination of properties - this is not a valid mode
                             LogMsgError("Gain Read", $"Unable to determine whether the driver is in ""Gain Not Implemented"", ""Gain Index"" or ""Gain Value"" mode. Please check the interface specification.")
@@ -812,6 +820,59 @@ Friend Class CameraTester
                     LogMsgError("Gain Read", $"Gain Read threw an exception but at least one of Gains, GainMin Or GainMax did not throw an exception. If Gain throws an exception, all the other gain properties should do likewise.")
                     LogMsgInfo("Gain Read", $"Gains threw an exception: {m_CanReadGains}, GainMin threw an exception: {m_CanReadGainMin}, GainMax threw an exception: {m_CanReadGainMax}.")
                 End If
+            End If
+
+            ' Gain write - Optional when neither gain index nor gain value mode is supported; must be implemented if either mode is supported
+
+            ' First test for the only valid not implemented state when neither gain mode is supported
+            If Not m_CanReadGain And Not m_CanReadGains And Not m_CanReadGainMin And Not m_CanReadGainMax Then ' We are in Not Implemented mode so make sure that we get a PropertyNotImplementedException when writing to Gain
+                Try
+                    m_Camera.Gain = 0
+                    LogMsgIssue("Gain Write", "Writing to Gain did not throw a PropertyNotImplementedException when reading Gain did.")
+                Catch ex As Exception
+                    HandleException("Gain Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplementedException is expected")
+                End Try
+            Else ' Test for Gain Index and Gain Value modes
+                Select Case m_GainMode
+                    Case GainOffsetMode.Unknown
+                        LogMsgIssue("Gain Write", "Cannot test Gain Write because of issues with other gain properties - skipping test")
+                    Case GainOffsetMode.IndexMode
+                    Case GainOffsetMode.ValueMode
+                        ' Test writing the minimum valid value
+                        Try
+                            m_Camera.Gain = m_GainMin
+                            LogMsgOK("Gain Write", $"Successfully set gain minimum value {m_GainMin}.")
+                        Catch ex As Exception
+                            HandleException("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value")
+                        End Try
+
+                        ' Test writing the maximum valid value
+                        Try
+                            m_Camera.Gain = m_GainMax
+                            LogMsgOK("Gain Write", $"Successfully set gain maximum value {m_GainMax}.")
+                        Catch ex As Exception
+                            HandleException("Gain Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when writing a legal value")
+                        End Try
+
+                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        Try
+                            m_Camera.Gain = m_GainMin - 1
+                            LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.")
+                        Catch ex As Exception
+                            HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMin - 1}, which is lower than the minimum value.")
+                        End Try
+
+                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        Try
+                            m_Camera.Gain = m_GainMax + 1
+                            LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.")
+                        Catch ex As Exception
+                            HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMax + 1} which is higher than the maximum value.")
+                        End Try
+                        MsgBox("WAITING")
+                    Case Else
+                        LogMsgError("Gain Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_GainMode}")
+                End Select
             End If
 
             ' PercentCompleted Read - Optional - corrected to match the specification
@@ -933,12 +994,15 @@ Friend Class CameraTester
                 If m_CanReadOffset Then ' Can read Offset so the driver could be in either Offset Index or Offset Value mode
                     ' Test for Offset Index mode
                     If (m_CanReadOffset And m_CanReadOffsets And Not m_CanReadOffsetMin And Not m_CanReadOffsetMax) Then ' We are in Offset Index mode so all is OK
+                        m_OffsetMode = GainOffsetMode.IndexMode
                         LogMsgOK("Offset Read", "Offset and Offsets can be read while OffsetMin and OffsetMax throw exceptions - the driver is in ""Offset Index"" mode.")
                     Else ' Test for Offset Value mode
                         If (m_CanReadOffset And Not m_CanReadOffsets And m_CanReadOffsetMin And m_CanReadOffsetMax) Then ' We are in Offset Value mode so all is OK
+                            m_OffsetMode = GainOffsetMode.ValueMode
                             LogMsgOK("Offset Read", "Offset, OffsetMin and OffsetMax can be read OK while Offsets throws an exception - the driver is in ""Offset Value"" mode.")
                         Else ' Bad combination of properties - this is not a valid mode
-                            LogMsgError("Offset Read", $"Unable to determine whether the driver is in ""Offset Not Implemented"", ""Offset Index"" or ""Offset Value"" mode. Please check the interface specification.")
+                            m_OffsetMode = GainOffsetMode.Unknown
+                            LogMsgIssue("Offset Read", $"Unable to determine whether the driver is in ""Offset Not Implemented"", ""Offset Index"" or ""Offset Value"" mode. Please check the interface specification.")
                             LogMsgInfo("Offset Read", $"Offset threw an exception: {m_CanReadOffset}, Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.")
                             LogMsgInfo("Offset Read", $"""Offset Not Implemented"" mode: Offset, Offsets, OffsetMin and OffsetMax must all throw exceptions.")
                             LogMsgInfo("Offset Read", $"""Offset Index"" mode: Offset and Offsets must work while OffsetMin and OffsetMax must throw exceptions.")
@@ -949,6 +1013,59 @@ Friend Class CameraTester
                     LogMsgError("Offset Read", $"Offset Read threw an exception but at least one of Offsets, OffsetMin Or OffsetMax did not throw an exception. If Offset throws an exception, all the other offset properties should do likewise.")
                     LogMsgInfo("Offset Read", $"Offsets threw an exception: {m_CanReadOffsets}, OffsetMin threw an exception: {m_CanReadOffsetMin}, OffsetMax threw an exception: {m_CanReadOffsetMax}.")
                 End If
+            End If
+
+            ' Offset write - Optional when neither offset index nor offset value mode is supported; must be implemented if either mode is supported
+
+            ' First test for the only valid not implemented state when neither offset mode is supported
+            If Not m_CanReadOffset And Not m_CanReadOffsets And Not m_CanReadOffsetMin And Not m_CanReadOffsetMax Then ' We are in Not Implemented mode so make sure that we get a PropertyNotImplementedException when writing to Offset
+                Try
+                    m_Camera.Offset = 0
+                    LogMsgIssue("Offset Write", "Writing to Offset did not throw a PropertyNotImplementedException when reading Offset did.")
+                Catch ex As Exception
+                    HandleException("Offset Write", MemberType.Property, Required.MustNotBeImplemented, ex, "PropertyNotImplementedException is expected")
+                End Try
+            Else ' Test for Offset Index and Offset Value modes
+                Select Case m_OffsetMode
+                    Case GainOffsetMode.Unknown
+                        LogMsgIssue("Offset Write", "Cannot test Offset Write because of issues with other offset properties - skipping test")
+                    Case GainOffsetMode.IndexMode
+                    Case GainOffsetMode.ValueMode
+                        ' Test writing the minimum valid value
+                        Try
+                            m_Camera.Offset = m_OffsetMin
+                            LogMsgOK("Offset Write", $"Successfully set offset minimum value {m_OffsetMin}.")
+                        Catch ex As Exception
+                            HandleException("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "when writing a legal value")
+                        End Try
+
+                        ' Test writing the maximum valid value
+                        Try
+                            m_Camera.Offset = m_OffsetMax
+                            LogMsgOK("Offset Write", $"Successfully set offset maximum value {m_OffsetMax}.")
+                        Catch ex As Exception
+                            HandleException("Offset Write", MemberType.Property, Required.MustNotBeImplemented, ex, "when writing a legal value")
+                        End Try
+
+                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        Try
+                            m_Camera.Offset = m_OffsetMin - 1
+                            LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.")
+                        Catch ex As Exception
+                            HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMin - 1}, which is lower than the minimum value.")
+                        End Try
+
+                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        Try
+                            m_Camera.Offset = m_OffsetMax + 1
+                            LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.")
+                        Catch ex As Exception
+                            HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMax + 1} which is higher than the maximum value.")
+                        End Try
+                        MsgBox("WAITING")
+                    Case Else
+                        LogMsgError("Offset Write", $"UNEXPECTED VALUE FOR OFFSETMODE: {m_OffsetMode}")
+                End Select
             End If
 
             ' SubExposureDuration Read - Optional 
