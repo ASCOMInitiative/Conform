@@ -51,6 +51,7 @@ VersionInfoProductName=ASCOM Conform
 #emit "VersionInfoVersion=" + MyAppVer
 WizardImageFile=NewWizardImage.bmp
 WizardSmallImageFile=ASCOMLogo.bmp
+SignTool = SignConform
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl
@@ -94,6 +95,8 @@ Name: {app}; Type: dirifempty
 
 [PreCompile]
 Name: "..\BuildConform.cmd"; Flags: CmdPrompt
+
+[PostCompile]
 
 [Code]
 const
