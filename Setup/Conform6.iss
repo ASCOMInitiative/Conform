@@ -96,8 +96,6 @@ Name: {app}; Type: dirifempty
 [PreCompile]
 Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
-[PostCompile]
-
 [Code]
 const
    REQUIRED_PLATFORM_VERSION = 6.5;    // Set this to the minimum required ASCOM Platform version for this application
