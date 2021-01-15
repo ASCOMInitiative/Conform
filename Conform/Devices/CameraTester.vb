@@ -6,6 +6,9 @@ Friend Class CameraTester
     Const CAMERA_PULSE_DURATION As Integer = 2000 'Duration of camera pulse guide test (ms)
     Const CAMERA_PULSE_TOLERANCE As Integer = 300 'Tolerance for acceptable performance (ms)
 
+    Const MAX_BIN_X As Integer = 16 ' Values of MaxBin above which warnings are given. Implemented to warn developers if they are returning "silly" values
+    Const MAX_BIN_Y As Integer = 16
+
     'Camera variables
     Private m_CanAbortExposure, m_CanAsymmetricBin, m_CanGetCoolerPower, m_CanSetCCDTemperature, m_CanStopExposure, m_CanFastReadout As Boolean
     Private m_CoolerOn, m_HasShutter, m_ImageReady As Boolean
@@ -398,8 +401,8 @@ Friend Class CameraTester
 #Region "ICameraV1 Properties"
 
         'Basic read tests
-        m_MaxBinX = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, 10)) : If TestStop() Then Exit Sub
-        m_MaxBinY = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, 10)) : If TestStop() Then Exit Sub
+        m_MaxBinX = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinX, "MaxBinX", 1, MAX_BIN_X)) : If TestStop() Then Exit Sub
+        m_MaxBinY = CShort(CameraPropertyTestInteger(CamPropertyType.MaxBinY, "MaxBinY", 1, MAX_BIN_Y)) : If TestStop() Then Exit Sub
 
         If Not m_CanAsymmetricBin Then ' Only symmetric binning is supported so confirm MaxBinX and Y match
             If m_MaxBinX <> m_MaxBinY Then LogMsg("CanAsymmetricBin", MessageLevel.msgError, "CanAsymmetricBin is false but MaxBinX and MaxBinY are not equal!")
@@ -1221,7 +1224,14 @@ Friend Class CameraTester
                 Case Is < p_Min 'Lower than minimum value
                     LogMsg(p_Name, MessageLevel.msgError, "Invalid value: " & CameraPropertyTestInteger.ToString)
                 Case Is > p_Max 'Higher than maximum value
-                    LogMsg(p_Name, MessageLevel.msgError, "Invalid value: " & CameraPropertyTestInteger.ToString)
+                    Select Case p_Type ' Provide the required message depending on the property being tested
+                        Case CamPropertyType.MaxBinX ' Informational message for MaxBinX
+                            LogMsg(p_Name, MessageLevel.msgInfo, $"{CameraPropertyTestInteger}. This is higher than Conform's test criterion: {MAX_BIN_X}. Is this intended?")
+                        Case CamPropertyType.MaxBinY ' Informational message for MaxBinY
+                            LogMsg(p_Name, MessageLevel.msgInfo, $"{CameraPropertyTestInteger}. This is higher than Conform's test criterion: {MAX_BIN_Y}. Is this intended?")
+                        Case Else ' Error message for all other cases
+                            LogMsg(p_Name, MessageLevel.msgError, "Invalid value: " & CameraPropertyTestInteger.ToString)
+                    End Select
                 Case Else 'OK value
                     LogMsg(p_Name, MessageLevel.msgOK, CameraPropertyTestInteger.ToString)
             End Select
