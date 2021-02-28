@@ -323,6 +323,7 @@ Friend Class DomeTester
 
     End Sub
     Overrides Sub CheckProperties()
+        If Not FrmConformMain.chkDomeShutter.Checked Then LogMsgInfo("Altitude", "You have configured Conform not to open the shutter so the following test may fail.")
         DomeOptionalTest(DomePropertyMethod.Altitude, MemberType.Property, "Altitude") : If TestStop() Then Exit Sub
         DomeOptionalTest(DomePropertyMethod.AtHome, MemberType.Property, "AtHome") : If TestStop() Then Exit Sub
         DomeOptionalTest(DomePropertyMethod.AtPark, MemberType.Property, "AtPark") : If TestStop() Then Exit Sub
@@ -387,6 +388,8 @@ Friend Class DomeTester
 
     Private Sub DomeSlewToAltitude(ByVal p_Name As String, ByVal p_Altitude As Double)
         Dim l_StartTime As Date
+
+        If Not FrmConformMain.chkDomeShutter.Checked Then LogMsgInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.")
 
         Status(StatusType.staAction, "Slew to " & p_Altitude & " degrees")
         m_Dome.SlewToAltitude(p_Altitude)
