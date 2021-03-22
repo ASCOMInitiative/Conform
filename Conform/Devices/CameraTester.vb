@@ -1535,7 +1535,7 @@ Friend Class CameraTester
                         If m_CanStopExposure Then 'Can abort and no exception so OK
                             LogMsg("StopExposure", MessageLevel.msgOK, "No exception generated when camera is already idle")
                         Else 'Can not abort and no exception - so violates specification
-                            LogMsg("StopExposure", MessageLevel.msgError, "CanStopExposure is false but no exception is generated when AbortExposure is called")
+                            LogMsg("StopExposure", MessageLevel.msgError, "CanStopExposure is false but no exception is generated when StopExposure is called")
                         End If
                     Catch ex As COMException
                         If m_CanStopExposure Then 'Can abort so should not have generated an error
