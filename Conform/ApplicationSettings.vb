@@ -170,27 +170,35 @@ Friend Class ApplicationSettings
     End Property
 
     'Telescope
-    Property TeleScopeTests() As Generic.Dictionary(Of String, CheckState)
+    Property TeleScopeTests() As Dictionary(Of String, CheckState)
         Get
-            Dim RetVal As New Generic.Dictionary(Of String, CheckState)
-            Dim CS As CheckState
+            Dim RetVal As New Dictionary(Of String, CheckState)
+            Dim testState As CheckState
+            Dim registryValue As String
 
-            For Each kvp As KeyValuePair(Of String, CheckState) In g_TelescopeTests
+            For Each kvp As KeyValuePair(Of String, CheckState) In g_TelescopeTestsMaster
                 Try
-                    CS = CType(System.Enum.Parse(GetType(CheckState), m_TelescopeTestsKey.GetValue(kvp.Key).ToString, True), CheckState)
-                    RetVal.Add(kvp.Key, CS)
-                Catch ex As System.IO.IOException 'Value doesn't exist so create it
+                    LogMsgDebug("TeleScopeTests", $"Retrieving key: {kvp.Key}")
+                    registryValue = m_TelescopeTestsKey.GetValue(kvp.Key).ToString
+                    LogMsgDebug("TeleScopeTests", $"Retrieved registry value: {registryValue} for {kvp.Key}")
+                    testState = CType(System.Enum.Parse(GetType(CheckState), registryValue, True), CheckState)
+                    LogMsgDebug("TeleScopeTests", $"Retrieved checked state: {testState} for {kvp.Key}")
+                    RetVal.Add(kvp.Key, testState)
+                Catch ex As IO.IOException 'Value doesn't exist so create it
+                    LogMsgDebug("TeleScopeTests", $"IOException for key {kvp.Key}: {ex}")
                     SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString)
                     RetVal.Add(kvp.Key, CheckState.Checked)
                 Catch ex As Exception
-                    'LogMsg("AppSettings.TelescopeTests", GlobalVarsAndCode.MessageLevel.msgError, "Unexpected exception: " & ex.ToString)
+                    LogMsgDebug("TeleScopeTests", $"Unexpected exception for key {kvp.Key}: {ex}")
                     SetName(m_TelescopeTestsKey, kvp.Key, CheckState.Checked.ToString)
                     RetVal.Add(kvp.Key, CheckState.Checked)
                 End Try
             Next
+            LogMsgDebug("TeleScopeTests", $"Returning {RetVal.Count} values.")
             Return RetVal
         End Get
-        Set(ByVal value As Generic.Dictionary(Of String, CheckState))
+        Set(ByVal value As Dictionary(Of String, CheckState))
+            LogMsgDebug("TeleScopeTests", $"Setting {value.Count} values.")
             For Each kvp As KeyValuePair(Of String, CheckState) In value
                 SetName(m_TelescopeTestsKey, kvp.Key, kvp.Value.ToString)
             Next

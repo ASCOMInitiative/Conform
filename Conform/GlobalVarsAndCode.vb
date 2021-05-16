@@ -125,29 +125,30 @@ Module GlobalVarsAndCode
     'Status update class
     Friend g_Status As Stat = New Stat
 
-    Friend g_TelescopeTests As New Generic.Dictionary(Of String, CheckState)
+    Friend g_TelescopeTests As New Dictionary(Of String, CheckState)
+    Friend g_TelescopeTestsMaster As New Dictionary(Of String, CheckState)
 
     Friend Sub SetTelescopeTestOptions()
-        'Set up list of Telescope Tests called from main and setup forms on-load events
-        g_TelescopeTests.Add(TELTEST_CAN_MOVE_AXIS, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_PARK_UNPARK, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_ABORT_SLEW, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_AXIS_RATE, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_COMMANDXXX, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_FIND_HOME, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_MOVE_AXIS, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_PULSE_GUIDE, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_COORDINATES, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_COORDINATES_ASYNC, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_TARGET, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_TARGET_ASYNC, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_DESTINATION_SIDE_OF_PIER, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_ALTAZ, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SLEW_TO_ALTAZ_ASYNC, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SYNC_TO_COORDINATES, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SYNC_TO_TARGET, CheckState.Checked)
-        g_TelescopeTests.Add(TELTEST_SYNC_TO_ALTAZ, CheckState.Checked)
-        g_TelescopeTests = g_Settings.TeleScopeTests() 'Get actual values from registry
+        'Populate the master list of Telescope Tests that are called from main and setup forms on-load events
+        g_TelescopeTestsMaster.Clear()
+        g_TelescopeTestsMaster.Add(TELTEST_CAN_MOVE_AXIS, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_PARK_UNPARK, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_ABORT_SLEW, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_AXIS_RATE, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_COMMANDXXX, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_FIND_HOME, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_MOVE_AXIS, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_PULSE_GUIDE, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_COORDINATES_ASYNC, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_TARGET_ASYNC, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_DESTINATION_SIDE_OF_PIER, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SLEW_TO_ALTAZ_ASYNC, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_COORDINATES, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_TARGET, CheckState.Checked)
+        g_TelescopeTestsMaster.Add(TELTEST_SYNC_TO_ALTAZ, CheckState.Checked)
     End Sub
 
 #End Region

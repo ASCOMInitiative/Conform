@@ -1165,6 +1165,8 @@ Public Class FrmConformMain
 
             'Set up list of Telescope Test options
             Call SetTelescopeTestOptions()
+            g_TelescopeTests = g_Settings.TeleScopeTests() 'Get actual values from registry
+
             If System.IntPtr.Size = 4 Then
                 LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 32bit mode")
             Else

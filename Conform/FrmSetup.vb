@@ -176,11 +176,11 @@ Public Class frmSetup
             g_Settings.FlipTestDECStep(GlobalVarsAndCode.SpecialTests.TelescopeDestinationSideOfPier, PierSide.pierEast) = txtDECStepE.Text
             g_Settings.DSOPSide = cmbDSOPSide.Text
 
-            Dim l_TScopeValues As New Generic.Dictionary(Of String, CheckState)
+            Dim l_TScopeValues As New Dictionary(Of String, CheckState)
 
             'Set Telescope method test check flags
 
-            For Each kvp As KeyValuePair(Of String, CheckState) In g_TelescopeTests
+            For Each kvp As KeyValuePair(Of String, CheckState) In g_TelescopeTestsMaster
                 l_TScopeValues.Add(kvp.Key, TScopeMethodTests.GetItemCheckState(TScopeMethodTests.Items.IndexOf(kvp.Key)))
             Next
 
@@ -193,6 +193,7 @@ Public Class frmSetup
 
             Me.Close()
         Catch ex As Exception
+            LogMsgError("BtnSetupOK_Click", $"Unexpected Conform exception: {ex}")
             MsgBox(ex.ToString)
         End Try
     End Sub

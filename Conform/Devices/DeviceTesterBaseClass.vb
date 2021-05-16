@@ -219,13 +219,19 @@ Friend Class DeviceTesterBaseClass
 
         'CommandXXX tests - Optional
         If IncludeMethod(MandatoryMethod.CommandXXX, p_DeviceType, g_InterfaceVersion) Then
+
+            ' Validate that the g_TelescopeTests collection is in a healthy state
+            Try
+                LogMsgDebug("CommandXXX Tests", $"Test collection is null: {IsNothing(g_TelescopeTests)}")
+                LogMsgDebug("CommandXXX Tests", $"Test collection size: {g_TelescopeTests.Count}")
+                For Each kvp As KeyValuePair(Of String, CheckState) In g_TelescopeTests
+                    LogMsgDebug("CommandXXX Tests", $"Found key: {kvp.Key} = {g_TelescopeTests(kvp.Key)}")
+                Next
+            Catch ex As Exception
+                LogMsgDebug("CommandXXX Tests", $"Exception: {ex}")
+            End Try
+
             If (g_TelescopeTests.Item(TELTEST_COMMANDXXX) = CheckState.Checked) Then
-                'CommandTest(CommandType.tstCommandBlind, "CommandBlind") : If TestStop() Then Exit Sub
-                'CommandTest(CommandType.tstCommandBool, "CommandBool") : If TestStop() Then Exit Sub
-                'CommandTest(CommandType.tstCommandString, "CommandString") : If TestStop() Then Exit Sub
-                'CommandTest(CommandType.tstCommandBlindRaw, "CommandBlind Raw") : If TestStop() Then Exit Sub
-                'CommandTest(CommandType.tstCommandBoolRaw, "CommandBool Raw") : If TestStop() Then Exit Sub
-                'CommandTest(CommandType.tstCommandStringRaw, "CommandString Raw") : If TestStop() Then Exit Sub
                 LogMsg("CommandString", MessageLevel.msgInfo, "Conform cannot test the CommandString method")
                 LogMsg("CommandBlind", MessageLevel.msgInfo, "Conform cannot test the CommandBlind method")
                 LogMsg("CommandBool", MessageLevel.msgInfo, "Conform cannot test the CommandBool method")
@@ -253,12 +259,12 @@ Friend Class DeviceTesterBaseClass
                         Const TEST_PARAMETERS As String = "Conform test parameters"
                         Select Case ActionString
                             Case Is = ""
-                                LogMsg("SupportedActions", MessageLevel.msgError, "Supported action " & i & " is an empty string")
+                                LogMsg("SupportedActions", MessageLevel.msgError, "Supported action " & i & " Is an empty string")
                             Case Else ' List the action that was found
                                 LogMsg("SupportedActions", MessageLevel.msgOK, "Found action: " & ActionString)
 
-                                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
+                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
                                     If ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:") Then
                                         Try
                                             If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
