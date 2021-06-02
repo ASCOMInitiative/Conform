@@ -207,14 +207,15 @@
     End Sub
     Overrides Property Connected() As Boolean
         Get
-            Connected = MyBase.Connected
+            LogCallToDriver("Connected", "About to get Connected property")
+            Return m_Focuser.Connected
         End Get
         Set(ByVal value As Boolean)
             Try
                 LogMsg("Connected", MessageLevel.msgDebug, "Setting connected state to: " & value.ToString())
+                LogCallToDriver("Connected", "About to set Link property")
                 m_Focuser.Link = value
                 LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully changed connected state")
-                MyBase.Connected = value
             Catch ex As Exception
                 LogMsg("Connected", MessageLevel.msgError, "Error changing focuser connected state: " & ex.ToString)
             End Try
@@ -228,6 +229,7 @@
     Overrides Sub CheckProperties()
         'Absolute - Required
         Try
+            LogCallToDriver("Absolute", "About to get Absolute property")
             m_Absolute = m_Focuser.Absolute
             LogMsg("Absolute", MessageLevel.msgOK, m_Absolute.ToString)
         Catch ex As Exception
@@ -236,6 +238,7 @@
 
         'IsMoving - Required
         Try
+            LogCallToDriver("IsMoving", "About to get IsMoving property")
             m_IsMoving = m_Focuser.IsMoving
             If Not m_IsMoving Then
                 LogMsg("IsMoving", MessageLevel.msgOK, m_IsMoving.ToString)
@@ -248,6 +251,7 @@
 
         'MaxStep - Required
         Try
+            LogCallToDriver("MaxStep", "About to get MaxStep property")
             m_MaxStep = m_Focuser.MaxStep
             LogMsg("MaxStep", MessageLevel.msgOK, m_MaxStep.ToString)
         Catch ex As Exception
@@ -256,6 +260,7 @@
 
         'MaxIncrement - Required
         Try
+            LogCallToDriver("MaxIncrement", "About to get MaxIncrement property")
             m_MaxIncrement = m_Focuser.MaxIncrement
             'Minimum value is 1, 0 or negative must be a bad value, >maxstep is a bad value
             Select Case m_MaxIncrement
@@ -274,6 +279,7 @@
         If m_Absolute Then 'Absolute focuser so this property should be supported
             Try
                 m_AbsolutePositionOK = False
+                LogCallToDriver("Position", "About to get Position property")
                 m_Position = m_Focuser.Position
                 Select Case m_Position 'Check that position is a valid value
                     Case Is < 0 'Lower than lowest position
@@ -289,6 +295,7 @@
             End Try
         Else 'Relative focuser so this should raise a not supported error
             Try
+                LogCallToDriver("Position", "About to get Position property")
                 m_Position = m_Focuser.Position
                 LogMsg("Position", MessageLevel.msgIssue, "This is a relative focuser but it didn't raise an exception for Focuser.Position")
             Catch ex As Exception
@@ -298,6 +305,7 @@
 
         'StepSize - Optional
         Try
+            LogCallToDriver("StepSize", "About to get StepSize property")
             m_StepSize = m_Focuser.StepSize
             Select Case m_StepSize
                 Case Is <= 0.0 'Must be >0
@@ -311,6 +319,7 @@
 
         'TempCompAvailable - Required
         Try
+            LogCallToDriver("TempCompAvailable", "About to get TempCompAvailable property")
             m_TempCompAvailable = m_Focuser.TempCompAvailable
             LogMsg("TempCompAvailable", MessageLevel.msgOK, m_TempCompAvailable.ToString)
         Catch ex As Exception
@@ -319,6 +328,7 @@
 
         'TempComp Read - Required
         Try
+            LogCallToDriver("TempComp Read", "About to get TempComp property")
             m_TempComp = m_Focuser.TempComp
             If m_TempComp And Not m_TempCompAvailable Then
                 LogMsg("TempComp Read", MessageLevel.msgIssue, "TempComp is True when TempCompAvailable is False - this should not be so")
@@ -335,10 +345,12 @@
                 m_TempCompTrueOK = False ' Initialise to false
                 m_TempCompFalseOK = False
                 'Turn compensation on 
+                LogCallToDriver("TempComp Write", "About to set TempComp property")
                 m_Focuser.TempComp = True
                 LogMsg("TempComp Write", MessageLevel.msgOK, "Successfully turned temperature compensation on")
                 m_TempCompTrueOK = True ' Set to true to indicate TempComp can be successfully set to True
                 'Turn compensation off
+                LogCallToDriver("TempComp Write", "About to set TempComp property")
                 m_Focuser.TempComp = False
                 LogMsg("TempComp Write", MessageLevel.msgOK, "Successfully turned temperature compensation off")
                 m_TempCompFalseOK = True
@@ -347,6 +359,7 @@
             End Try
         Else 'Should raise an exception
             Try
+                LogCallToDriver("TempComp Write", "About to set TempComp property")
                 m_Focuser.TempComp = True
                 LogMsg("TempComp Write", MessageLevel.msgIssue, "Temperature compensation is not available but no exception was raised when TempComp was set True")
             Catch ex As Exception
@@ -355,10 +368,12 @@
         End If
 
         'Restore original TempComp setting if possible
+        LogCallToDriver("TempComp Write", "About to set TempComp property")
         Try : m_Focuser.TempComp = m_TempComp : Catch : End Try
 
         'Temperature - Optional
         Try
+            LogCallToDriver("Temperature", "About to get Temperature property")
             m_Temperature = m_Focuser.Temperature
             Select Case m_Temperature
                 Case Is <= -50.0 'Probably a bad value
@@ -375,6 +390,7 @@
     Public Overrides Sub CheckMethods()
         'Halt - optional
         Try
+            LogCallToDriver("Halt", "About to call Halt method")
             m_Focuser.Halt()
             LogMsg("Halt", MessageLevel.msgOK, "Focuser halted OK")
         Catch ex As COMException
@@ -392,7 +408,10 @@
         Status(StatusType.staTest, "Focuser Move")
         Try
             'Ensure that TempComp is false so that a move should be possible
-            If m_TempCompFalseOK Then m_Focuser.TempComp = False
+            If m_TempCompFalseOK Then
+                LogCallToDriver("Move - TempComp False", "About to set TempComp property")
+                m_Focuser.TempComp = False
+            End If
             Call MoveFocuser("Move - TempComp False")
         Catch ex As Exception
             HandleException("Move", MemberType.Method, Required.Mandatory, ex, "")
@@ -407,6 +426,7 @@
             Select Case g_InterfaceVersion
                 Case 0, 1, 2 ' Original test method for IFocuserV2 and earlier devices
                     Try
+                        LogCallToDriver("Move - TempComp True", "About to set TempComp property")
                         m_Focuser.TempComp = True
                         Call MoveFocuser("Move - TempComp True")
                         LogMsg("Move - TempComp True", MessageLevel.msgError, "TempComp is True but no exception is thrown by the Move Method - See Focuser.TempComp entry in Platform help file")
@@ -422,6 +442,7 @@
 
                 Case 3 ' Test method for revised IFocuserV3 behaviour introduced in Platform 6.4
                     Try
+                        LogCallToDriver("Move - TempComp True V3", "About to set TempComp property")
                         m_Focuser.TempComp = True
                         Call MoveFocuser("Move - TempComp True V3")
                     Catch ex As Exception
@@ -434,15 +455,21 @@
 
             ' For absolute focusers, test movement to the 0 and MaxStep limits, also that the focuser will gracefully stop at the limits if commanded to move beyond them
             If m_Absolute Then
-                If m_TempCompFalseOK Then m_Focuser.TempComp = False ' Set temperature compensation off
+                If m_TempCompFalseOK Then
+                    LogCallToDriver("Move - To 0", "About to set TempComp property")
+                    m_Focuser.TempComp = False ' Set temperature compensation off
+                End If
 
                 ' Test movement to the 0 limit
                 Try
                     Call MoveFocuserToPosition("Move - To 0", 0)
+                    LogCallToDriver("Move - To 0", "About to get Position property")
                     Select Case m_Focuser.Position
                         Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogCallToDriver("Move - To 0", "About to get Position property")
                             LogMsg("Move - To 0", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
                         Case Else
+                            LogCallToDriver("Move - To 0", "About to get Position property")
                             LogMsg("Move - To 0", MessageLevel.msgInfo, String.Format("Move was within {0} counts of desired position", m_Focuser.Position))
                     End Select
                 Catch ex As Exception
@@ -452,10 +479,13 @@
                 ' Test movement below the 0 limit
                 Try
                     Call MoveFocuserToPosition("Move - Below 0", -OUT_OF_RANGE_INCREMENT)
+                    LogCallToDriver("Move - Below 0", "About to get Position property")
                     Select Case m_Focuser.Position
                         Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogCallToDriver("Move - Below 0", "About to get Position property")
                             LogMsg("Move - Below 0", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
                         Case Else
+                            LogCallToDriver("Move - Below 0", "About to get Position property")
                             LogMsg("Move - Below 0", MessageLevel.msgError, String.Format("Move was permitted below position 0: {0} ", m_Focuser.Position))
                     End Select
                 Catch ex As Exception
@@ -465,10 +495,13 @@
                 ' Test movement to the MaxSteps limit
                 Try
                     Call MoveFocuserToPosition("Move - To MaxStep", m_MaxStep)
+                    LogCallToDriver("Move - To MaxStep", "About to get Position property")
                     Select Case m_Focuser.Position
                         Case m_MaxStep - GOOD_MOVE_TOLERANCE To m_MaxStep + GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogCallToDriver("Move - To MaxStep", "About to get Position property")
                             LogMsg("Move - To MaxStep", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
                         Case Else
+                            LogCallToDriver("Move - To MaxStep", "About to get Position property")
                             LogMsg("Move - To MaxStep", MessageLevel.msgInfo, String.Format("Move position: {0}, within {1} counts of desired position", m_Focuser.Position, m_Focuser.Position - m_MaxStep))
                     End Select
                 Catch ex As Exception
@@ -478,10 +511,13 @@
                 ' Test movement above the MaxStep limit
                 Try
                     Call MoveFocuserToPosition("Move - Above Maxstep", m_MaxStep + OUT_OF_RANGE_INCREMENT)
+                    LogCallToDriver("Move - Above MaxStep", "About to get Position property")
                     Select Case m_Focuser.Position
                         Case m_MaxStep - GOOD_MOVE_TOLERANCE To m_MaxStep + GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
+                            LogCallToDriver("Move - Above MaxStep", "About to get Position property")
                             LogMsg("Move - Above Maxstep", MessageLevel.msgOK, String.Format("Moved to {0}", m_Focuser.Position))
                         Case Else
+                            LogCallToDriver("Move - Above MaxStep", "About to get Position property")
                             LogMsg("Move - Above Maxstep", MessageLevel.msgError, String.Format("Moved to {0}, {1} steps from MaxStep ", m_Focuser.Position, m_Focuser.Position - m_MaxStep))
                     End Select
                 Catch ex As Exception
@@ -503,6 +539,7 @@
     Private Sub MoveFocuser(testName As String)
         If m_Absolute Then 'This is an absolute focuser so position is an absolute value
             'Save the current absolute position
+            LogCallToDriver(testName, "About to get Position property")
             m_PositionOrg = m_Focuser.Position
             'Calculate an acceptable focus position
             m_Position = m_PositionOrg + CInt(m_MaxStep / 10) 'Move by 1/10 of the maximum focus distance out 
@@ -521,10 +558,12 @@
 
         'Test outcome if absolute
         If m_Absolute Then
+            LogCallToDriver(testName, "About to get Position property")
             Select Case m_Focuser.Position - m_Position
                 Case -GOOD_MOVE_TOLERANCE To +GOOD_MOVE_TOLERANCE ' OK if within a small tolerance of expected value
                     LogMsg(testName, MessageLevel.msgOK, "Absolute move OK")
                 Case Else
+                    LogCallToDriver(testName, "About to get Position property")
                     LogMsg(testName, MessageLevel.msgInfo, "Move was within " & m_Focuser.Position - m_Position & " counts of desired position")
             End Select
         Else
@@ -535,12 +574,16 @@
         Status(StatusType.staAction, "Returning to original position: " & m_PositionOrg)
         LogMsg(testName, MessageLevel.msgInfo, "Returning to original position: " & m_PositionOrg)
         If m_Absolute Then
+            LogCallToDriver(testName, "About to call Move method")
             m_Focuser.Move(m_PositionOrg) 'Return to original position
         Else
+            LogCallToDriver(testName, "About to call Move method")
             m_Focuser.Move(-m_Position) 'Return to original position
         End If
         Status(StatusType.staStatus, "Waiting for asynchronous move to complete")
+
         'Wait for asynchronous move to finish
+        LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly")
         Do While m_Focuser.IsMoving And (Not g_Stop)
             If m_AbsolutePositionOK Then Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " & m_Focuser.Position & " / " & m_PositionOrg)
             Application.DoEvents()
@@ -552,6 +595,7 @@
         Dim l_StartTime, l_EndTime As Date
 
         'Confirm that the focuser is not moving
+        LogCallToDriver(testName, "About to get IsMoving property")
         If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
             LogMsg(testName, MessageLevel.msgIssue, "Focuser is already moving before start of Move test, rest of test skipped")
         Else 'Focuser not moving so proceed with the test
@@ -564,11 +608,13 @@
 
             Status(StatusType.staAction, "Moving to new position")
             l_StartTime = Now
+            LogCallToDriver(testName, "About to call Move method")
             m_Focuser.Move(newPosition) ' Move the focuser
             l_EndTime = Now
 
             If l_EndTime.Subtract(l_StartTime).TotalMilliseconds > 1000 Then 'Move took more than 1 second so assume a synchronous call
                 'Confirm that IsMoving is false
+                LogCallToDriver(testName, "About to get IsMoving property")
                 If m_Focuser.IsMoving Then 'This is an issue as we are expecting the focuser to be not moving
                     LogMsg(testName, MessageLevel.msgIssue, "Synchronous move expected but focuser is moving after return from Focuser.Move")
                 Else
@@ -576,6 +622,7 @@
                 End If
             Else 'Move took less than 1 second so assume an asynchronous call
                 Status(StatusType.staStatus, "Waiting for asynchronous move to complete")
+                LogCallToDriver(testName, "About to get IsMoving and Position properties repeatedly")
                 Do While (m_Focuser.IsMoving And (Not g_Stop))
                     If m_AbsolutePositionOK Then Status(StatusType.staStatus, "Waiting for asynchronous move to complete, Position: " & m_Focuser.Position & " / " & newPosition)
                     Application.DoEvents()

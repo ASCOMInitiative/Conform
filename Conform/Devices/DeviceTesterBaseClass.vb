@@ -728,6 +728,7 @@ Friend Class DeviceTesterBaseClass
         End Try
 
         Try
+            If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, "About to set Connected property")
             ObjectToRelease.Connected = False
             LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Connected successfully set to False")
         Catch ex1 As Exception
@@ -1046,6 +1047,15 @@ Friend Class DeviceTesterBaseClass
         End If
         Return RetVal
     End Function
+
+    ''' <summary>
+    ''' Logs a call to a driver if enabled within Conform's configuration
+    ''' </summary>
+    ''' <param name="test">Name of the current test</param>
+    ''' <param name="memberName">Name of member being called</param>
+    Protected Sub LogCallToDriver(test As String, memberName As String)
+        If g_Settings.DisplayMethodCalls Then LogMsg(test, MessageLevel.msgComment, memberName)
+    End Sub
 
 #End Region
 End Class

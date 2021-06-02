@@ -171,8 +171,10 @@ Friend Class ObservingConditionsTester
             l_IObservingConditions = CType(l_DeviceObject, ASCOM.DeviceInterface.IObservingConditions)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver through Interface IObservingConditions")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IObservingConditions.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes Interface IObservingConditions")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IObservingConditions.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does Not expose Interface IObservingConditions")
@@ -196,8 +198,10 @@ Friend Class ObservingConditionsTester
             l_DriverAccessObservingConditions = New ASCOM.DriverAccess.ObservingConditions(g_ObservingConditionsProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver Using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessObservingConditions.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected Using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessObservingConditions.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting To driver Using driver access toolkit: " & ex.Message)
@@ -230,11 +234,12 @@ Friend Class ObservingConditionsTester
     End Sub
     Overrides Property Connected() As Boolean
         Get
-            Connected = MyBase.Connected
+            LogCallToDriver("Absolute", "About to get Connected property")
+            Return m_ObservingConditions.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Absolute", "About to set Connected property")
             m_ObservingConditions.Connected = value
-            MyBase.Connected = value
         End Set
     End Property
     Overrides Sub CheckCommonMethods()
@@ -249,6 +254,7 @@ Friend Class ObservingConditionsTester
         If IsGoodValue(averageperiod) Then
             ' Try setting a bad value i.e. less than -1, this should be rejected
             Try 'Invalid low value
+                LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property")
                 m_ObservingConditions.AveragePeriod = -2.0
                 LogMsgIssue("AveragePeriod Write", "No error generated on setting the average period < -1.0")
             Catch ex As Exception
@@ -257,6 +263,7 @@ Friend Class ObservingConditionsTester
 
             ' Try setting a good zero value, this should be accepted
             Try 'Invalid low value
+                LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property")
                 m_ObservingConditions.AveragePeriod = 0.0
                 LogMsgOK("AveragePeriod Write", "Successfully set average period to 0.0")
             Catch ex As Exception
@@ -265,6 +272,7 @@ Friend Class ObservingConditionsTester
 
             ' Try setting a good positive value, this should be accepted
             Try 'Invalid low value
+                LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property")
                 m_ObservingConditions.AveragePeriod = 5.0
                 LogMsgOK("AveragePeriod Write", "Successfully set average period to 5.0")
             Catch ex As Exception
@@ -273,6 +281,7 @@ Friend Class ObservingConditionsTester
 
             ' Restore original value, this should be accepted
             Try 'Invalid low value
+                LogCallToDriver("AveragePeriod Write", "About to set AveragePeriod property")
                 m_ObservingConditions.AveragePeriod = averageperiod
                 LogMsgOK("AveragePeriod Write", "Successfully restored original average period: " & averageperiod)
             Catch ex As Exception
@@ -353,6 +362,7 @@ Friend Class ObservingConditionsTester
 
         'Refresh
         Try
+            LogCallToDriver("AveragePeriod Write", "About to call Refresh method")
             m_ObservingConditions.Refresh()
             LogMsg("Refresh", MessageLevel.msgOK, "Refreshed OK")
         Catch ex As Exception
@@ -428,8 +438,10 @@ Friend Class ObservingConditionsTester
         End Try
         If MethodName.StartsWith(PROPERTY_TIMESINCELASTUPDATE) Then ' Extract the sensor name from the TimeSinceLastUpdateXXX property name
             SensorName = MethodName.Substring(PROPERTY_TIMESINCELASTUPDATE.Length)
+            LogCallToDriver(MethodName, $"About to call TimeSinceLastUpdate({SensorName}) method")
         Else
             SensorName = MethodName
+            LogCallToDriver(MethodName, $"About to get {SensorName} property")
         End If
         LogMsg("TestDouble", MessageLevel.msgDebug, "methodName: " & MethodName & ", SensorName: " & SensorName)
         sensorHasTimeOfLastUpdate(SensorName) = False
@@ -539,7 +551,7 @@ Friend Class ObservingConditionsTester
 
     End Function
 
-    Private Function TestSensorDescription(ByVal p_Nmae As String, ByVal p_Type As ObservingConditionsProperty, ByVal p_MaxLength As Integer, p_Mandatory As Required) As String
+    Private Function TestSensorDescription(ByVal p_Name As String, ByVal p_Type As ObservingConditionsProperty, ByVal p_MaxLength As Integer, p_Mandatory As Required) As String
         Dim MethodName As String
 
         'Create a text version of the calling method name
@@ -549,10 +561,11 @@ Friend Class ObservingConditionsTester
             MethodName = "?????? Read"
         End Try
 
-        sensorHasDescription(p_Nmae) = False
+        sensorHasDescription(p_Name) = False
 
         TestSensorDescription = Nothing
         Try
+            LogCallToDriver(MethodName, $"About to call SensorDescription({p_Name}) method")
             Select Case p_Type
                 'TimeSincelastUpdate method
                 Case ObservingConditionsProperty.SensorDescriptionCloudCover
@@ -599,7 +612,7 @@ Friend Class ObservingConditionsTester
                     End If
             End Select
 
-            sensorHasDescription(p_Nmae) = True
+            sensorHasDescription(p_Name) = True
 
         Catch ex As Exception
             HandleException(MethodName, MemberType.Method, p_Mandatory, ex, "")

@@ -581,6 +581,7 @@ Public Class FrmConformMain
                 If Not TestStop() Then 'Only connect if we successfully created the device
                     Try
                         g_Stop = True 'Reset stop flag in case connect fails
+                        If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Connected property")
                         l_TestDevice.Connected = True
                         g_Stop = False 'It worked so allow late steps to run
                         LogMsg("ConformanceCheck", MessageLevel.msgOK, "Connected OK")

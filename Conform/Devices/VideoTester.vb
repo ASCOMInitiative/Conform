@@ -142,8 +142,10 @@ Friend Class VideoTester
             l_ICamera = CType(l_DeviceObject, ASCOM.Interface.ICamera)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface ICamera")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ICamera")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface ICamera")
@@ -165,8 +167,10 @@ Friend Class VideoTester
             l_ICamera = CType(l_DeviceObject, ASCOM.DeviceInterface.ICameraV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface ICameraV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ICameraV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface ICameraV2")
@@ -188,8 +192,10 @@ Friend Class VideoTester
             l_DriverAccessCamera = New ASCOM.DriverAccess.Camera(g_VideoCameraProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessCamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessCamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -227,9 +233,11 @@ Friend Class VideoTester
     End Sub
     Overrides Property Connected() As Boolean
         Get
+            LogCallToDriver("Connected", "About to get Connected property")
             Connected = Video.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             Video.Connected = value
             g_Stop = False
         End Set
@@ -242,6 +250,7 @@ Friend Class VideoTester
         Try
             Select Case p_Type
                 Case CanProperty.CanConfigureDeviceProperties
+                    LogCallToDriver(p_Type.ToString(), "About to get CanConfigureDeviceProperties property")
                     CanConfigureDeviceProperties = Video.CanConfigureDeviceProperties
                     LogMsg(p_Name, MessageLevel.msgOK, CanConfigureDeviceProperties.ToString)
                 Case Else
@@ -262,6 +271,7 @@ Friend Class VideoTester
         ' CameraState - Mandatory
         Try
             CanReadCameraState = False
+            LogCallToDriver("CameraState", "About to get VideoCameraRunning property")
             CameraState = VideoCameraState.videoCameraRunning
             CameraState = Video.CameraState
             CanReadCameraState = True
@@ -285,6 +295,7 @@ Friend Class VideoTester
         Try
             CanReadFrameRate = False
             FrameRate = VideoCameraFrameRate.PAL
+            LogCallToDriver("FrameRate", "About to get FrameRate property")
             FrameRate = Video.FrameRate
             CanReadFrameRate = True
             LogMsg("FrameRate Read", MessageLevel.msgOK, FrameRate.ToString)
@@ -355,6 +366,7 @@ Friend Class VideoTester
         ' SensorType - Mandatory
         Try
             CanReadSensorType = False
+            LogCallToDriver("SensorType", "About to get SensorType property")
             SensorType = Video.SensorType
             CanReadSensorType = True ' Set a flag to indicate that we have got a valid SensorType value
             'Successfully retrieved a value
@@ -556,6 +568,7 @@ Friend Class VideoTester
 
         Try
             TestShort = 0
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.GainMax
                     CanReadGainMax = False
@@ -640,6 +653,7 @@ Friend Class VideoTester
 
         Try
             TestInteger = 0
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.BitDepth
                     TestInteger = Video.BitDepth
@@ -736,6 +750,7 @@ Friend Class VideoTester
         TestVideoFrame = Nothing
 
         Try
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.LastVideoFrame
                     CanReadVideoFrame = False
@@ -764,6 +779,7 @@ Friend Class VideoTester
 
         Try
             TestDouble = 0.0
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.PixelSizeX
                     TestDouble = Video.PixelSizeX
@@ -834,6 +850,7 @@ Friend Class VideoTester
         End Try
 
         Try
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.Gains
                     CanReadGains = False
@@ -882,6 +899,7 @@ Friend Class VideoTester
 
         TestString = ""
         Try
+            LogCallToDriver(p_Type.ToString(), $"About to get {p_Type} property")
             Select Case p_Type
                 Case VideoProperty.SensorName
                     TestString = Video.SensorName

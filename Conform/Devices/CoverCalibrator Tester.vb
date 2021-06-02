@@ -100,8 +100,10 @@ Friend Class CoverCalibratorTester
 
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using early binding to ICoverCalibratorV1 interface")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 deviceInterface.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using early binding to ICoverCalibratorV1 interface")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 deviceInterface.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using early binding to ICoverCalibratorV1 interface: " & ex.Message)
@@ -122,8 +124,10 @@ Friend Class CoverCalibratorTester
             driverAccessDevice = New CoverCalibrator(g_CoverCalibratorProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 driverAccessDevice.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 driverAccessDevice.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -174,9 +178,11 @@ Friend Class CoverCalibratorTester
 
     Public Overrides Property Connected() As Boolean
         Get
+            LogCallToDriver("Connected", "About to get Connected property")
             Connected = coverCalibratorDevice.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             coverCalibratorDevice.Connected = value
         End Set
     End Property

@@ -91,8 +91,10 @@ Friend Class RotatorTester
             l_IRotator = CType(l_DeviceObject, ASCOM.Interface.IRotator)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver with interface IRotator")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IRotator.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver exposes interface IRotator")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IRotator.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver does not expose interface IRotator")
@@ -113,8 +115,10 @@ Friend Class RotatorTester
             l_IRotator = CType(l_DeviceObject, ASCOM.DeviceInterface.IRotatorV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver with interface IRotatorV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IRotator.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver exposes interface IRotatorV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IRotator.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver does not expose interface IRotatorV2")
@@ -136,8 +140,10 @@ Friend Class RotatorTester
             l_DriverAccessRotator = New ASCOM.DriverAccess.Rotator(g_RotatorProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessRotator.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessRotator.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -175,9 +181,11 @@ Friend Class RotatorTester
     End Sub
     Overrides Property Connected() As Boolean
         Get
+            LogCallToDriver("Connected", "About to get Connected property")
             Connected = m_Rotator.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             m_Rotator.Connected = value
         End Set
     End Property
@@ -187,6 +195,7 @@ Friend Class RotatorTester
 
     Public Overrides Sub ReadCanProperties()
         Try
+            LogCallToDriver("CanReverse", "About to get CanReverse property")
             m_CanReverse = m_Rotator.CanReverse
             LogMsg("CanReverse", MessageLevel.msgOK, m_CanReverse.ToString)
         Catch ex As Exception
@@ -199,14 +208,17 @@ Friend Class RotatorTester
         Dim l_Now As Date
         'Get the rotator into a standard state
         g_Stop = True
+        LogCallToDriver("PreRunCheck", "About to call Halt method")
         Try : m_Rotator.Halt() : Catch : End Try 'Stop any movement
         l_Now = Now
         Try 'Confirm that rotator is not moving or wait for it to stop
             Status(StatusType.staAction, "Waiting up to " & ROTATOR_WAIT_LIMIT & " seconds for rotator to stop moving")
+            LogCallToDriver("CanReverse", "About to get IsMoving property repeatedly")
             Do
                 WaitFor(500)
                 Status(StatusType.staStatus, Now.Subtract(l_Now).TotalSeconds & "/" & ROTATOR_WAIT_LIMIT)
             Loop Until (Not m_Rotator.IsMoving) Or (Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT)
+
             If Not m_Rotator.IsMoving Then 'Rotator is stopped so OK
                 g_Stop = False 'Clear stop flag to allow other tests to run
             Else 'Report error message and don't do other tests
@@ -222,6 +234,7 @@ Friend Class RotatorTester
         'IsMoving - Optional (V1,V2), Mandatory (V3)
         Try
             m_CanReadIsMoving = False
+            LogCallToDriver("IsMoving", "About to get IsMoving property")
             m_IsMoving = m_Rotator.IsMoving
             m_CanReadIsMoving = True ' Can read OK, doesn't generate an exception
             If m_IsMoving Then
@@ -251,6 +264,7 @@ Friend Class RotatorTester
 
         'Reverse Read - Optional if CanReverse is False, Mandatory if CanReverse is True (V1,V2), Mandatory (V3)
         Try
+            LogCallToDriver("Reverse", "About to get Reverse property")
             m_Reverse = m_Rotator.Reverse
             If m_CanReverse Then
                 LogMsg("Reverse Read", MessageLevel.msgOK, m_Reverse.ToString)
@@ -273,11 +287,14 @@ Friend Class RotatorTester
         'Reverse Write - Optional if CanReverse is False, Mandatory if CanReverse is True (V1,V2), Mandatory (V3)
         Try
             If m_Reverse Then 'Try and set reverse to the opposite state
+                LogCallToDriver("Reverse", "About to set Reverse property")
                 m_Rotator.Reverse = False
             Else
+                LogCallToDriver("Reverse", "About to set Reverse property")
                 m_Rotator.Reverse = True
             End If
 
+            LogCallToDriver("Reverse", "About to set Reverse property")
             m_Rotator.Reverse = m_Reverse 'Restore original value
 
             If m_CanReverse Then
@@ -302,6 +319,7 @@ Friend Class RotatorTester
 
             Try
                 canReadMechanicalPosition = False
+                LogCallToDriver("MechanicalPosition", "About to set MechanicalPosition property")
                 mechanicalPosition = m_Rotator.MechanicalPosition
                 canReadMechanicalPosition = True 'Can read mechanical position OK, doesn't generate an exception
 
@@ -339,6 +357,7 @@ Friend Class RotatorTester
 
         Try
             RotatorPropertyTestSingle = 0.0
+            LogCallToDriver(p_Name, $"About to get {p_Name} property")
             Select Case p_Type
                 Case RotatorPropertyMethod.Position
                     canReadPosition = False
@@ -371,10 +390,12 @@ Friend Class RotatorTester
 
     Overrides Sub CheckMethods()
 
+        LogCallToDriver("AccessChecks", "About to get Connected property")
         LogMsg("CheckMethods", MessageLevel.msgDebug, "Rotator is connected: " & m_Rotator.Connected.ToString)
 
         ' Halt - Optional (V1,V2 and V3)
         Try
+            LogCallToDriver("Halt", $"About to call Halt method")
             m_Rotator.Halt()
             LogMsg("Halt", MessageLevel.msgOK, "Halt command successful")
         Catch ex As Exception
@@ -448,6 +469,7 @@ Friend Class RotatorTester
         RotatorMoveTest(RotatorPropertyMethod.MoveMechanical, "Sync", MechanicalAngle, "") : If TestStop() Then Exit Sub
 
         Try
+            LogCallToDriver("Sync", $"About to call Sync method")
             m_Rotator.Sync(SyncAngle)
             LogMsgOK("Sync", "Synced OK")
 
@@ -468,6 +490,7 @@ Friend Class RotatorTester
         Dim l_RotatorStartPosition, rotatorPosition As Single
         Dim l_OKLimit, l_PositionOffset As Double
 
+        LogCallToDriver(p_Name, $"About to get Position property")
         LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Start value, position: " & p_Value.ToString("0.000") & " " & m_Rotator.Position.ToString("0.000"))
 
         Try
@@ -476,19 +499,23 @@ Friend Class RotatorTester
                 Case RotatorPropertyMethod.Move
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Reading rotator start position: " & canReadPosition)
                     If canReadPosition Then 'Get us to a starting point of 10 degrees
+                        LogCallToDriver(p_Name, $"About to get Position property")
                         l_RotatorStartPosition = m_Rotator.Position
                     End If
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Starting relative move")
+                    LogCallToDriver(p_Name, $"About to call Move method")
                     m_Rotator.Move(p_Value)
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Starting relative move")
                 Case RotatorPropertyMethod.MoveAbsolute
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Starting absolute move")
                     l_RotatorStartPosition = 0.0
+                    LogCallToDriver(p_Name, $"About to call MoveAbsolute method")
                     m_Rotator.MoveAbsolute(p_Value)
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Completed absolute move")
                 Case RotatorPropertyMethod.MoveMechanical
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Starting mechanical move")
                     l_RotatorStartPosition = 0.0
+                    LogCallToDriver(p_Name, $"About to call MoveMechanical method")
                     m_Rotator.MoveMechanical(p_Value)
                     LogMsg("RotatorMoveTest", MessageLevel.msgDebug, "Completed mechanical move")
                 Case Else
@@ -501,6 +528,7 @@ Friend Class RotatorTester
                 Select Case p_type
                     Case RotatorPropertyMethod.Move
                         If canReadPosition Then
+                            LogCallToDriver(p_Name, $"About to get Position property")
                             LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous move successful - moved by " & p_Value & " degrees to: " & m_Rotator.Position & " degrees")
                         Else
                             LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous move successful")
@@ -508,6 +536,7 @@ Friend Class RotatorTester
                     Case RotatorPropertyMethod.MoveMechanical
                     Case RotatorPropertyMethod.MoveAbsolute
                         If canReadPosition Then
+                            LogCallToDriver(p_Name, $"About to get Position property")
                             LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous move successful to: " & m_Rotator.Position & " degrees")
                         Else
                             LogMsg(p_Name, MessageLevel.msgOK, "Asynchronous move successful")
@@ -515,6 +544,7 @@ Friend Class RotatorTester
                 End Select
             Else 'Synchronous move
                 If canReadPosition Then
+                    LogCallToDriver(p_Name, $"About to get Position property")
                     LogMsg(p_Name, MessageLevel.msgOK, "Synchronous move successful to: " & m_Rotator.Position & " degrees")
                 Else
                     LogMsg(p_Name, MessageLevel.msgOK, "Synchronous move successful")
@@ -528,8 +558,10 @@ Friend Class RotatorTester
                 Else
                     l_OKLimit = ROTATOR_OK_TOLERANCE
                 End If
+                LogCallToDriver(p_Name, $"About to get Position property")
                 LogMsg(p_Name & "1", MessageLevel.msgDebug, "Position, value, start, tolerance: " & m_Rotator.Position.ToString("0.000") & " " & p_Value.ToString("0.000") & " " & l_RotatorStartPosition.ToString("0.000") & " " & l_OKLimit.ToString("0.000"))
 
+                LogCallToDriver(p_Name, $"About to get Position property")
                 rotatorPosition = m_Rotator.Position
                 If g_InterfaceVersion < 3 Then ' Interface V1 and V2 behaviour
                     If rotatorPosition < 0.0 Then LogMsg(p_Name, MessageLevel.msgInfo, "Rotator supports angles < 0.0")
@@ -540,8 +572,10 @@ Friend Class RotatorTester
 
                 ' Get the relevant position value
                 If p_type = RotatorPropertyMethod.MoveMechanical Then ' Use the MechanicalPosition property
+                    LogCallToDriver(p_Name, $"About to get MechanicalPosition property")
                     rotatorPosition = m_Rotator.MechanicalPosition
                 Else ' Use the Position property for all other methods
+                    LogCallToDriver(p_Name, $"About to get Position property")
                     rotatorPosition = m_Rotator.Position
                 End If
                 ' Calculate the position offset from the required position
@@ -592,10 +626,13 @@ Friend Class RotatorTester
         LogMsg("RotatorWait", MessageLevel.msgDebug, "Entered RotatorWait")
         If m_CanReadIsMoving Then 'Can read IsMoving so test for asynchronous and synchronous behaviour
             LogMsg("RotatorWait", MessageLevel.msgDebug, "Can Read IsMoving OK")
+            LogCallToDriver(p_Name, $"About to get Ismoving property")
             If m_Rotator.IsMoving Then
                 LogMsg("RotatorWait", MessageLevel.msgDebug, "Rotator is moving, waiting for move to complete")
                 Status(StatusType.staTest, p_Name & " test")
                 Status(StatusType.staAction, "Waiting for move to complete")
+
+                LogCallToDriver(p_Name, $"About to get Position and Ismoving properties repeatedly")
                 Do
                     WaitFor(500)
                     If canReadPosition Then 'Only do this if position doesn't generate an exception
@@ -623,6 +660,7 @@ Friend Class RotatorTester
     Private Sub RelativeMoveTest(ByVal p_RelativeStepSize As Single)
         Dim l_Target As Single
         If canReadPosition Then
+            LogCallToDriver("Move", $"About to get Position property")
             If m_Rotator.Position < p_RelativeStepSize Then 'Set a value that should succeed OK
                 l_Target = p_RelativeStepSize
             Else

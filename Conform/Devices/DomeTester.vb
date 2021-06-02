@@ -125,8 +125,10 @@ Friend Class DomeTester
             l_IDome = CType(l_DeviceObject, ASCOM.Interface.IDome)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver through interface IDome")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IDome.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface IDome")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IDome.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface IDome")
@@ -147,8 +149,10 @@ Friend Class DomeTester
             l_IDome = CType(l_DeviceObject, ASCOM.DeviceInterface.IDomeV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver through interface IDomeV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IDome.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface IDomeV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IDome.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface IDomeV2")
@@ -171,8 +175,10 @@ Friend Class DomeTester
             l_DriverAccessDome = New ASCOM.DriverAccess.Dome(g_DomeProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessDome.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessDome.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -212,9 +218,11 @@ Friend Class DomeTester
     End Sub
     Overrides Property Connected() As Boolean
         Get
+            LogCallToDriver("Connected", "About to get Connected property")
             Connected = m_Dome.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             m_Dome.Connected = value
             g_Stop = False
         End Set
@@ -232,8 +240,10 @@ Friend Class DomeTester
         If g_DomeProgID.ToUpper = "DOMESIM.DOME" Then
             l_VString = ""
             Try
+                LogCallToDriver("PreRunCheck", "About to get DriverInfo property")
                 l_VStringPtr = InStr(m_Dome.DriverInfo.ToUpper, "ASCOM DOME SIMULATOR ") 'Point at the start of the version string
                 If l_VStringPtr > 0 Then 'There is a version string so read what it is
+                    LogCallToDriver("PreRunCheck", "About to get DriverInfo property")
                     l_VString = Mid(m_Dome.DriverInfo.ToUpper, l_VStringPtr + 21) 'Get the version string
                     l_VStringPtr = InStr(l_VString, ".")
                     If l_VStringPtr > 1 Then 'there is a first version number part
@@ -270,6 +280,7 @@ Friend Class DomeTester
         If Not TestStop() Then
             'Get into a consistent state
             Try
+                LogCallToDriver("PreRunCheck", "About to get Slewing property")
                 m_Slewing = m_Dome.Slewing ' Try to read the Slewing property
                 If m_Slewing Then
                     LogMsg("DomeSafety", MessageLevel.msgInfo, $"The Slewing property is true at device start-up. This could be by design or possibly Slewing logic is inverted?") ' Display a message if slewing is True
@@ -282,14 +293,19 @@ Friend Class DomeTester
             If FrmConformMain.chkDomeShutter.Checked Then
                 LogMsg("DomeSafety", MessageLevel.msgComment, "Attempting to open shutter as some tests may fail if it is closed...")
                 Try
+                    LogCallToDriver("PreRunCheck", "About to call OpenShutter")
                     m_Dome.OpenShutter()
                     Try : DomeShutterWait(ShutterState.shutterOpen) : Catch : End Try
                     If TestStop() Then 'Stop button pressed
+                        LogCallToDriver("PreRunCheck", "About to get ShutterStatus property")
                         LogMsg("DomeSafety", MessageLevel.msgComment, "Stop button pressed, further testing abandoned, shutter status: " & m_Dome.ShutterStatus.ToString)
                     Else 'Got to end of test
+                        LogCallToDriver("PreRunCheck", "About to get ShutterStatus property")
                         If m_Dome.ShutterStatus = ShutterState.shutterOpen Then
+                            LogCallToDriver("PreRunCheck", "About to get ShutterStatus property")
                             LogMsg("DomeSafety", MessageLevel.msgOK, "Shutter status: " & m_Dome.ShutterStatus.ToString)
                         Else
+                            LogCallToDriver("PreRunCheck", "About to get ShutterStatus property")
                             LogMsg("DomeSafety", MessageLevel.msgWarning, "Shutter status: " & m_Dome.ShutterStatus.ToString)
                         End If
                     End If
@@ -357,6 +373,7 @@ Friend Class DomeTester
             If m_CanSetShutter Then
                 LogMsg("DomeSafety", MessageLevel.msgInfo, "Attempting to close shutter...")
                 Try 'Close shutter
+                    LogCallToDriver("DomeSafety", "About to call CloseShutter")
                     m_Dome.CloseShutter()
                     DomeShutterWait(ShutterState.shutterClosed)
                     LogMsg("DomeSafety", MessageLevel.msgOK, "Shutter successfully closed")
@@ -374,6 +391,7 @@ Friend Class DomeTester
         If m_CanPark Then 'Can park the dome
             LogMsg("DomeSafety", MessageLevel.msgInfo, "Attempting to park dome...")
             Try 'Park
+                LogCallToDriver("DomeSafety", "About to call Park")
                 m_Dome.Park()
                 DomeWaitForSlew(g_Settings.DomeAzimuthTimeout)
                 LogMsg("DomeSafety", MessageLevel.msgOK, "Dome successfully parked")
@@ -392,9 +410,11 @@ Friend Class DomeTester
         If Not FrmConformMain.chkDomeShutter.Checked Then LogMsgInfo("SlewToAltitude", "You have configured Conform not to open the shutter so the following slew may fail.")
 
         Status(StatusType.staAction, "Slew to " & p_Altitude & " degrees")
+        LogCallToDriver(p_Name, "About to call SlewToAltitude")
         m_Dome.SlewToAltitude(p_Altitude)
         If m_CanReadSlewing Then 'Can read slewing so make sure dome is at rest
             l_StartTime = Now
+            LogCallToDriver(p_Name, "About to get Slewing property")
             If m_Dome.Slewing Then 'Asynchronous slew
                 DomeWaitForSlew(g_Settings.DomeAltitudeTimeout) : If TestStop() Then Exit Sub
                 m_AsyncSlewAltitude = True
@@ -412,12 +432,15 @@ Friend Class DomeTester
         Status(StatusType.staAction, "Slew to " & p_Azimuth & " degrees")
         If p_Azimuth >= 0.0 And p_Azimuth <= 359.9999999 Then 'Only check for successful operation on legal values
             m_CanSlewToAzimuth = False
+            LogCallToDriver(p_Name, "About to call SlewToAzimuth")
             m_Dome.SlewToAzimuth(p_Azimuth)
             m_CanSlewToAzimuth = True 'Command is supported and didn't generate an exception
         Else
+            LogCallToDriver(p_Name, "About to call SlewToAzimuth")
             m_Dome.SlewToAzimuth(p_Azimuth)
         End If
         If m_CanReadSlewing Then 'Can read slewing so make sure dome is at rest
+            LogCallToDriver(p_Name, "About to get Slewing property")
             If m_Dome.Slewing Then 'Asynchronous slew
                 DomeWaitForSlew(g_Settings.DomeAzimuthTimeout) : If TestStop() Then Exit Sub
                 m_AsyncSlewAzimuth = True
@@ -451,63 +474,77 @@ Friend Class DomeTester
             Select Case p_Type
                 'Properties
                 Case DomePropertyMethod.CanFindHome
+                    LogCallToDriver(p_Name, "About to get CanFindHome property")
                     m_CanFindHome = m_Dome.CanFindHome
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanFindHome.ToString)
                 Case DomePropertyMethod.CanPark
+                    LogCallToDriver(p_Name, "About to get CanPark property")
                     m_CanPark = m_Dome.CanPark
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanPark.ToString)
                 Case DomePropertyMethod.CanSetAltitude
+                    LogCallToDriver(p_Name, "About to get CanSetAltitude property")
                     m_CanSetAltitude = m_Dome.CanSetAltitude
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSetAltitude.ToString)
                 Case DomePropertyMethod.CanSetAzimuth
+                    LogCallToDriver(p_Name, "About to get CanSetAzimuth property")
                     m_CanSetAzimuth = m_Dome.CanSetAzimuth
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSetAzimuth.ToString)
                 Case DomePropertyMethod.CanSetPark
+                    LogCallToDriver(p_Name, "About to get CanSetPark property")
                     m_CanSetPark = m_Dome.CanSetPark
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSetPark.ToString)
                 Case DomePropertyMethod.CanSetShutter
+                    LogCallToDriver(p_Name, "About to get CanSetShutter property")
                     m_CanSetShutter = m_Dome.CanSetShutter
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSetShutter.ToString)
                 Case DomePropertyMethod.CanSlave
+                    LogCallToDriver(p_Name, "About to get CanSlave property")
                     m_CanSlave = m_Dome.CanSlave
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSlave.ToString)
                 Case DomePropertyMethod.CanSyncAzimuth
+                    LogCallToDriver(p_Name, "About to get CanSyncAzimuth property")
                     m_CanSyncAzimuth = m_Dome.CanSyncAzimuth
                     LogMsg(p_Name, MessageLevel.msgOK, m_CanSyncAzimuth.ToString)
                 Case DomePropertyMethod.Connected
+                    LogCallToDriver(p_Name, "About to get Connected property")
                     m_Connected = m_Dome.Connected
                     LogMsg(p_Name, MessageLevel.msgOK, m_Connected.ToString)
                 Case DomePropertyMethod.Description
-                    m_Description = m_Dome.Description
-                    LogMsg(p_Name, MessageLevel.msgOK, m_Description.ToString)
-                Case DomePropertyMethod.Description
+                    LogCallToDriver(p_Name, "About to get Description property")
                     m_Description = m_Dome.Description
                     LogMsg(p_Name, MessageLevel.msgOK, m_Description.ToString)
                 Case DomePropertyMethod.DriverInfo
+                    LogCallToDriver(p_Name, "About to get DriverInfo property")
                     m_DriverINfo = m_Dome.DriverInfo
                     LogMsg(p_Name, MessageLevel.msgOK, m_DriverINfo.ToString)
                 Case DomePropertyMethod.InterfaceVersion
+                    LogCallToDriver(p_Name, "About to get InterfaceVersion property")
                     m_InterfaceVersion = m_Dome.InterfaceVersion
                     LogMsg(p_Name, MessageLevel.msgOK, m_InterfaceVersion.ToString)
                 Case DomePropertyMethod.Name
+                    LogCallToDriver(p_Name, "About to get Name property")
                     m_Name = m_Dome.Name
                     LogMsg(p_Name, MessageLevel.msgOK, m_Name.ToString)
                 Case DomePropertyMethod.SlavedRead
                     m_CanReadSlaved = False
+                    LogCallToDriver(p_Name, "About to get Slaved property")
                     m_Slaved = m_Dome.Slaved
                     m_CanReadSlaved = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_Slaved.ToString)
                 Case DomePropertyMethod.Slewing
                     m_CanReadSlewing = False
+                    LogCallToDriver(p_Name, "About to get Slewing property")
                     m_Slewing = m_Dome.Slewing
                     m_CanReadSlewing = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_Slewing.ToString)
 
                     'Methods
                 Case DomePropertyMethod.AbortSlew
+                    LogCallToDriver(p_Name, "About to call AbortSlew method")
                     m_Dome.AbortSlew()
                     'Confirm that slaved is false
                     If m_CanReadSlaved Then 'Check it is false
+                        LogCallToDriver(p_Name, "About to get Slaved property")
                         If m_Dome.Slaved Then 'Should not be showing slaved after AbortSlew
                             LogMsg("AbortSlew", MessageLevel.msgError, "Slaved property Is true after AbortSlew")
                         Else ' Not slaved so fine
@@ -530,26 +567,31 @@ Friend Class DomeTester
                 'Properties
                 Case DomePropertyMethod.Altitude
                     m_CanReadAltitude = False
+                    LogCallToDriver(p_Name, "About to get Altitude property")
                     m_Altitude = m_Dome.Altitude
                     m_CanReadAltitude = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_Altitude.ToString)
                 Case DomePropertyMethod.AtHome
                     m_CanReadAtHome = False
+                    LogCallToDriver(p_Name, "About to get AtHome property")
                     m_AtHome = m_Dome.AtHome
                     m_CanReadAtHome = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_AtHome.ToString)
                 Case DomePropertyMethod.AtPark
                     m_CanReadAtPark = False
+                    LogCallToDriver(p_Name, "About to get AtPark property")
                     m_AtPark = m_Dome.AtPark
                     m_CanReadAtPark = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_AtPark.ToString)
                 Case DomePropertyMethod.Azimuth
                     m_CanReadAzimuth = False
+                    LogCallToDriver(p_Name, "About to get Azimuth property")
                     m_Azimuth = m_Dome.Azimuth
                     m_CanReadAzimuth = True
                     LogMsg(p_Name, MessageLevel.msgOK, m_Azimuth.ToString)
                 Case DomePropertyMethod.ShutterStatus
                     m_CanReadShutterStatus = False
+                    LogCallToDriver(p_Name, "About to get ShutterStatus property")
                     m_ShutterStatus = m_Dome.ShutterStatus
                     m_CanReadShutterStatus = True
                     m_ShutterStatus = CType(m_ShutterStatus, ShutterState) 'In release mode only an integer value is returned
@@ -558,18 +600,23 @@ Friend Class DomeTester
                     If m_CanSlave Then 'Write test should succeed
                         If m_CanReadSlaved Then 'Can read so worth testing write
                             If m_Slaved Then 'We are slaved so try and turn it off
+                                LogCallToDriver(p_Name, "About to set Slaved property")
                                 m_Dome.Slaved = False
                             Else 'Not slaved so try and turn on
+                                LogCallToDriver(p_Name, "About to set Slaved property")
                                 m_Dome.Slaved = True
                             End If
+                            LogCallToDriver(p_Name, "About to set Slaved property")
                             m_Dome.Slaved = m_Slaved 'Restore original value
                             LogMsg("Slaved Write", MessageLevel.msgOK, "Slave state changed successfully")
                         Else 'Can't read so skip test
                             LogMsg("Slaved Write", MessageLevel.msgInfo, "Test skipped since Slaved property can't be read")
                         End If
                     Else 'Slaved write should generate an exception
+                        LogCallToDriver(p_Name, "About to set Slaved property")
                         m_Dome.Slaved = True
                         LogMsg(p_Name, MessageLevel.msgError, "CanSlave is false but setting Slaved true did not raise an exception")
+                        LogCallToDriver(p_Name, "About to set Slaved property")
                         m_Dome.Slaved = False 'Unslave to continue tests
                     End If
                     'Methods
@@ -586,12 +633,15 @@ Friend Class DomeTester
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetShutter is false but CloseShutter did not raise an exception")
                     End If
                 Case DomePropertyMethod.CommandBlind
+                    LogCallToDriver(p_Name, "About to call CommandBlind method")
                     m_Dome.CommandBlind("") 'm_Dome.CommandBlind("", True)
                     LogMsg(p_Name, MessageLevel.msgOK, "Null string successfully sent")
                 Case DomePropertyMethod.CommandBool
+                    LogCallToDriver(p_Name, "About to call CommandBool method")
                     m_Dome.CommandBool("") 'm_Dome.CommandBool("", True)
                     LogMsg(p_Name, MessageLevel.msgOK, "Null string successfully sent")
                 Case DomePropertyMethod.CommandString
+                    LogCallToDriver(p_Name, "About to call CommandString method")
                     m_Dome.CommandString("") 'm_Dome.CommandString("", True)
                     LogMsg(p_Name, MessageLevel.msgOK, "Null string successfully sent")
                 Case DomePropertyMethod.FindHome
@@ -599,11 +649,14 @@ Friend Class DomeTester
                         Status(StatusType.staTest, p_Name)
                         Status(StatusType.staAction, "Waiting for movement to stop")
                         Try
+                            LogCallToDriver(p_Name, "About to call FindHome method")
                             m_Dome.FindHome()
                             If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
+                                LogCallToDriver(p_Name, "About to get Slaved Property")
                                 If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Home did not raise an exception")
                             End If
                             If m_CanReadSlewing Then 'Make sure dome is at rest
+                                LogCallToDriver(p_Name, "About to get Slewing property repeatedly")
                                 Do
                                     WaitFor(SLEEP_TIME)
                                     Application.DoEvents()
@@ -612,6 +665,7 @@ Friend Class DomeTester
                             End If
                             If Not TestStop() Then 'Only do remaining tests if stop hasn't been pressed
                                 If m_CanReadAtHome Then 'Can read AtHome so confirm that it 
+                                    LogCallToDriver(p_Name, "About to get AtHome property")
                                     If m_Dome.AtHome Then 'Dome shows as homed - hooray!
                                         LogMsg(p_Name, MessageLevel.msgOK, "Dome homed successfully")
                                     Else 'Home completed but apparently dome isn't homed!
@@ -627,6 +681,7 @@ Friend Class DomeTester
                             Call DomeStabliisationWait()
                         End Try
                     Else 'CanFindHome is false so FindHome should throw a not implemented exception
+                        LogCallToDriver(p_Name, "About to call FindHome method")
                         m_Dome.FindHome()
                         LogMsg(p_Name, MessageLevel.msgError, "CanFindHome is false but FindHome did not throw an exception")
                     End If
@@ -639,6 +694,7 @@ Friend Class DomeTester
                             HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetShutter is True")
                         End Try
                     Else 'OpenShutter should throw an exception
+                        LogCallToDriver(p_Name, "About to call OpenShutter method")
                         m_Dome.OpenShutter()
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetShutter is false but OpenShutter did not raise an exception")
                     End If
@@ -648,11 +704,14 @@ Friend Class DomeTester
                         Status(StatusType.staTest, p_Name)
                         Status(StatusType.staAction, "Waiting for movement to stop")
                         Try
+                            LogCallToDriver(p_Name, "About to call Park method")
                             m_Dome.Park()
                             If m_CanReadSlaved Then 'Check whether slaved is true, if it is then Park  should have raised an exception and didn't
+                                LogCallToDriver(p_Name, "About to get Slaved property")
                                 If m_Dome.Slaved Then LogMsg(p_Name, MessageLevel.msgError, "Slaved is true but Park did not raise an exception")
                             End If
                             If m_CanReadSlewing Then 'Make sure dome is at rest
+                                LogCallToDriver(p_Name, "About to get Slewing property repeatedly")
                                 Do
                                     WaitFor(SLEEP_TIME)
                                     Application.DoEvents()
@@ -661,6 +720,7 @@ Friend Class DomeTester
                             End If
                             If Not TestStop() Then 'Only do remain tests if stop hasn't been pressed
                                 If m_CanReadAtPark Then 'Can read at park so confirm that it 
+                                    LogCallToDriver(p_Name, "About to get AtPark property")
                                     If m_Dome.AtPark Then 'Dome shows as parked - hooray!
                                         LogMsg(p_Name, MessageLevel.msgOK, "Dome parked successfully")
                                     Else 'Park completed but apparently dome isn't parked!
@@ -676,18 +736,21 @@ Friend Class DomeTester
                             Call DomeStabliisationWait()
                         End Try
                     Else 'Park command should throw a not implemented exception
+                        LogCallToDriver(p_Name, "About to call Park method")
                         m_Dome.Park()
                         LogMsg(p_Name, MessageLevel.msgError, "CanPark is false but Park did not raise an exception")
                     End If
                 Case DomePropertyMethod.SetPark
                     If m_CanSetPark Then 'Should be able to set park so try it
                         Try
+                            LogCallToDriver(p_Name, "About to call SetPark method")
                             m_Dome.SetPark()
                             LogMsg(p_Name, MessageLevel.msgOK, "SetPark issued OK")
                         Catch ex As Exception
                             HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, "CanSetPark is True")
                         End Try
                     Else 'Can't set park so should raise an error
+                        LogCallToDriver(p_Name, "About to call SetPark method")
                         m_Dome.SetPark()
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetPath is false but SetPath did not throw an exception")
                     End If
@@ -722,6 +785,7 @@ Friend Class DomeTester
                             End Try
                         End If
                     Else 'SlewToAltitude should raise an exception
+                        LogCallToDriver(p_Name, "About to call SlewToAltitude method")
                         m_Dome.SlewToAltitude(45.0)
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetAltitude is false but SlewToAltitude did not raise an exception")
                     End If
@@ -760,6 +824,7 @@ Friend Class DomeTester
                             If TestStop() Then Exit Sub
                         End If
                     Else 'SlewToAzimuth should throw an exception
+                        LogCallToDriver(p_Name, "About to call SlewToAzimuth method")
                         m_Dome.SlewToAzimuth(45.0)
                         LogMsg(p_Name, MessageLevel.msgError, "CanSetAzimuth is false but SlewToAzimuth did not throw an exception")
                     End If
@@ -767,6 +832,7 @@ Friend Class DomeTester
                     If m_CanSyncAzimuth Then 'Can sync azimuth so test the command
                         If m_CanSlewToAzimuth Then 'SlewToAzimuth command appears to work so use it
                             If m_CanReadAzimuth Then 'Can also read azimuth so test sync to a new azimuth
+                                LogCallToDriver(p_Name, "About to get Azimuth property")
                                 l_OriginalAzimuth = m_Dome.Azimuth
                                 If l_OriginalAzimuth > 300.0 Then ' Choose a smaller azimuth
                                     l_NewAzimuth = l_OriginalAzimuth - DOME_SYNC_OFFSET
@@ -788,14 +854,17 @@ Friend Class DomeTester
                                         LogMsg(p_Name, MessageLevel.msgIssue, "Dome azimuth was " & Math.Abs(l_NewAzimuth - m_Dome.Azimuth) & " degrees away from expected value")
                                 End Select
                                 'Now try and restore original value
+                                LogCallToDriver(p_Name, "About to call SyncToAzimuth method")
                                 m_Dome.SyncToAzimuth(l_OriginalAzimuth)
                             Else 'Can't read azimuth so can only test that command completes
+                                LogCallToDriver(p_Name, "About to call SyncToAzimuth method")
                                 m_Dome.SyncToAzimuth(45.0) 'Sync to an arbitrary direction
                                 LogMsg(p_Name, MessageLevel.msgOK, "Dome successfully synced to 45 degrees but unable to read azimuth to confirm this")
                             End If
 
                             'Now test sync to illegal values
                             Try
+                                LogCallToDriver(p_Name, "About to call SyncToAzimuth method")
                                 m_Dome.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_LOW)
                                 LogMsg(p_Name, MessageLevel.msgError, "No exception generated when syncing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_LOW & " degrees")
                             Catch ex As Exception
@@ -803,6 +872,7 @@ Friend Class DomeTester
                             End Try
                             If TestStop() Then Exit Sub
                             Try
+                                LogCallToDriver(p_Name, "About to call SyncToAzimuth method")
                                 m_Dome.SyncToAzimuth(DOME_ILLEGAL_AZIMUTH_HIGH)
                                 LogMsg(p_Name, MessageLevel.msgError, "No exception generated when syncing to illegal azimuth " & DOME_ILLEGAL_AZIMUTH_HIGH & " degrees")
                             Catch ex As Exception
@@ -813,6 +883,7 @@ Friend Class DomeTester
                             LogMsg(p_Name, MessageLevel.msgInfo, "SyncToAzimuth test skipped since SlewToAzimuth throws an exception")
                         End If
                     Else 'Can not sync azimuth so SyncAzimuth should raise an exception
+                        LogCallToDriver(p_Name, "About to call SyncToAzimuth method")
                         m_Dome.SyncToAzimuth(45.0)
                         LogMsg(p_Name, MessageLevel.msgError, "CanSyncAzimuth is false but SyncToAzimuth did not raise an exception")
                     End If
@@ -832,6 +903,7 @@ Friend Class DomeTester
         If FrmConformMain.chkDomeShutter.Checked Then 'Shutter tests are allowed
             Status(StatusType.staTest, p_Name)
             If m_CanReadShutterStatus Then 'Can read shutter status so use it
+                LogCallToDriver(p_Name, "About to get ShutterStatus property")
                 l_ShutterState = CType(m_Dome.ShutterStatus, ShutterState)
 
                 'Make sure we are in the required state to start the test
@@ -841,6 +913,7 @@ Friend Class DomeTester
                             'Wrong state, get to the required state
                             Status(StatusType.staAction, "Opening shutter ready for close test")
                             LogMsg(p_Name, MessageLevel.msgDebug, "Opening shutter ready for close test")
+                            LogCallToDriver(p_Name, "About to call OpenShutter method")
                             m_Dome.OpenShutter()
                             If Not DomeShutterWait(ShutterState.shutterOpen) Then Exit Sub 'Wait for shutter to open
                             Call DomeStabliisationWait()
@@ -854,6 +927,7 @@ Friend Class DomeTester
                             If Not DomeShutterWait(ShutterState.shutterClosed) Then Exit Sub 'Wait for shutter to close
                             LogMsg(p_Name, MessageLevel.msgDebug, "Opening shutter ready for close test")
                             Status(StatusType.staAction, "Opening shutter ready for close test")
+                            LogCallToDriver(p_Name, "About to call OpenShutter method")
                             m_Dome.OpenShutter() 'Then open it
                             If Not DomeShutterWait(ShutterState.shutterOpen) Then Exit Sub
                             Call DomeStabliisationWait()
@@ -875,6 +949,7 @@ Friend Class DomeTester
                             If Not DomeShutterWait(ShutterState.shutterOpen) Then Exit Sub 'Wait for shutter to open
                             LogMsg(p_Name, MessageLevel.msgDebug, "Closing shutter ready for open test")
                             Status(StatusType.staAction, "Closing shutter ready for open test")
+                            LogCallToDriver(p_Name, "About to call CloseShutter method")
                             m_Dome.CloseShutter() 'Then close it
                             If Not DomeShutterWait(ShutterState.shutterClosed) Then Exit Sub
                             Call DomeStabliisationWait()
@@ -894,6 +969,7 @@ Friend Class DomeTester
                             'Wrong state, get to the required state
                             Status(StatusType.staAction, "Closing shutter ready for open  test")
                             LogMsg(p_Name, MessageLevel.msgDebug, "Closing shutter ready for open test")
+                            LogCallToDriver(p_Name, "About to call CloseShutter method")
                             m_Dome.CloseShutter()
                             If Not DomeShutterWait(ShutterState.shutterClosed) Then Exit Sub 'Wait for shutter to open
                             Call DomeStabliisationWait()
@@ -906,12 +982,15 @@ Friend Class DomeTester
                 If p_RequiredShutterState = ShutterState.shutterClosed Then 'Testing ShutterClose
                     'Shutter is now open so close it
                     Status(StatusType.staAction, "Closing shutter")
+                    LogCallToDriver(p_Name, "About to call CloseShutter method")
                     m_Dome.CloseShutter()
                     Status(StatusType.staAction, "Waiting for shutter to close")
                     LogMsg(p_Name, MessageLevel.msgDebug, "Waiting for shutter to close")
                     If Not DomeShutterWait(ShutterState.shutterClosed) Then
+                        LogCallToDriver(p_Name, "About to get ShutterStatus property")
                         l_ShutterState = m_Dome.ShutterStatus
                         l_ShutterState = CType(l_ShutterState, ShutterState)
+                        LogCallToDriver(p_Name, "About to get ShutterStatus property")
                         LogMsg(p_Name, MessageLevel.msgError, "Unable to close shutter - ShutterStatus: " & m_Dome.ShutterStatus.ToString)
                         Exit Sub
                     Else
@@ -924,8 +1003,10 @@ Friend Class DomeTester
                     Status(StatusType.staAction, "Waiting for shutter to open")
                     LogMsg(p_Name, MessageLevel.msgDebug, "Waiting for shutter to open")
                     If Not DomeShutterWait(ShutterState.shutterOpen) Then
+                        LogCallToDriver(p_Name, "About to get ShutterStatus property")
                         l_ShutterState = m_Dome.ShutterStatus
                         l_ShutterState = CType(l_ShutterState, ShutterState)
+                        LogCallToDriver(p_Name, "About to get ShutterStatus property")
                         LogMsg(p_Name, MessageLevel.msgError, "Unable to open shutter - ShutterStatus: " & m_Dome.ShutterStatus.ToString)
                         Exit Sub
                     Else
@@ -938,10 +1019,12 @@ Friend Class DomeTester
                 LogMsg(p_Name, MessageLevel.msgDebug, "Can't read shutter status!")
                 If p_RequiredShutterState = ShutterState.shutterClosed Then 'Testing ShutterClose
                     'Just issue command to see if it doesn't generate an error
+                    LogCallToDriver(p_Name, "About to call CloseShutter method")
                     m_Dome.CloseShutter()
                     Call DomeStabliisationWait()
                 Else 'Testing ShutterOpen
                     'Just issue command to see if it doesn't generate an error
+                    LogCallToDriver(p_Name, "About to call OpenShutter method")
                     m_Dome.OpenShutter()
                     Call DomeStabliisationWait()
                 End If
@@ -962,6 +1045,7 @@ Friend Class DomeTester
         DomeShutterWait = False
         l_StartTime = Now
         Try
+            LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property repeatedly")
             Do
                 WaitFor(SLEEP_TIME)
                 Application.DoEvents()
@@ -969,6 +1053,7 @@ Friend Class DomeTester
                 l_ShutterState = CType(l_ShutterState, ShutterState)
                 Status(StatusType.staStatus, "Shutter State: " & l_ShutterState.ToString & " Timeout: " & Now.Subtract(l_StartTime).Seconds & "/" & g_Settings.DomeShutterTimeout)
             Loop Until (l_ShutterState = p_RequiredStatus) Or TestStop() Or (Now.Subtract(l_StartTime).TotalSeconds > g_Settings.DomeShutterTimeout)
+            LogCallToDriver("DomeShutterWait", "About to get ShutterStatus property")
             If (m_Dome.ShutterStatus = p_RequiredStatus) Then DomeShutterWait = True ' All worked so return True
             If (Now.Subtract(l_StartTime).TotalSeconds > g_Settings.DomeShutterTimeout) Then ' We timed out so give error message
                 LogMsg("DomeShutterWait", MessageLevel.msgError, "Timed out waiting for shutter to reach state: " & p_RequiredStatus.ToString & ", consider increasing the timeout setting in Options / Conformance Options")

@@ -202,8 +202,10 @@ Friend Class CameraTester
             l_ICamera = CType(l_DeviceObject, ASCOM.Interface.ICamera)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface ICamera")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ICamera")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface ICamera")
@@ -225,8 +227,10 @@ Friend Class CameraTester
             l_ICamera = CType(l_DeviceObject, ASCOM.DeviceInterface.ICameraV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface ICameraV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ICameraV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ICamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface ICameraV2")
@@ -248,8 +252,10 @@ Friend Class CameraTester
             l_DriverAccessCamera = New ASCOM.DriverAccess.Camera(g_CameraProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessCamera.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessCamera.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)

@@ -110,8 +110,10 @@
             l_ISwitch = CType(l_DeviceObject, ASCOM.Interface.ISwitch)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver through interface ISwitch")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISwitch.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ISwitch")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISwitch.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgDebug, "Connected Exception: " & ex.ToString)
@@ -134,8 +136,10 @@
             l_ISwitch = CType(l_DeviceObject, ASCOM.DeviceInterface.ISwitchV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver through interface ISwitchV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISwitch.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface ISwitchV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISwitch.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface ISwitchV2")
@@ -159,8 +163,10 @@
             l_DriverAccessSwitch = New ASCOM.DriverAccess.Switch(g_SwitchProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessSwitch.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessSwitch.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -198,11 +204,12 @@
     End Sub
     Overrides Property Connected() As Boolean
         Get
-            Connected = MyBase.Connected
+            LogCallToDriver("Connected", "About to get Connected property")
+            Return m_Switch.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to get Connected property")
             m_Switch.Connected = value
-            MyBase.Connected = value
         End Set
     End Property
     Overrides Sub CheckCommonMethods()
@@ -236,7 +243,7 @@
                         l_GetSwitchOK = False
                         l_SetSwitchOK = False
                         Try 'Read switch state
-                            If g_Settings.DisplayMethodCalls Then LogMsg("GetSwitch " & i, MessageLevel.msgComment, String.Format("About to get switch {0}", i))
+                            LogCallToDriver("GetSwitch " & i, $"About to call GetSwitch({i}) method")
                             l_GetSwitchOriginal = m_Switch.GetSwitch(i)
                             LogMsg("GetSwitch " & i, MessageLevel.msgOK, "Found switch, state: " & l_GetSwitchOriginal.ToString)
                             l_GetSwitchOK = True
@@ -255,13 +262,15 @@
                         End Try
 
                         Try 'Now try to write the value
-                            If g_Settings.DisplayMethodCalls Then LogMsg("SetSwitch " & i, MessageLevel.msgComment, String.Format("About to set switch {0}", i))
+                            LogCallToDriver("SetSwitch " & i, $"About to call SetSwitch({i})")
                             m_Switch.SetSwitch(i, Not l_GetSwitchOriginal) ' Swap the switch state
                             l_SetSwitchOK = True
                             If l_GetSwitchOK Then
+                                LogCallToDriver("SetSwitch", $"About to call GetSwitch({i}) method")
                                 l_NewSwitchState = m_Switch.GetSwitch(i) 'Read the new switch state to confirm that value did change
                                 If l_NewSwitchState = Not l_GetSwitchOriginal Then 'State did change, test successful
                                     LogMsg("SetSwitch " & i, MessageLevel.msgOK, "Switch correctly changed state")
+                                    LogCallToDriver("SetSwitch", "About to call SetSwitch method")
                                     m_Switch.SetSwitch(i, l_GetSwitchOriginal) 'Now put switch back to original state
                                 Else 'State didn't change so error
                                     LogMsg("SetSwitch " & i, MessageLevel.msgIssue, "Switch did not change state, currently it is " & l_NewSwitchState.ToString)

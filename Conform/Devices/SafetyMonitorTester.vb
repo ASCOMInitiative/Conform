@@ -81,8 +81,10 @@ Friend Class SafetyMonitorTester
 
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using early binding to ISafetyMonitor interface")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISafetyMonitor.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using early binding to ISafetyMonitor interface")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_ISafetyMonitor.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using early binding to ISafetyMonitor interface: " & ex.Message)
@@ -105,8 +107,10 @@ Friend Class SafetyMonitorTester
             l_DriverAccessSafetyMonitor = New ASCOM.DriverAccess.SafetyMonitor(g_SafetyMonitorProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessSafetyMonitor.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessSafetyMonitor.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -144,6 +148,7 @@ Friend Class SafetyMonitorTester
     Public Overrides Sub PreConnectChecks()
         'Confirm that key properties are false when not connected
         Try
+            LogCallToDriver("IsSafe", "About to get IsSafe property")
             m_IsSafe = m_SafetyMonitor.IsSafe
             If Not m_IsSafe Then
                 LogMsg("IsSafe", MessageLevel.msgOK, "Reports false before connection")
@@ -156,9 +161,11 @@ Friend Class SafetyMonitorTester
     End Sub
     Overrides Property Connected() As Boolean
         Get
+            LogCallToDriver("Connected", "About to get Connected property")
             Connected = m_SafetyMonitor.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             m_SafetyMonitor.Connected = value
         End Set
     End Property
@@ -183,6 +190,7 @@ Friend Class SafetyMonitorTester
             Select Case p_Type
                 Case RequiredProperty.propIsSafe
                     m_IsSafe = m_SafetyMonitor.IsSafe
+                    LogCallToDriver("IsSafe", "About to get IsSafe property")
                     LogMsg(p_Name, MessageLevel.msgOK, m_IsSafe.ToString)
                 Case Else
                     LogMsg(p_Name, MessageLevel.msgError, "RequiredPropertiesTest: Unknown test type " & p_Type.ToString)

@@ -71,8 +71,10 @@
             l_IFilterWheel = CType(l_DeviceObject, ASCOM.Interface.IFilterWheel)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface IFilterWheel")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IFilterWheel.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface IFilterWheel")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IFilterWheel.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface IFilterWheel")
@@ -93,8 +95,10 @@
             l_IFilterWheel = CType(l_DeviceObject, ASCOM.DeviceInterface.IFilterWheelV2)
             LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using interface IFilterWheelV2")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IFilterWheel.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device exposes interface IFilterWheelV2")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_IFilterWheel.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgInfo, "Device does not expose interface IFilterWheelV2")
@@ -116,8 +120,10 @@
             l_DriverAccessFilterWheel = New ASCOM.DriverAccess.FilterWheel(g_FilterWheelProgID)
             LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully created driver using driver access toolkit")
             Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessFilterWheel.Connected = True
                 LogMsg("AccessChecks", MessageLevel.msgOK, "Successfully connected using driver access toolkit")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
                 l_DriverAccessFilterWheel.Connected = False
             Catch ex As Exception
                 LogMsg("AccessChecks", MessageLevel.msgError, "Error connecting to driver using driver access toolkit: " & ex.Message)
@@ -154,11 +160,12 @@
     End Sub
     Overrides Property Connected() As Boolean
         Get
-            Connected = MyBase.Connected
+            LogCallToDriver("Connected", "About to get Connected property")
+            Return m_FilterWheel.Connected
         End Get
         Set(ByVal value As Boolean)
+            LogCallToDriver("Connected", "About to set Connected property")
             m_FilterWheel.Connected = value
-            MyBase.Connected = value
         End Set
     End Property
     Public Overrides Sub PreRunCheck()
@@ -169,6 +176,7 @@
         WaitFor(1000) 'Wait for 1 second to allow any movement to start
         StartTime = Now
         Try
+            LogCallToDriver("Pre-run Check", "About to get Position property repeatedly")
             Do
                 SetStatus("FilterWheel Pre-run Check", "Waiting for movement to stop", Now.Subtract(StartTime).Seconds & " second(s)")
                 WaitFor(SLEEP_TIME)
@@ -194,6 +202,7 @@
 
         'FocusOffsets - Required - Read only
         Try
+            LogCallToDriver("FocusOffsets Get", "About to get FocusOffsets property")
             l_Offsets = m_FilterWheel.FocusOffsets
             l_NOffsets = l_Offsets.Length
             If l_NOffsets = 0 Then
@@ -214,6 +223,7 @@
 
         'Names - Required - Read only
         Try
+            LogCallToDriver("Names Get", "About to get Names property")
             l_Names = m_FilterWheel.Names
             l_NNames = l_Names.Length
             If l_NNames = 0 Then
@@ -251,6 +261,7 @@
                 LogMsg("Position", MessageLevel.msgWarning, "Filter position tests skipped as number of filters appears to be 0: " & l_NOffsets.ToString)
             Case Else
                 Try
+                    LogCallToDriver("Position Get", "About to get Position property")
                     l_StartFilterNumber = m_FilterWheel.Position
                     If (l_StartFilterNumber < 0) Or (l_StartFilterNumber >= l_NOffsets) Then 'Illegal starting position provided
                         LogMsg("Position Get", MessageLevel.msgError, "Illegal filter position returned: " & l_StartFilterNumber.ToString)
@@ -258,8 +269,10 @@
                         LogMsg("Position Get", MessageLevel.msgOK, "Currently at position: " & i.ToString)
                         For i = 0 To CShort(l_NOffsets - 1)
                             Try
+                                LogCallToDriver("Position Set", "About to set Position property")
                                 m_FilterWheel.Position = i
                                 l_StartTime = Now
+                                LogCallToDriver("Position Set", "About to get Position property repeatedly")
                                 Do
                                     System.Threading.Thread.Sleep(100)
                                     TestStop()
@@ -278,12 +291,14 @@
                             End Try
                         Next
                         Try 'Confirm that an error is correctly generated for outside range values
+                            LogCallToDriver("Position Set", "About to set Position property")
                             m_FilterWheel.Position = -1 'Negative position, positions should never be negative
                             LogMsg("Position Set", MessageLevel.msgError, "Failed to generate exception when selecting filter with negative filter number")
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Position Set", MemberType.Property, Required.MustBeImplemented, ex, "setting position to - 1", "Correctly rejected bad position: -1")
                         End Try
                         Try 'Confirm that an error is correctly generated for outside range values
+                            LogCallToDriver("Position Set", "About to set Position property")
                             m_FilterWheel.Position = CShort(l_NOffsets) 'This should be 1 above the highest array element returned
                             LogMsg("Position Set", MessageLevel.msgError, "Failed to generate exception when selecting filter outside expected range")
                         Catch ex As Exception
