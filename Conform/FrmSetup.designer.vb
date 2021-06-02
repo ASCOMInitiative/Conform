@@ -60,6 +60,7 @@ Partial Class frmSetup
         Me.numMaxBinY = New System.Windows.Forms.NumericUpDown()
         Me.numMaxBinX = New System.Windows.Forms.NumericUpDown()
         Me.DomeTests = New System.Windows.Forms.TabPage()
+        Me.chkOpenDomeShutter = New System.Windows.Forms.CheckBox()
         Me.txtDomeStabilisationWait = New System.Windows.Forms.TextBox()
         Me.Label13 = New System.Windows.Forms.Label()
         Me.txtDomeAltitudeTimeout = New System.Windows.Forms.TextBox()
@@ -74,6 +75,10 @@ Partial Class frmSetup
         Me.UpDownObservingConditionsWaitTime = New System.Windows.Forms.NumericUpDown()
         Me.UpDownObservingConditionsRetries = New System.Windows.Forms.NumericUpDown()
         Me.SwitchTests = New System.Windows.Forms.TabPage()
+        Me.chkSwitchSetEnabled = New System.Windows.Forms.CheckBox()
+        Me.Label24 = New System.Windows.Forms.Label()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.txtSwitchExtendedTestRange = New System.Windows.Forms.TextBox()
         Me.txtSwitchReadDelay = New System.Windows.Forms.TextBox()
         Me.Label15 = New System.Windows.Forms.Label()
         Me.Label14 = New System.Windows.Forms.Label()
@@ -109,9 +114,6 @@ Partial Class frmSetup
         Me.txtStartHAW = New System.Windows.Forms.TextBox()
         Me.SideOfPier = New System.Windows.Forms.TabPage()
         Me.ErrorProvider1 = New System.Windows.Forms.ErrorProvider(Me.components)
-        Me.txtSwitchExtendedTestRange = New System.Windows.Forms.TextBox()
-        Me.Label23 = New System.Windows.Forms.Label()
-        Me.Label24 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
@@ -503,6 +505,7 @@ Partial Class frmSetup
         '
         'DomeTests
         '
+        Me.DomeTests.Controls.Add(Me.chkOpenDomeShutter)
         Me.DomeTests.Controls.Add(Me.txtDomeStabilisationWait)
         Me.DomeTests.Controls.Add(Me.Label13)
         Me.DomeTests.Controls.Add(Me.txtDomeAltitudeTimeout)
@@ -518,6 +521,15 @@ Partial Class frmSetup
         Me.DomeTests.TabIndex = 5
         Me.DomeTests.Text = "Dome Tests"
         Me.DomeTests.UseVisualStyleBackColor = True
+        '
+        'chkOpenDomeShutter
+        '
+        Me.chkOpenDomeShutter.Location = New System.Drawing.Point(347, 41)
+        Me.chkOpenDomeShutter.Name = "chkOpenDomeShutter"
+        Me.chkOpenDomeShutter.Size = New System.Drawing.Size(243, 34)
+        Me.chkOpenDomeShutter.TabIndex = 8
+        Me.chkOpenDomeShutter.Text = "Weather Safety" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Allow Dome shutter to open while testing"
+        Me.chkOpenDomeShutter.UseVisualStyleBackColor = True
         '
         'txtDomeStabilisationWait
         '
@@ -631,6 +643,7 @@ Partial Class frmSetup
         '
         'SwitchTests
         '
+        Me.SwitchTests.Controls.Add(Me.chkSwitchSetEnabled)
         Me.SwitchTests.Controls.Add(Me.Label24)
         Me.SwitchTests.Controls.Add(Me.Label23)
         Me.SwitchTests.Controls.Add(Me.txtSwitchExtendedTestRange)
@@ -645,6 +658,41 @@ Partial Class frmSetup
         Me.SwitchTests.TabIndex = 6
         Me.SwitchTests.Text = "SwitchTests"
         Me.SwitchTests.UseVisualStyleBackColor = True
+        '
+        'chkSwitchSetEnabled
+        '
+        Me.chkSwitchSetEnabled.AutoSize = True
+        Me.chkSwitchSetEnabled.Location = New System.Drawing.Point(338, 53)
+        Me.chkSwitchSetEnabled.Name = "chkSwitchSetEnabled"
+        Me.chkSwitchSetEnabled.Size = New System.Drawing.Size(205, 30)
+        Me.chkSwitchSetEnabled.TabIndex = 8
+        Me.chkSwitchSetEnabled.Text = "Device Safety" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Allow switches to be set and changed"
+        Me.chkSwitchSetEnabled.UseVisualStyleBackColor = True
+        '
+        'Label24
+        '
+        Me.Label24.AutoSize = True
+        Me.Label24.Location = New System.Drawing.Point(444, 178)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(137, 13)
+        Me.Label24.TabIndex = 7
+        Me.Label24.Text = "-XXX ... +MaxSwitch + XXX"
+        '
+        'Label23
+        '
+        Me.Label23.AutoSize = True
+        Me.Label23.Location = New System.Drawing.Point(159, 178)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(173, 13)
+        Me.Label23.TabIndex = 6
+        Me.Label23.Text = "Extended switch number test range"
+        '
+        'txtSwitchExtendedTestRange
+        '
+        Me.txtSwitchExtendedTestRange.Location = New System.Drawing.Point(338, 175)
+        Me.txtSwitchExtendedTestRange.Name = "txtSwitchExtendedTestRange"
+        Me.txtSwitchExtendedTestRange.Size = New System.Drawing.Size(100, 20)
+        Me.txtSwitchExtendedTestRange.TabIndex = 4
         '
         'txtSwitchReadDelay
         '
@@ -977,31 +1025,6 @@ Partial Class frmSetup
         '
         Me.ErrorProvider1.ContainerControl = Me
         '
-        'txtSwitchExtendedTestRange
-        '
-        Me.txtSwitchExtendedTestRange.Location = New System.Drawing.Point(338, 175)
-        Me.txtSwitchExtendedTestRange.Name = "txtSwitchExtendedTestRange"
-        Me.txtSwitchExtendedTestRange.Size = New System.Drawing.Size(100, 20)
-        Me.txtSwitchExtendedTestRange.TabIndex = 4
-        '
-        'Label23
-        '
-        Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(159, 178)
-        Me.Label23.Name = "Label23"
-        Me.Label23.Size = New System.Drawing.Size(173, 13)
-        Me.Label23.TabIndex = 6
-        Me.Label23.Text = "Extended switch number test range"
-        '
-        'Label24
-        '
-        Me.Label24.AutoSize = True
-        Me.Label24.Location = New System.Drawing.Point(444, 178)
-        Me.Label24.Name = "Label24"
-        Me.Label24.Size = New System.Drawing.Size(137, 13)
-        Me.Label24.TabIndex = 7
-        Me.Label24.Text = "-XXX ... +MaxSwitch + XXX"
-        '
         'frmSetup
         '
         Me.AcceptButton = Me.btnSetupOK
@@ -1134,4 +1157,6 @@ Partial Class frmSetup
     Friend WithEvents Label24 As Label
     Friend WithEvents Label23 As Label
     Friend WithEvents txtSwitchExtendedTestRange As TextBox
+    Friend WithEvents chkOpenDomeShutter As CheckBox
+    Friend WithEvents chkSwitchSetEnabled As CheckBox
 End Class

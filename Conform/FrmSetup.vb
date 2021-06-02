@@ -70,10 +70,12 @@ Public Class frmSetup
         txtDomeAzimuthTimeout.Text = g_Settings.DomeAzimuthTimeout.ToString
         txtDomeShutterTimout.Text = g_Settings.DomeShutterTimeout.ToString
         txtDomeStabilisationWait.Text = g_Settings.DomeStabilisationWait.ToString
+        chkOpenDomeShutter.Checked = g_Settings.DomeShutter
 
         'Switch Tests
         txtSwitchReadDelay.Text = g_Settings.SwitchReadDelay.ToString
         txtSwitchWriteDelay.Text = g_Settings.SwitchWriteDelay.ToString
+        chkSwitchSetEnabled.Checked = g_Settings.SwitchSet
 
         'Special - DestinationSideOfPier
         txtStartHAW.Text = g_Settings.FlipTestHAStart(GlobalVarsAndCode.SpecialTests.TelescopeDestinationSideOfPier, PierSide.pierWest).ToString
@@ -148,11 +150,13 @@ Public Class frmSetup
             g_Settings.DomeAzimuthTimeout = CDbl(txtDomeAzimuthTimeout.Text)
             g_Settings.DomeShutterTimeout = CDbl(txtDomeShutterTimout.Text)
             g_Settings.DomeStabilisationWait = CDbl(txtDomeStabilisationWait.Text)
+            g_Settings.DomeShutter = chkOpenDomeShutter.Checked
 
             'Switch Tests
             g_Settings.SwitchReadDelay = CInt(txtSwitchReadDelay.Text)
             g_Settings.SwitchWriteDelay = CInt(txtSwitchWriteDelay.Text)
             g_Settings.ExtendedSwitchNumberTestRange = CInt(txtSwitchExtendedTestRange.Text)
+            g_Settings.SwitchSet = chkSwitchSetEnabled.Checked
 
             'ObservingConditions
             g_Settings.ObservingConditionsMaxRetries = CInt(UpDownObservingConditionsRetries.Value)

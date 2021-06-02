@@ -441,7 +441,7 @@ Public Class FrmConformMain
     ' Constants
     Const MINIMUM_PLATFORM_VERSION As Double = 6.4 ' Must be running under at least this version of the Platform. Currently 6.4 because of move to IFocuserV3
     Const FORCE_DEBUG As Boolean = False
-    Const UPDATE_CHECK_FILE_DEBUG As String = "http://www.thesimpsons.nildram.co.uk/conform.txt"
+    Const UPDATE_CHECK_FILE_DEBUG As String = "https://download.ascom-standards.org/devtools/conform.txt"
     Const UPDATE_CHECK_FILE_RELEASE As String = "https://download.ascom-standards.org/devtools/conform.txt"
     Const UPDATE_CHECK_TIMEOUT As Integer = 10000 'Version check timeout time in milliseconds
     Const UPDATE_FREQUENCY As Integer = 7 'Number of days between checks for version updates
