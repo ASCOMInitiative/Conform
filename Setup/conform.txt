@@ -1,4 +1,15 @@
-6.5.7500.22515
+6.5.7827.29963
+Version 6.5.7827.29963 - This version requires Platform 6.5
+  All - Installers and executables are now code signed
+  All - Implement "About to call" messages for all device device types.
+  Camera - Add tests for writing to Camera.Gain and Camera.Offset
+  Camera - Extend the MaxBinX and MaxBinY validity range to 16 and make the message status Information rather than Error.
+  Camera - Correct message given when Camera.CanStopExposure is false but StopExposure does not throw an exception.
+  Dome - Add warnings for tests that may fail if Conform is configured not to open the shutter
+  Dome - Replicate Dome safety check-box in the Setup dialogue
+  Switch - Replicate Switch safety check-box in the Setup dialogue
+  Telescope - Improve internal resilience of Telescope tester.
+  
 Version 6.5.7500.22515 - This version requires Platform 6.5
   All - Improved exception handling when creating drivers
   All - Fixed version check that failed because ascom-standards web site has moved to HTTPS only
