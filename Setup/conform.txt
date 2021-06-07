@@ -1,5 +1,5 @@
 6.5.7827.29963
-Version 6.5.7827.29963 - This version requires Platform 6.5
+Version 6.5.7827.29963 - This version requires Platform 6.5 - https://github.com/ASCOMInitiative/Conform/releases
   All - Installers and executables are now code signed
   All - Implement "About to call" messages for all device device types.
   Camera - Add tests for writing to Camera.Gain and Camera.Offset
