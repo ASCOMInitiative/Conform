@@ -1169,9 +1169,9 @@ Public Class FrmConformMain
             g_TelescopeTests = g_Settings.TeleScopeTests() 'Get actual values from registry
 
             If System.IntPtr.Size = 4 Then
-                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 32bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker - Version {My.Application.Info.Version} - 32bit mode")
             Else
-                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 64bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker - Version {My.Application.Info.Version} - 64bit mode")
             End If
         Catch ex As Exception
             MsgBox(ex.ToString)
