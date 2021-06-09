@@ -1,0 +1,43 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Required Import to use MSBuild Community Tasks -->
+	
+    <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+    <PropertyGroup>
+	
+        <!-- Directory in which to export the latest ASCOM code base from GitHub-->
+        <ConformSolutionDirectory>$(MSBuildProjectDirectory)\..</ConformSolutionDirectory>
+        <ConformProjectDirectory>$(ConformSolutionDirectory)\Conform</ConformProjectDirectory>
+        <MyProjectDirectory>$(ConformProjectDirectory)\My Project</MyProjectDirectory>
+		
+        <!-- Names and locations of solution and project files used by this build script-->
+        <ConformVSSolution>Conform.sln</ConformVSSolution>
+		
+    </PropertyGroup>
+
+    <!-- Main build target for this build -->
+    <Target Name="Build">
+
+        <!-- Create global AssemblyVersion attributes from the Platform version, service pack and revision numbers.-->
+        <AssemblyInfo 
+		    CodeLanguage="VB" 
+			OutputFile="$(MyProjectDirectory)\AssemblyVersionInfo.vb" 
+			AssemblyVersion="6.5.*"/>
+
+        <!-- Build the 64bit release executable after cleaning the solution -->
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Release;Platform=Any CPU" />
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Build" Properties="Configuration=Release;Platform=Any CPU" />
+
+        <!-- Build the 64bit debug executable after cleaning the solution -->
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Debug;Platform=Any CPU" />
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Build" Properties="Configuration=Debug;Platform=Any CPU" />
+
+        <!-- Build the 32bit release executable after cleaning the solution -->
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Release;Platform=x86" />
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Build" Properties="Configuration=Release;Platform=x86" />
+
+        <!-- Build the 32bit debug executable after cleaning the solution -->
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Debug;Platform=x86" />
+        <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Build" Properties="Configuration=Debug;Platform=x86" />
+  </Target>
+
+</Project>
