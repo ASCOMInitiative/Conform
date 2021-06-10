@@ -14,7 +14,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("ASCOM Conformance Checker." & vbcrlf & vbcrlf & "This tool confirms conformance of an ASCOM driver to the relevant ASCOM specification." & vbcrlf & vbcrlf & "Please report issues on ASCOM's Groups.io Help forum, thanks - Peter.")> 
 <Assembly: AssemblyCompany("Peter Simpson")> 
 <Assembly: AssemblyProduct("Conform")>
-<Assembly: AssemblyCopyright("Copyright © Peter Simpson 2020")>
+<Assembly: AssemblyCopyright("Copyright © Peter Simpson 2021")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("6.5.*")>
+'<Assembly: AssemblyVersion("6.5.*")>
 '<Assembly: AssemblyFileVersion("6.5.65.1")>
 
 <Assembly: NeutralResourcesLanguageAttribute("")> 

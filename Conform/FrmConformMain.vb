@@ -957,6 +957,11 @@ Public Class FrmConformMain
         Else
             g_LogLevel = MessageLevel.msgComment
         End If
+
+        ' Update check boxes in case they are changed in the setup dialogue
+        chkDomeShutter.Checked = g_Settings.DomeShutter
+        chkSwitchSet.Checked = g_Settings.SwitchSet
+
         SetupForm.Close()
     End Sub
     Private Sub MnuTestCamera_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles mnuTestCamera.Click
@@ -1169,9 +1174,9 @@ Public Class FrmConformMain
             g_TelescopeTests = g_Settings.TeleScopeTests() 'Get actual values from registry
 
             If System.IntPtr.Size = 4 Then
-                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 32bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker - Version {My.Application.Info.Version} - 32bit mode")
             Else
-                LogMsg("Start-up", MessageLevel.msgAlways, "ASCOM Device Conformance Checker - 64bit mode")
+                LogMsg("Start-up", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker - Version {My.Application.Info.Version} - 64bit mode")
             End If
         Catch ex As Exception
             MsgBox(ex.ToString)

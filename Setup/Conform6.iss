@@ -21,19 +21,19 @@
 [Setup]
 #define MyAppVer GetFileVersion("..\Conform\bin\Release\Conform.exe") ; define variable
 AppID={{CEDF90C4-A415-4903-94D6-9099F7AE41B5}
-AppCopyright=Copyright © 2017 Peter Simpson
+AppCopyright=Copyright © 2021 Peter Simpson
 AppName=ASCOM Conform
 AppPublisher=Peter Simpson
-AppPublisherURL=http://www.ascom-standards.org
-AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
-AppUpdatesURL=http://www.ascom-standards.org
+AppPublisherURL=https://www.ascom-standards.org
+AppSupportURL=https://ascomtalk.groups.io/g/Developer/topics
+AppUpdatesURL=https://www.ascom-standards.org
 #emit "AppVerName=ASCOM Conform " + MyAppVer
 #emit "AppVersion=" + MyAppVer
 ;ArchitecturesInstallIn64BitMode=x64
 Compression=lzma/Max
 DefaultDirName={commonpf}\ASCOM\Conform
 DefaultGroupName=ASCOM Platform 6\Tools
-MinVersion=6.0
+MinVersion=6.1SP1
 #emit "OutputBaseFilename=Conform(" + MyAppVer +")setup"
 OutputDir=.\Builds
 PrivilegesRequired=admin
