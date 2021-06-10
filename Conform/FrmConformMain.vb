@@ -957,6 +957,11 @@ Public Class FrmConformMain
         Else
             g_LogLevel = MessageLevel.msgComment
         End If
+
+        ' Update check boxes in case they are changed in the setup dialogue
+        chkDomeShutter.Checked = g_Settings.DomeShutter
+        chkSwitchSet.Checked = g_Settings.SwitchSet
+
         SetupForm.Close()
     End Sub
     Private Sub MnuTestCamera_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles mnuTestCamera.Click

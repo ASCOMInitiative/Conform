@@ -1,27 +1,38 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!-- Required Import to use MSBuild Community Tasks -->
-	
     <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+
     <PropertyGroup>
-	
-        <!-- Directory in which to export the latest ASCOM code base from GitHub-->
+
+        <!-- Conform major and minor version numbers -->
+        <MajorVersion>6</MajorVersion>
+        <MinorVersion>5</MinorVersion>
+
+        <!-- Folder variables -->
         <ConformSolutionDirectory>$(MSBuildProjectDirectory)\..</ConformSolutionDirectory>
         <ConformProjectDirectory>$(ConformSolutionDirectory)\Conform</ConformProjectDirectory>
         <MyProjectDirectory>$(ConformProjectDirectory)\My Project</MyProjectDirectory>
+
+        <!-- Name of the file containing the assembly version number -->
+        <VersionFileName>AssemblyVersionInfo.vb</VersionFileName>
 		
-        <!-- Names and locations of solution and project files used by this build script-->
+        <!-- Name of the Conform solution file used by this build script -->
         <ConformVSSolution>Conform.sln</ConformVSSolution>
+		
+        <!-- Calculate the build day and time using Microsoft's Visual Studio "auto version" formula ready for use in the version string -->
+		<BuildDay>$([System.Math]::Floor($([System.TimeSpan]::FromTicks($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks),$([System.DateTime]::Parse("2000/01/01").ToBinary())))).TotalDays)))</BuildDay>
+		<BuildTime>$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalSeconds),2))))</BuildTime>
 		
     </PropertyGroup>
 
     <!-- Main build target for this build -->
     <Target Name="Build">
 
-        <!-- Create global AssemblyVersion attributes from the Platform version, service pack and revision numbers.-->
+        <!-- Create a global version number file for use in all builds -->
         <AssemblyInfo 
 		    CodeLanguage="VB" 
-			OutputFile="$(MyProjectDirectory)\AssemblyVersionInfo.vb" 
-			AssemblyVersion="6.5.*"/>
+			OutputFile="$(MyProjectDirectory)\$(VersionFileName)" 
+			AssemblyVersion="$(MajorVersion).$(MinorVersion).$(BuildDay).$(BuildTime)"/>
 
         <!-- Build the 64bit release executable after cleaning the solution -->
         <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Release;Platform=Any CPU" />
@@ -38,6 +49,7 @@
         <!-- Build the 32bit debug executable after cleaning the solution -->
         <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Clean" Properties="Configuration=Debug;Platform=x86" />
         <MSBuild Projects="$(ConformSolutionDirectory)\$(ConformVSSolution)" Targets="Build" Properties="Configuration=Debug;Platform=x86" />
+		
   </Target>
 
 </Project>
