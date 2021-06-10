@@ -1,4 +1,10 @@
-6.5.7827.29963
+6.5.7831.20978
+Version 6.5.7831.20978 - This version requires Platform 6.5 - https://github.com/ASCOMInitiative/Conform/releases
+  All - The 32bit and 64bit executables now have the same version number.
+  All - The installer has been updated to report current support URLs.
+  Dome - Safety status changes made in the setup GUI are now reflected in the main GUI.
+  Switch - Safety status changes made in the setup GUI are now reflected in the main GUI.
+
 Version 6.5.7827.29963 - This version requires Platform 6.5 - https://github.com/ASCOMInitiative/Conform/releases
   All - Installers and executables are now code signed
   All - Implement "About to call" messages for all device device types.
