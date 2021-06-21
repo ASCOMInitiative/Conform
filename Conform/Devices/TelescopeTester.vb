@@ -49,7 +49,7 @@ Friend Class TelescopeTester
     Private m_StartTime, m_EndTime, m_StartTimeUTC As Date
     Private m_LastLogFileDirectory As String, m_CanReadSideOfPier As Boolean
     Private m_TargetAltitude, m_TargetAzimuth As Double
-    Private canReadAltitide, canReadAzimuth As Boolean
+    Private canReadAltitide, canReadAzimuth, canReadSiderealTime As Boolean
 
     Private telescopeDeviceType As DeviceType
 
@@ -1135,8 +1135,11 @@ Friend Class TelescopeTester
 
         'SiderealTime - Required
         Try
+            canReadSiderealTime = False
             If g_Settings.DisplayMethodCalls Then LogMsg("SiderealTime", MessageLevel.msgComment, "About to get SiderealTime property")
             m_SiderealTimeScope = telescopeDevice.SiderealTime
+            canReadSiderealTime = True
+
             m_SiderealTimeASCOM = (18.697374558 + 24.065709824419081 * (g_Util.DateLocalToJulian(Now) - 2451545.0) + (m_SiteLongitude / 15.0)) Mod 24.0
             Select Case m_SiderealTimeScope
                 Case Is < 0.0, Is >= 24.0
@@ -2015,7 +2018,11 @@ Friend Class TelescopeTester
         Else
             LogMsg("Performance: SideOfPier", MessageLevel.msgInfo, "Skipping test as this method is not supported in interface v1" & g_InterfaceVersion)
         End If
-        TelescopePerformanceTest(PerformanceType.tstPerfSiderealTime, "SiderealTime") : If TestStop() Then Exit Sub
+        If canReadSiderealTime Then
+            TelescopePerformanceTest(PerformanceType.tstPerfSiderealTime, "SiderealTime") : If TestStop() Then Exit Sub
+        Else
+            LogMsgInfo("Performance: SiderealTime", "Skipping test because the SiderealTime property throws an exception.")
+        End If
         TelescopePerformanceTest(PerformanceType.tstPerfSlewing, "Slewing") : If TestStop() Then Exit Sub
         TelescopePerformanceTest(PerformanceType.tstPerfUTCDate, "UTCDate") : If TestStop() Then Exit Sub
         g_Status.Clear()
@@ -4282,35 +4289,47 @@ Friend Class TelescopeTester
     End Sub
 
     Private Function TelescopeRAFromHourAngle(testName As String, ByVal p_Offset As Double) As Double
-        'Create a legal RA based on an offset from Sidereal time
-        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
-        TelescopeRAFromHourAngle = telescopeDevice.SiderealTime - p_Offset
-        Select Case TelescopeRAFromHourAngle
-            Case Is < 0.0 'Illegal if < 0 hours
-                TelescopeRAFromHourAngle = TelescopeRAFromHourAngle + 24.0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                TelescopeRAFromHourAngle = TelescopeRAFromHourAngle - 24.0
-        End Select
+
+        ' Handle the possibility that the mandatory SideealTime property has not been implemented
+        If canReadSiderealTime Then
+            'Create a legal RA based on an offset from Sidereal time
+            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
+            TelescopeRAFromHourAngle = telescopeDevice.SiderealTime - p_Offset
+            Select Case TelescopeRAFromHourAngle
+                Case Is < 0.0 'Illegal if < 0 hours
+                    TelescopeRAFromHourAngle += 24.0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    TelescopeRAFromHourAngle -= 24.0
+            End Select
+        Else
+            TelescopeRAFromHourAngle = 0.0 - p_Offset
+        End If
     End Function
 
     Private Function TelescopeRAFromSiderealTime(testName As String, ByVal p_Offset As Double) As Double
         Dim CurrentSiderealTime As Double
-        'Create a legal RA based on an offset from Sidereal time
-        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
-        CurrentSiderealTime = telescopeDevice.SiderealTime
-        Select Case CurrentSiderealTime 'Deal with possibility that sidereal time from the driver is bad
-            Case Is < 0.0 'Illegal if < 0 hours
-                CurrentSiderealTime = 0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                CurrentSiderealTime = 0
-        End Select
-        TelescopeRAFromSiderealTime = CurrentSiderealTime + p_Offset
-        Select Case TelescopeRAFromSiderealTime
-            Case Is < 0.0 'Illegal if < 0 hours
-                TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime + 24.0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime - 24.0
-        End Select
+
+        ' Handle the possibility that the mandatory SideealTime property has not been implemented
+        If canReadSiderealTime Then
+            'Create a legal RA based on an offset from Sidereal time
+            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
+            CurrentSiderealTime = telescopeDevice.SiderealTime
+            Select Case CurrentSiderealTime 'Deal with possibility that sidereal time from the driver is bad
+                Case Is < 0.0 'Illegal if < 0 hours
+                    CurrentSiderealTime = 0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    CurrentSiderealTime = 0
+            End Select
+            TelescopeRAFromSiderealTime = CurrentSiderealTime + p_Offset
+            Select Case TelescopeRAFromSiderealTime
+                Case Is < 0.0 'Illegal if < 0 hours
+                    TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime + 24.0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime - 24.0
+            End Select
+        Else
+            TelescopeRAFromSiderealTime = 0.0 + p_Offset
+        End If
     End Function
 
     Private Sub TestEarlyBinding(ByVal TestType As InterfaceType)
