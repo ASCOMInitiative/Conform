@@ -134,6 +134,30 @@ Friend Class RotatorTester
             GC.Collect()
         End Try
 
+        Try
+            l_DeviceObject = CreateObject(g_RotatorProgID)
+            l_IRotator = CType(l_DeviceObject, ASCOM.DeviceInterface.IRotatorV3)
+            LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver with interface IRotatorV3")
+            Try
+                LogCallToDriver("AccessChecks", "About to set Connected property")
+                l_IRotator.Connected = True
+                LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver exposes interface IRotatorV3")
+                LogCallToDriver("AccessChecks", "About to set Connected property")
+                l_IRotator.Connected = False
+            Catch ex As Exception
+                LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver does not expose interface IRotatorV3")
+            End Try
+        Catch ex As Exception
+            LogMsg("AccessChecks", MessageLevel.msgInfo, "Driver does not expose interface IRotatorV3")
+        Finally
+            'Clean up
+            Try : Marshal.ReleaseComObject(l_IRotator) : Catch : End Try
+            Try : Marshal.ReleaseComObject(l_DeviceObject) : Catch : End Try
+            l_DeviceObject = Nothing
+            l_IRotator = Nothing
+            GC.Collect()
+        End Try
+
         'Try client access toolkit
         l_DriverAccessRotator = Nothing
         Try
