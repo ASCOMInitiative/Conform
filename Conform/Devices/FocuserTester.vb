@@ -8,6 +8,8 @@
     Private m_StepSize, m_Temperature As Double
     Private m_TempCompTrueOK, m_TempCompFalseOK As Boolean ' Variable to confirm that TempComp can be successfully set to True
     Private m_AbsolutePositionOK As Boolean = False ' Variable to confirm that absolute position can be read OK
+    Private m_CanReadIsMoving As Boolean = False ' Variable to confirm that IsMoving can be read OK
+    Private m_CanReadTemperature As Boolean = False ' Variable to confirm that Temperature can be read OK
 
     Private Const GOOD_MOVE_TOLERANCE As Integer = 2 ' ± Position tolerance within which a move will be considered to be OK
     Private Const OUT_OF_RANGE_INCREMENT As Integer = 10 ' For absolute focusers, the position delta, below 0 or above maximum steps, to test that the focuser will not move to the specified position
@@ -239,9 +241,11 @@
         'IsMoving - Required
         Try
             LogCallToDriver("IsMoving", "About to get IsMoving property")
+            m_CanReadIsMoving = False
             m_IsMoving = m_Focuser.IsMoving
             If Not m_IsMoving Then
                 LogMsg("IsMoving", MessageLevel.msgOK, m_IsMoving.ToString)
+                m_CanReadIsMoving = True
             Else
                 LogMsg("IsMoving", MessageLevel.msgError, "IsMoving is True at start of tests and it should be false")
             End If
@@ -373,6 +377,7 @@
 
         'Temperature - Optional
         Try
+            m_CanReadTemperature = False
             LogCallToDriver("Temperature", "About to get Temperature property")
             m_Temperature = m_Focuser.Temperature
             Select Case m_Temperature
@@ -382,6 +387,7 @@
                     LogMsg("Temperature", MessageLevel.msgWarning, "Temperature > 50.0, - possibly an issue, actual value: " & m_Temperature.ToString)
                 Case Else
                     LogMsg("Temperature", MessageLevel.msgOK, m_Temperature.ToString)
+                    m_CanReadTemperature = True
             End Select
         Catch ex As Exception
             HandleException("Temperature", MemberType.Property, Required.Optional, ex, "")
@@ -637,21 +643,21 @@
 
     Overrides Sub CheckPerformance()
         'Position
-        If True Then
+        If m_AbsolutePositionOK Then
             FocuserPerformanceTest(FocuserPropertyMethod.Position, "Position")
         Else
             LogMsg("Position", MessageLevel.msgInfo, "Skipping test as property is not supported")
         End If
 
         'IsMoving
-        If True Then
+        If m_CanReadIsMoving Then
             FocuserPerformanceTest(FocuserPropertyMethod.IsMoving, "IsMoving")
         Else
             LogMsg("IsMoving", MessageLevel.msgInfo, "Skipping test as property is not supported")
         End If
 
-        'IsMoving
-        If True Then
+        'Temperature
+        If m_CanReadTemperature Then
             FocuserPerformanceTest(FocuserPropertyMethod.Temperature, "Temperature")
         Else
             LogMsg("Temperature", MessageLevel.msgInfo, "Skipping test as property is not supported")
