@@ -1066,7 +1066,7 @@
                     Case SwitchMethod.MinSwitchValue
                         DoubleValue = m_Switch.MinSwitchValue(LOW_TEST_VALUE)
                     Case SwitchMethod.SetSwitch
-                        m_Switch.SetSwitchValue(LOW_TEST_VALUE, False)
+                        m_Switch.SetSwitch(LOW_TEST_VALUE, False)
                     Case SwitchMethod.SetSwitchName
                         ' Ignoring this because it is an optional parameter
                     Case SwitchMethod.SetSwitchValue
