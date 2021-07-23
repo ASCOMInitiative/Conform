@@ -11,5 +11,5 @@
 Option Strict Off
 Option Explicit On
 
-<Assembly: System.Reflection.AssemblyVersion("6.5.*")> 
+<Assembly: System.Reflection.AssemblyVersion("6.5.7873.27935")> 
 
