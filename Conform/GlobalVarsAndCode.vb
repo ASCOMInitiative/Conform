@@ -315,6 +315,7 @@ Module GlobalVarsAndCode
         FrmConformMain.staAction.Text = Action
         FrmConformMain.staStatus.Text = Status
     End Sub
+
     Friend Sub ExTest(ByVal p_TestName As String, ByVal p_EXMessage As String, ByVal p_LogMessage As String)
         Dim l_Msg As String
         l_Msg = UCase(p_EXMessage)

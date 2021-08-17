@@ -3566,6 +3566,19 @@ Friend Class TelescopeTester
 
                     Case OptionalMethodType.SideOfPierWrite
                         'SideOfPier Write
+
+                        ' Tracking must be enabled for the SideOfPier tests so enable it if possible, otherwise skip the test
+                        If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPier Write", MessageLevel.msgComment, $"About to get Tracking property")
+                        If Not telescopeDevice.Tracking Then
+                            If trackingCanActuallybeChanged Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPier Write", MessageLevel.msgComment, $"About to set Tracking property True")
+                                telescopeDevice.Tracking = True
+                            Else
+                                LogMsgInfo("SideOfPier Write", "Tests skipped because Tracking cannot be enabled.")
+                                Exit Select
+                            End If
+                        End If
+
                         If canSetPierside Then 'Can set pier side so test if we can
                             SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0), 0.0, "Slewing to far start point")
                             If TestStop() Then Exit Sub
@@ -4110,6 +4123,18 @@ Friend Class TelescopeTester
     Private Sub SideOfPierTests()
         Dim l_PierSideMinus3, l_PierSideMinus9, l_PierSidePlus3, l_PierSidePlus9 As SideOfPierResults
         Dim l_Declination3, l_Declination9, l_StartRA As Double
+
+        ' Tracking must be enabled for the SideOfPier tests so enable it if possible, otherwise skip the test
+        If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPierTests", MessageLevel.msgComment, $"About to get Tracking property")
+        If Not telescopeDevice.Tracking Then
+            If trackingCanActuallybeChanged Then
+                If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPierTests", MessageLevel.msgComment, $"About to set Tracking property True")
+                telescopeDevice.Tracking = True
+            Else
+                LogMsgInfo("SideOfPier", "Tests skipped because Tracking cannot be enabled.")
+                Return
+            End If
+        End If
 
         'Slew to starting position
         LogMsg("SideofPier", MessageLevel.msgDebug, "Starting Side of Pier tests")
