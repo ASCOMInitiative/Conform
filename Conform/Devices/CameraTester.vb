@@ -999,7 +999,7 @@ Friend Class CameraTester
                     LogMsg("ReadoutModes Read", MessageLevel.msgOK, ReadoutMode.ToString)
                 Next
             Catch ex As Exception
-                HandleException("Gain Read", MemberType.Property, Required.Mandatory, ex, "")
+                HandleException("ReadoutModes Read", MemberType.Property, Required.Mandatory, ex, "")
             End Try
 
             ' ReadoutMode Read - Mandatory
