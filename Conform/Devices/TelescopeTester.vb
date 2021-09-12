@@ -49,7 +49,8 @@ Friend Class TelescopeTester
     Private m_StartTime, m_EndTime, m_StartTimeUTC As Date
     Private m_LastLogFileDirectory As String, m_CanReadSideOfPier As Boolean
     Private m_TargetAltitude, m_TargetAzimuth As Double
-    Private canReadAltitide, canReadAzimuth As Boolean
+    Private canReadAltitide, canReadAzimuth, canReadSiderealTime As Boolean
+    Private trackingCanActuallybeChanged As Boolean
 
     Private telescopeDeviceType As DeviceType
 
@@ -422,11 +423,25 @@ Friend Class TelescopeTester
             End Try
         End If
 
-        If (Not TestStop()) And canSetTracking Then
+        ' Determine whether the tracking state can actually be changed
+        Try
+            canSetTracking = False
+            If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call CanSetTracking method")
+            canSetTracking = telescopeDevice.CanSetTracking
+            LogMsg("Mount Safety", MessageLevel.msgInfo, $"Can read CanSetTracking property: {canSetTracking}")
+        Catch ex As Exception
+            ' Ignore errors in getting the CanSetTracking value, at this early point we just assume that the tracking state cannot be set
+            LogMsg("Mount Safety", MessageLevel.msgInfo, $"Cannot read CanSetTracking property... {ex.GetType().Name} - {ex.Message}")
+        End Try
+
+        Try
             If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to set Tracking property true")
             telescopeDevice.Tracking = True
-            LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope tracking has been enabled")
-        End If
+            LogMsg("Mount Safety", MessageLevel.msgInfo, "Can set Tracking property - Scope tracking has been enabled")
+        Catch ex As Exception
+            ' Ignore errors in setting the Tracking state, at this early point we just assume that the tracking state cannot be set
+            LogMsg("Mount Safety", MessageLevel.msgInfo, $"Cannot set Tracking property... {ex.GetType().Name} - {ex.Message}")
+        End Try
 
         If Not TestStop() Then
             LogMsg("TimeCheck", MessageLevel.msgInfo, "PC Time Zone:  " & g_Util.TimeZoneName & ", offset " & g_Util.TimeZoneOffset.ToString & " hours.")
@@ -1135,8 +1150,11 @@ Friend Class TelescopeTester
 
         'SiderealTime - Required
         Try
+            canReadSiderealTime = False
             If g_Settings.DisplayMethodCalls Then LogMsg("SiderealTime", MessageLevel.msgComment, "About to get SiderealTime property")
             m_SiderealTimeScope = telescopeDevice.SiderealTime
+            canReadSiderealTime = True
+
             m_SiderealTimeASCOM = (18.697374558 + 24.065709824419081 * (g_Util.DateLocalToJulian(Now) - 2451545.0) + (m_SiteLongitude / 15.0)) Mod 24.0
             Select Case m_SiderealTimeScope
                 Case Is < 0.0, Is >= 24.0
@@ -1245,6 +1263,7 @@ Friend Class TelescopeTester
 
         'Tracking Write - Optional
         l_OriginalTrackingState = m_Tracking
+        trackingCanActuallybeChanged = False ' Start by assuming that tracking cannot actually be changed
         If canSetTracking Then ' Set should work OK
             Try
                 If m_Tracking Then 'OK try turning tracking off
@@ -1265,6 +1284,7 @@ Friend Class TelescopeTester
                 If g_Settings.DisplayMethodCalls Then LogMsg("Tracking Write", MessageLevel.msgComment, "About to set Tracking property " & l_OriginalTrackingState)
                 telescopeDevice.Tracking = l_OriginalTrackingState 'Restore original state
                 WaitFor(TRACKING_COMMAND_DELAY) 'Wait for a short time to allow mounts to implement the tracking state change
+                trackingCanActuallybeChanged = True ' Log that Tracking can be successfully changed
             Catch ex As Exception
                 HandleException("Tracking Write", MemberType.Property, Required.MustBeImplemented, ex, "CanSetTracking is True")
             End Try
@@ -1279,6 +1299,8 @@ Friend Class TelescopeTester
                 End If
                 If g_Settings.DisplayMethodCalls Then LogMsg("Tracking Write", MessageLevel.msgComment, "About to get Tracking property")
                 m_Tracking = telescopeDevice.Tracking
+                trackingCanActuallybeChanged = True ' Log that Tracking can be successfully changed
+
                 LogMsg("Tracking Write", MessageLevel.msgIssue, "CanSetTracking is false but no error generated when value is set")
             Catch ex As Exception
                 HandleException("Tracking Write", MemberType.Property, Required.MustNotBeImplemented, ex, "CanSetTracking is False")
@@ -2015,7 +2037,11 @@ Friend Class TelescopeTester
         Else
             LogMsg("Performance: SideOfPier", MessageLevel.msgInfo, "Skipping test as this method is not supported in interface v1" & g_InterfaceVersion)
         End If
-        TelescopePerformanceTest(PerformanceType.tstPerfSiderealTime, "SiderealTime") : If TestStop() Then Exit Sub
+        If canReadSiderealTime Then
+            TelescopePerformanceTest(PerformanceType.tstPerfSiderealTime, "SiderealTime") : If TestStop() Then Exit Sub
+        Else
+            LogMsgInfo("Performance: SiderealTime", "Skipping test because the SiderealTime property throws an exception.")
+        End If
         TelescopePerformanceTest(PerformanceType.tstPerfSlewing, "Slewing") : If TestStop() Then Exit Sub
         TelescopePerformanceTest(PerformanceType.tstPerfUTCDate, "UTCDate") : If TestStop() Then Exit Sub
         g_Status.Clear()
@@ -2038,6 +2064,7 @@ Friend Class TelescopeTester
     Private Sub TelescopeSyncTest(ByVal testType As SlewSyncType, ByVal testName As String, ByVal driverSupportsMethod As Boolean, ByVal canDoItName As String)
         Dim showOutcome As Boolean = False
         Dim difference, syncRA, syncDEC, syncAlt, syncAz, newAlt, newAz, currentAz, currentAlt, startRA, startDec, currentRA, currentDec As Double
+        Dim trackingState As Boolean
 
         ' Basic test to make sure the method is either implemented OK or fails as expected if it is not supported in this driver.
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get RightAscension property")
@@ -2045,25 +2072,45 @@ Friend Class TelescopeTester
         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Declination property")
         syncDEC = telescopeDevice.Declination
 
+        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, $"About to get Tracking property")
+        trackingState = telescopeDevice.Tracking
+
+        'Enable tracking where appropriate
+        Select Case testName
+            Case SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to true")
+                        telescopeDevice.Tracking = True
+                        trackingState = True
+                    End If
+                Else
+                    LogMsgDebug(testName, $"Not setting tracking - CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+            Case SlewSyncType.SyncToAltAz
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to false")
+                        telescopeDevice.Tracking = False
+                        trackingState = False
+                    End If
+                Else
+                    LogMsgDebug(testName, $"Not setting tracking - CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+
+            Case Else
+                ' Does not need to be enabled for remaining tests so no action
+        End Select
+
         If Not driverSupportsMethod Then ' Call should fail
             Try
                 Select Case testType
                     Case SlewSyncType.SyncToCoordinates 'SyncToCoordinates
-                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Tracking property")
-                        If canSetTracking And (Not telescopeDevice.Tracking) Then
-                            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to true")
-                            telescopeDevice.Tracking = True
-                        End If
                         LogMsg(testName, MessageLevel.msgDebug, "SyncToCoordinates: " & FormatRA(syncRA) & " " & FormatDec(syncDEC))
                         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to call SyncToCoordinates method, RA: " & FormatRA(syncRA) & ", Declination: " & FormatDec(syncDEC))
                         telescopeDevice.SyncToCoordinates(syncRA, syncDEC)
                         LogMsg(testName, MessageLevel.msgError, "CanSyncToCoordinates is False but call to SyncToCoordinates did not throw an exception.")
                     Case SlewSyncType.SyncToTarget 'SyncToTarget
-                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Tracking property")
-                        If canSetTracking And (Not telescopeDevice.Tracking) Then
-                            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to true")
-                            telescopeDevice.Tracking = True
-                        End If
                         Try
                             LogMsg(testName, MessageLevel.msgDebug, "Setting TargetRightAscension: " & FormatRA(syncRA))
                             If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set TargetRightAscension property to " & FormatRA(syncRA))
@@ -2092,11 +2139,6 @@ Friend Class TelescopeTester
                         If canReadAzimuth Then
                             If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Azimuth property")
                             syncAz = telescopeDevice.Azimuth
-                        End If
-                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Tracking property")
-                        If canSetTracking And telescopeDevice.Tracking Then
-                            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to false")
-                            telescopeDevice.Tracking = False
                         End If
                         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to call SyncToAltAz method, Altitude: " & FormatDec(syncAlt) & ", Azimuth: " & FormatDec(syncAz))
                         telescopeDevice.SyncToAltAz(syncAz, syncAlt) 'Sync to new Alt Az
@@ -2235,11 +2277,6 @@ Friend Class TelescopeTester
                         syncAz = currentAz + 1.0
                         If syncAlt < 0.0 Then syncAlt = 1.0 'Ensure legal Alt
                         If syncAz > 359.0 Then syncAz = 358.0 'Ensure legal Az
-                        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get Tracking property")
-                        If canSetTracking And telescopeDevice.Tracking Then
-                            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to set Tracking property to false")
-                            telescopeDevice.Tracking = False
-                        End If
                         If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to call SyncToAltAz method, Altitude: " & FormatDec(syncAlt) & ", Azimuth: " & FormatDec(syncAz))
                         telescopeDevice.SyncToAltAz(syncAz, syncAlt) 'Sync to new Alt Az
                         If canReadAltitide And canReadAzimuth Then 'Can check effects of a sync
@@ -2287,7 +2324,41 @@ Friend Class TelescopeTester
                     Case Else 'Do nothing
                 End Select
             Catch ex As Exception
-                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, canDoItName & " is True")
+                LogMsgDebug(testName, $"Test type: {testType}, Tracking state: {trackingState}, Driver Supports Method: {driverSupportsMethod}")
+
+                Select Case testType
+                    Case SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget
+                        If trackingState Then ' The mount is tracking so test for normal operation
+                            If driverSupportsMethod Then ' Mount says that it does support this capability
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, canDoItName & " is True")
+                            Else ' Mount says that it does not support this capability
+                                HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, canDoItName & " is False")
+                            End If
+                        Else ' The mount is not tracking so expect an InValidOperationException or MethodNotImplementedException
+                            If driverSupportsMethod Then 'Mount says that it does support this capability
+                                HandleInvalidOperationExceptionAsOK(testName, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{testName} correctly rejected the operation because Tracking is not enabled")
+                            Else ' Mount says that it does not support this capability
+                                HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, canDoItName & " is False")
+                            End If
+                        End If
+                    Case SlewSyncType.SyncToAltAz
+                        If Not trackingState Then ' The mount is stationary so test for normal operation
+                            If driverSupportsMethod Then ' Mount says that it does support this capability
+                                HandleException(testName, MemberType.Method, Required.MustBeImplemented, ex, canDoItName & " is True")
+                            Else ' Mount says that it does not support this capability
+                                HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, canDoItName & " is False")
+                            End If
+                        Else ' The mount is not tracking so expect an InValidOperationException or MethodNotImplementedException
+                            If driverSupportsMethod Then 'Mount says that it does support this capability
+                                HandleInvalidOperationExceptionAsOK(testName, MemberType.Method, Required.MustBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{testName} correctly rejected the operation because Tracking is enabled")
+                            Else ' Mount says that it does not support this capability
+                                HandleException(testName, MemberType.Method, Required.MustNotBeImplemented, ex, canDoItName & " is False")
+                            End If
+                        End If
+                    Case Else
+                        ' No other cases
+                End Select
+
             End Try
 
         End If
@@ -2295,30 +2366,50 @@ Friend Class TelescopeTester
 
     Private Sub TelescopeSlewTest(ByVal p_Test As SlewSyncType, ByVal p_Name As String, ByVal p_CanDoIt As Boolean, ByVal p_CanDoItName As String)
         Dim l_Difference, l_ActualAltitude, l_ActualAzimuth, actualRA, actualDec As Double
+        Dim trackingState As Boolean
 
         Status(StatusType.staTest, p_Name)
-        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-        If canSetTracking Then telescopeDevice.Tracking = True 'Enable tracking for these tests
+
+        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, $"About to get Tracking property")
+        trackingState = telescopeDevice.Tracking
+        LogMsgDebug(p_Name, $"Tracking: {trackingState}")
+
+        'Enable tracking where appropriate
+        Select Case p_Test
+            Case SlewSyncType.SlewToCoordinates, SlewSyncType.SlewToCoordinatesAsync, SlewSyncType.SlewToTarget, SlewSyncType.SlewToTargetAsync, SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
+                        telescopeDevice.Tracking = True
+                        trackingState = True
+                    End If
+                Else
+                    LogMsgDebug(p_Name, $"Not setting tracking - Tracking: {trackingState}, CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+            Case SlewSyncType.SlewToAltAz, SlewSyncType.SlewToAltAzAsync
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to false")
+                        telescopeDevice.Tracking = False
+                        trackingState = False
+                    End If
+                Else
+                    LogMsgDebug(p_Name, $"Not setting tracking - Tracking: {trackingState}, CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+
+            Case Else
+                ' Does not need to be enabled for remaining tests so no action
+        End Select
 
         Try
             Select Case p_Test
                 Case SlewSyncType.SlewToCoordinates
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                    If canSetTracking And (Not telescopeDevice.Tracking) Then
-                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                        telescopeDevice.Tracking = True
-                    End If
                     m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -1.0)
                     m_TargetDeclination = 1.0
                     Status(StatusType.staAction, "Slewing")
                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call SlewToCoordinates method, RA: " & FormatRA(m_TargetRightAscension) & ", Declination: " & FormatDec(m_TargetDeclination))
                     telescopeDevice.SlewToCoordinates(m_TargetRightAscension, m_TargetDeclination)
                 Case SlewSyncType.SlewToCoordinatesAsync
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                    If canSetTracking And (Not telescopeDevice.Tracking) Then
-                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                        telescopeDevice.Tracking = True
-                    End If
                     m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -2.0)
                     m_TargetDeclination = 2.0
                     Status(StatusType.staAction, "Slewing")
@@ -2326,11 +2417,6 @@ Friend Class TelescopeTester
                     telescopeDevice.SlewToCoordinatesAsync(m_TargetRightAscension, m_TargetDeclination)
                     WaitForSlew(p_Name)
                 Case SlewSyncType.SlewToTarget
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                    If canSetTracking And (Not telescopeDevice.Tracking) Then
-                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                        telescopeDevice.Tracking = True
-                    End If
                     m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -3.0)
                     m_TargetDeclination = 3.0
 
@@ -2344,6 +2430,7 @@ Friend Class TelescopeTester
                             ' Ignore other errors at this point as we aren't trying to test Telescope.TargetRightAscension
                         End If
                     End Try
+
                     Try
                         If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set TargetDeclination property to " & FormatDec(m_TargetDeclination))
                         telescopeDevice.TargetDeclination = m_TargetDeclination
@@ -2357,12 +2444,8 @@ Friend Class TelescopeTester
                     Status(StatusType.staAction, "Slewing")
                     If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to call SlewToTarget method")
                     telescopeDevice.SlewToTarget()
+
                 Case SlewSyncType.SlewToTargetAsync 'SlewToTargetAsync
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                    If canSetTracking And (Not telescopeDevice.Tracking) Then
-                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                        telescopeDevice.Tracking = True
-                    End If
                     m_TargetRightAscension = TelescopeRAFromSiderealTime(p_Name, -4.0)
                     m_TargetDeclination = 4.0
                     Try
@@ -2521,11 +2604,39 @@ Friend Class TelescopeTester
                 LogMsg(p_Name, MessageLevel.msgIssue, p_CanDoItName & " is false but no exception was generated on use")
             End If
         Catch ex As Exception
-            If p_CanDoIt Then
-                HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, p_CanDoItName & " is True")
-            Else
-                HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName & " is False")
-            End If
+            Select Case p_Test
+                Case SlewSyncType.SlewToCoordinates, SlewSyncType.SlewToCoordinatesAsync, SlewSyncType.SlewToTarget, SlewSyncType.SlewToTargetAsync, SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget
+                    If trackingState Then ' The mount is tracking so test for normal operation
+                        If p_CanDoIt Then ' Mount says that it does support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, p_CanDoItName & " is True")
+                        Else ' Mount says that it does not support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName & " is False")
+                        End If
+                    Else ' The mount is not tracking so expect an InValidOperationException or MethodNotImplementedException
+                        If p_CanDoIt Then 'Mount says that it does support this capability
+                            HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is not enabled")
+                        Else ' Mount says that it does not support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName & " is False")
+                        End If
+                    End If
+                Case SlewSyncType.SlewToAltAz, SlewSyncType.SlewToAltAzAsync
+                    If Not trackingState Then ' The mount is tracking so test for normal operation
+                        If p_CanDoIt Then ' Mount says that it does support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustBeImplemented, ex, p_CanDoItName & " is True")
+                        Else ' Mount says that it does not support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName & " is False")
+                        End If
+                    Else ' The mount is not tracking so expect an InValidOperationException or MethodNotImplementedException
+                        If p_CanDoIt Then 'Mount says that it does support this capability
+                            HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is enabled")
+                        Else ' Mount says that it does not support this capability
+                            HandleException(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, p_CanDoItName & " is False")
+                        End If
+                    End If
+                Case Else
+                    ' No other cases
+            End Select
+
         End Try
         g_Status.Clear()  'Clear status messages
     End Sub
@@ -2539,13 +2650,42 @@ Friend Class TelescopeTester
     ''' <remarks></remarks>
     Private Sub TelescopeBadCoordinateTest(p_Name As String, p_Test As SlewSyncType, BadCoordinate1 As Double, BadCoordinate2 As Double)
 
+        Dim trackingState As Boolean
+
+        Status(StatusType.staTest, p_Name)
+
+        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, $"About to get Tracking property")
+        trackingState = telescopeDevice.Tracking
+
+        'Enable tracking where appropriate
+        Select Case p_Test
+            Case SlewSyncType.SlewToCoordinates, SlewSyncType.SlewToCoordinatesAsync, SlewSyncType.SlewToTarget, SlewSyncType.SlewToTargetAsync, SlewSyncType.SyncToCoordinates, SlewSyncType.SyncToTarget
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
+                        telescopeDevice.Tracking = True
+                        trackingState = True
+                    End If
+                Else
+                    LogMsgDebug(p_Name, $"Not setting tracking - CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+            Case SlewSyncType.SlewToAltAz, SlewSyncType.SlewToAltAzAsync, SlewSyncType.SyncToAltAz
+                If canSetTracking And trackingCanActuallybeChanged Then
+                    If canSetTracking And (Not trackingState) Then
+                        If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to false")
+                        telescopeDevice.Tracking = False
+                        trackingState = False
+                    End If
+                Else
+                    LogMsgDebug(p_Name, $"Not setting tracking - CanSetTracking:  {canSetTracking}, TrackingCanActuallyBeChanged: {trackingCanActuallybeChanged}")
+                End If
+
+            Case Else
+                ' Does not need to be enabled for remaining tests so no action
+        End Select
+
         Select Case p_Test
             Case SlewSyncType.SlewToCoordinates, SlewSyncType.SlewToCoordinatesAsync
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (Not telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                    telescopeDevice.Tracking = True
-                End If
                 Try
                     Status(StatusType.staAction, "Slew underway")
                     m_TargetRightAscension = BadCoordinate1
@@ -2590,11 +2730,6 @@ Friend Class TelescopeTester
                 End Try
 
             Case SlewSyncType.SyncToCoordinates
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (Not telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                    telescopeDevice.Tracking = True
-                End If
                 Try
                     Status(StatusType.staAction, "Sync underway")
                     m_TargetRightAscension = BadCoordinate1
@@ -2619,11 +2754,6 @@ Friend Class TelescopeTester
                 End Try
 
             Case SlewSyncType.SlewToTarget, SlewSyncType.SlewToTargetAsync
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (Not telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                    telescopeDevice.Tracking = True
-                End If
                 Try
                     Status(StatusType.staAction, "Slew underway")
                     m_TargetRightAscension = BadCoordinate1
@@ -2690,11 +2820,6 @@ Friend Class TelescopeTester
                 End Try
 
             Case SlewSyncType.SyncToTarget
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (Not telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to true")
-                    telescopeDevice.Tracking = True
-                End If
                 Try
                     Status(StatusType.staAction, "Sync underway")
                     m_TargetRightAscension = BadCoordinate1
@@ -2741,11 +2866,6 @@ Friend Class TelescopeTester
                 End Try
 
             Case SlewSyncType.SlewToAltAz, SlewSyncType.SlewToAltAzAsync
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to false")
-                    telescopeDevice.Tracking = False
-                End If
                 Try
                     Status(StatusType.staAction, "Slew underway")
                     m_TargetAltitude = BadCoordinate1
@@ -2765,7 +2885,11 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
                 Catch ex As Exception
                     Status(StatusType.staAction, "Slew rejected")
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    If IsInvalidValueException(p_Name, ex) Then
+                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    Else ' Handle valid InvalidoperationException or some other exception type
+                        HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is enabled")
+                    End If
                 End Try
                 Try
                     Status(StatusType.staAction, "Slew underway")
@@ -2786,15 +2910,14 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Azimuth coordinate: " & FormatAzimuth(m_TargetAzimuth))
                 Catch ex As Exception
                     Status(StatusType.staAction, "Slew rejected")
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " & FormatAzimuth(m_TargetAzimuth))
+                    If IsInvalidValueException(p_Name, ex) Then
+                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    Else ' Handle valid InvalidoperationException or some other exception type
+                        HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is enabled")
+                    End If
                 End Try
 
             Case SlewSyncType.SyncToAltAz
-                If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to get Tracking property")
-                If canSetTracking And (telescopeDevice.Tracking) Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg(p_Name, MessageLevel.msgComment, "About to set Tracking property to false")
-                    telescopeDevice.Tracking = False
-                End If
                 Try
                     Status(StatusType.staAction, "Sync underway")
                     m_TargetAltitude = BadCoordinate1
@@ -2804,7 +2927,11 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
                 Catch ex As Exception
                     Status(StatusType.staAction, "Sync rejected")
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    If IsInvalidValueException(p_Name, ex) Then
+                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    Else ' Handle valid InvalidoperationException or some other exception type
+                        HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is enabled")
+                    End If
                 End Try
                 Try
                     Status(StatusType.staAction, "Sync underway")
@@ -2815,7 +2942,11 @@ Friend Class TelescopeTester
                     LogMsg(p_Name, MessageLevel.msgError, "Failed to reject bad Azimuth coordinate: " & FormatAzimuth(m_TargetAzimuth))
                 Catch ex As Exception
                     Status(StatusType.staAction, "Sync rejected")
-                    HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "syncing to bad Azimuth coordinate", "Correctly rejected bad Azimuth coordinate: " & FormatAzimuth(m_TargetAzimuth))
+                    If IsInvalidValueException(p_Name, ex) Then
+                        HandleInvalidValueExceptionAsOK(p_Name, MemberType.Method, Required.Mandatory, ex, "slewing to bad Altitude coordinate", "Correctly rejected bad Altitude coordinate: " & FormatAltitude(m_TargetAltitude))
+                    Else ' Handle valid InvalidoperationException or some other exception type
+                        HandleInvalidOperationExceptionAsOK(p_Name, MemberType.Method, Required.MustNotBeImplemented, ex, "An ASCOM.InvalidOperationException should be thrown when Tracking is false", $"{p_Name} correctly rejected the operation because Tracking is enabled")
+                    End If
                 End Try
 
             Case Else
@@ -3435,6 +3566,19 @@ Friend Class TelescopeTester
 
                     Case OptionalMethodType.SideOfPierWrite
                         'SideOfPier Write
+
+                        ' Tracking must be enabled for the SideOfPier tests so enable it if possible, otherwise skip the test
+                        If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPier Write", MessageLevel.msgComment, $"About to get Tracking property")
+                        If Not telescopeDevice.Tracking Then
+                            If trackingCanActuallybeChanged Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPier Write", MessageLevel.msgComment, $"About to set Tracking property True")
+                                telescopeDevice.Tracking = True
+                            Else
+                                LogMsgInfo("SideOfPier Write", "Tests skipped because Tracking cannot be enabled.")
+                                Exit Select
+                            End If
+                        End If
+
                         If canSetPierside Then 'Can set pier side so test if we can
                             SlewScope(TelescopeRAFromHourAngle(p_Name, -3.0), 0.0, "Slewing to far start point")
                             If TestStop() Then Exit Sub
@@ -3680,6 +3824,7 @@ Friend Class TelescopeTester
     End Sub
 
 #If RELEASE Then
+
     Private Sub TelescopeMoveAxisTest(ByVal p_Name As String, ByVal p_Axis As TelescopeAxes, ByVal p_AxisRates As Object)
         Dim l_Rate As Object = Nothing
 #Else
@@ -3978,6 +4123,18 @@ Friend Class TelescopeTester
     Private Sub SideOfPierTests()
         Dim l_PierSideMinus3, l_PierSideMinus9, l_PierSidePlus3, l_PierSidePlus9 As SideOfPierResults
         Dim l_Declination3, l_Declination9, l_StartRA As Double
+
+        ' Tracking must be enabled for the SideOfPier tests so enable it if possible, otherwise skip the test
+        If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPierTests", MessageLevel.msgComment, $"About to get Tracking property")
+        If Not telescopeDevice.Tracking Then
+            If trackingCanActuallybeChanged Then
+                If g_Settings.DisplayMethodCalls Then LogMsg("SideOfPierTests", MessageLevel.msgComment, $"About to set Tracking property True")
+                telescopeDevice.Tracking = True
+            Else
+                LogMsgInfo("SideOfPier", "Tests skipped because Tracking cannot be enabled.")
+                Return
+            End If
+        End If
 
         'Slew to starting position
         LogMsg("SideofPier", MessageLevel.msgDebug, "Starting Side of Pier tests")
@@ -4282,35 +4439,47 @@ Friend Class TelescopeTester
     End Sub
 
     Private Function TelescopeRAFromHourAngle(testName As String, ByVal p_Offset As Double) As Double
-        'Create a legal RA based on an offset from Sidereal time
-        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
-        TelescopeRAFromHourAngle = telescopeDevice.SiderealTime - p_Offset
-        Select Case TelescopeRAFromHourAngle
-            Case Is < 0.0 'Illegal if < 0 hours
-                TelescopeRAFromHourAngle = TelescopeRAFromHourAngle + 24.0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                TelescopeRAFromHourAngle = TelescopeRAFromHourAngle - 24.0
-        End Select
+
+        ' Handle the possibility that the mandatory SideealTime property has not been implemented
+        If canReadSiderealTime Then
+            'Create a legal RA based on an offset from Sidereal time
+            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
+            TelescopeRAFromHourAngle = telescopeDevice.SiderealTime - p_Offset
+            Select Case TelescopeRAFromHourAngle
+                Case Is < 0.0 'Illegal if < 0 hours
+                    TelescopeRAFromHourAngle += 24.0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    TelescopeRAFromHourAngle -= 24.0
+            End Select
+        Else
+            TelescopeRAFromHourAngle = 0.0 - p_Offset
+        End If
     End Function
 
     Private Function TelescopeRAFromSiderealTime(testName As String, ByVal p_Offset As Double) As Double
         Dim CurrentSiderealTime As Double
-        'Create a legal RA based on an offset from Sidereal time
-        If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
-        CurrentSiderealTime = telescopeDevice.SiderealTime
-        Select Case CurrentSiderealTime 'Deal with possibility that sidereal time from the driver is bad
-            Case Is < 0.0 'Illegal if < 0 hours
-                CurrentSiderealTime = 0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                CurrentSiderealTime = 0
-        End Select
-        TelescopeRAFromSiderealTime = CurrentSiderealTime + p_Offset
-        Select Case TelescopeRAFromSiderealTime
-            Case Is < 0.0 'Illegal if < 0 hours
-                TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime + 24.0
-            Case Is >= 24.0 'Illegal if > 24 hours
-                TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime - 24.0
-        End Select
+
+        ' Handle the possibility that the mandatory SideealTime property has not been implemented
+        If canReadSiderealTime Then
+            'Create a legal RA based on an offset from Sidereal time
+            If g_Settings.DisplayMethodCalls Then LogMsg(testName, MessageLevel.msgComment, "About to get SiderealTime property")
+            CurrentSiderealTime = telescopeDevice.SiderealTime
+            Select Case CurrentSiderealTime 'Deal with possibility that sidereal time from the driver is bad
+                Case Is < 0.0 'Illegal if < 0 hours
+                    CurrentSiderealTime = 0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    CurrentSiderealTime = 0
+            End Select
+            TelescopeRAFromSiderealTime = CurrentSiderealTime + p_Offset
+            Select Case TelescopeRAFromSiderealTime
+                Case Is < 0.0 'Illegal if < 0 hours
+                    TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime + 24.0
+                Case Is >= 24.0 'Illegal if > 24 hours
+                    TelescopeRAFromSiderealTime = TelescopeRAFromSiderealTime - 24.0
+            End Select
+        Else
+            TelescopeRAFromSiderealTime = 0.0 + p_Offset
+        End If
     End Function
 
     Private Sub TestEarlyBinding(ByVal TestType As InterfaceType)
