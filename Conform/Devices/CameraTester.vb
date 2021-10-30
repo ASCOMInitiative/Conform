@@ -1762,6 +1762,7 @@ Friend Class CameraTester
                         'Check image array dimensions
                         Try
                             ' Retrieve the image array
+                            Status(StatusType.staAction, "Retrieving ImageArray...")
                             If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArray")
                             sw.Restart()
                             m_ImageArray = CType(m_Camera.ImageArray, Array)
@@ -1779,7 +1780,7 @@ Friend Class CameraTester
                                             l_NumPlanes = CStr(m_ImageArray.GetUpperBound(2) + 1) & " planes"
                                         End If
                                     End If
-                                    LogMsg("ImageArray", MessageLevel.msgOK, "Successfully read 32 bit integer array (" & l_NumPlanes & ") " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1) & " pixels")
+                                    LogMsg("ImageArray", MessageLevel.msgOK, "Successfully read 32 bit integer array (" & l_NumPlanes & ") " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1) & $" pixels in {sw.Elapsed.TotalSeconds:0.000}s")
                                 Else ' Element types DO NOT match the expected int32 type
                                     LogMsg("ImageArray", MessageLevel.msgError, "Expected 32 bit integer array, actually got: " & m_ImageArray.GetType.ToString)
                                 End If
@@ -1801,52 +1802,61 @@ Friend Class CameraTester
                         GC.Collect()
 
                         'Check image array variant dimensions
-                        Dim imageArrayObject As Array
-                        Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                            sw.Restart()
-                            imageArrayObject = m_Camera.ImageArrayVariant
-                            sw.Stop()
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Get ImageArrayVariant completed in " & sw.ElapsedMilliseconds & "ms")
-                            sw.Restart()
-                            m_ImageArrayVariant = CType(imageArrayObject, Array)
-                            sw.Stop()
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Conversion to Array completed in " & sw.ElapsedMilliseconds & "ms")
-                            If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
-                                If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
-                                    If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
-                                        l_NumPlanes = "1 plane"
-                                        l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
-                                    Else 'Read the number of image planes from the maximum value of the third array index
-                                        l_NumPlanes = "1 plane"
-                                        If m_ImageArrayVariant.GetUpperBound(2) > 0 Then 'More than 1 plane
-                                            l_NumPlanes = CStr(m_ImageArrayVariant.GetUpperBound(2) + 1) & " planes"
-                                            l_VariantType = m_ImageArrayVariant(0, 0, 0).GetType.ToString()
-                                        Else 'Just one plane
-                                            l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
-                                        End If
-                                    End If
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Successfully read variant array (" & l_NumPlanes & ") with " & l_VariantType & " elements " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1) & " pixels")
-                                Else
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Expected variant array, actually got: " & m_ImageArrayVariant.GetType.ToString)
-                                End If
-                            Else
-                                If (m_ImageArrayVariant.GetLength(0) = p_NumY) And (m_ImageArrayVariant.GetLength(1) = p_NumX) Then
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image dimensions swapped, expected values: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
-                                Else
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image does not have the expected dimensions of: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
-                                End If
-                            End If
-                        Catch ex As COMException
-                            LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_COM & "exception when reading ImageArrayVariant" & ex.ToString)
-                        Catch ex As Exception
-                            LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_NET & "exception when reading ImageArrayVariant" & ex.ToString)
-                        End Try
 
-                        ' Release large image objects from memory
-                        m_ImageArrayVariant = Nothing
-                        imageArrayObject = Nothing
-                        GC.Collect()
+                        If False Then
+                            Dim imageArrayObject As Array
+                            Try
+                                Status(StatusType.staAction, "Retrieving ImageArrayVariant...")
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                                sw.Restart()
+                                imageArrayObject = m_Camera.ImageArrayVariant
+                                sw.Stop()
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Get ImageArrayVariant completed in " & sw.ElapsedMilliseconds & "ms")
+
+                                Dim swa As New Stopwatch()
+                                swa.Start()
+                                m_ImageArrayVariant = CType(imageArrayObject, Array)
+                                swa.Stop()
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Conversion to Array completed in " & swa.ElapsedMilliseconds & "ms")
+
+                                If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
+                                    If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
+                                        If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
+                                            l_NumPlanes = "1 plane"
+                                            l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
+                                        Else 'Read the number of image planes from the maximum value of the third array index
+                                            l_NumPlanes = "1 plane"
+                                            If m_ImageArrayVariant.GetUpperBound(2) > 0 Then 'More than 1 plane
+                                                l_NumPlanes = CStr(m_ImageArrayVariant.GetUpperBound(2) + 1) & " planes"
+                                                l_VariantType = m_ImageArrayVariant(0, 0, 0).GetType.ToString()
+                                            Else 'Just one plane
+                                                l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
+                                            End If
+                                        End If
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Successfully read variant array (" & l_NumPlanes & ") with " & l_VariantType & " elements " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1) & $" pixels in {sw.Elapsed.TotalSeconds:0.000}s")
+                                    Else
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Expected variant array, actually got: " & m_ImageArrayVariant.GetType.ToString)
+                                    End If
+                                Else
+                                    If (m_ImageArrayVariant.GetLength(0) = p_NumY) And (m_ImageArrayVariant.GetLength(1) = p_NumX) Then
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image dimensions swapped, expected values: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
+                                    Else
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image does not have the expected dimensions of: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
+                                    End If
+                                End If
+                            Catch ex As COMException
+                                LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_COM & "exception when reading ImageArrayVariant" & ex.ToString)
+                            Catch ex As Exception
+                                LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_NET & "exception when reading ImageArrayVariant" & ex.ToString)
+                            End Try
+
+                            ' Release large image objects from memory
+                            m_ImageArrayVariant = Nothing
+                            imageArrayObject = Nothing
+                            GC.Collect()
+                        Else
+                            LogMsgIssue("ImageArrayVariant", "TESTS SKIPPED!")
+                        End If
                     Else 'Expecting an error and didn't get one!
                         LogMsg("StartExposure", MessageLevel.msgComment, "Test: " & p_ExpectedErrorMessage)
                         LogMsg("StartExposure", MessageLevel.msgError, "Expected an exception and didn't get one - BinX:" & p_BinX &
