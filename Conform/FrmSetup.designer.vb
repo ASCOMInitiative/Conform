@@ -114,6 +114,7 @@ Partial Class frmSetup
         Me.txtStartHAW = New System.Windows.Forms.TextBox()
         Me.SideOfPier = New System.Windows.Forms.TabPage()
         Me.ErrorProvider1 = New System.Windows.Forms.ErrorProvider(Me.components)
+        Me.ChkTestImageArrayVariant = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
@@ -426,6 +427,7 @@ Partial Class frmSetup
         '
         'CameraTests
         '
+        Me.CameraTests.Controls.Add(Me.ChkTestImageArrayVariant)
         Me.CameraTests.Controls.Add(Me.Label22)
         Me.CameraTests.Controls.Add(Me.Label21)
         Me.CameraTests.Controls.Add(Me.Label20)
@@ -1025,6 +1027,16 @@ Partial Class frmSetup
         '
         Me.ErrorProvider1.ContainerControl = Me
         '
+        'ChkTestImageArrayVariant
+        '
+        Me.ChkTestImageArrayVariant.AutoSize = True
+        Me.ChkTestImageArrayVariant.Location = New System.Drawing.Point(241, 209)
+        Me.ChkTestImageArrayVariant.Name = "ChkTestImageArrayVariant"
+        Me.ChkTestImageArrayVariant.Size = New System.Drawing.Size(136, 17)
+        Me.ChkTestImageArrayVariant.TabIndex = 7
+        Me.ChkTestImageArrayVariant.Text = "Test ImageArrayVariant"
+        Me.ChkTestImageArrayVariant.UseVisualStyleBackColor = True
+        '
         'frmSetup
         '
         Me.AcceptButton = Me.btnSetupOK
@@ -1159,4 +1171,5 @@ Partial Class frmSetup
     Friend WithEvents txtSwitchExtendedTestRange As TextBox
     Friend WithEvents chkOpenDomeShutter As CheckBox
     Friend WithEvents chkSwitchSetEnabled As CheckBox
+    Friend WithEvents ChkTestImageArrayVariant As CheckBox
 End Class

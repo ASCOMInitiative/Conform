@@ -602,24 +602,29 @@ Friend Class CameraTester
         m_ImageArrayVariant = Nothing
         GC.Collect()
 
-        If m_ImageReady Then 'ImageReady is incorrectly flagged so don't know what to expect!
-            Try
-                Dim ImageArrayVariantObject As Object
-                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                ImageArrayVariantObject = m_Camera.ImageArrayVariant
-                m_ImageArrayVariant = CType(ImageArrayVariantObject, Integer(,))
-                LogMsg("ImageArrayVariant", MessageLevel.msgError, "No image has been taken but ImageArray has not generated an exception")
-            Catch ex As Exception
-                LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
-            End Try
-        Else 'ImageReady is false so should throw an exception
-            Try
-                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
-                LogMsg("ImageArrayVariant", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
-            Catch ex As Exception
-                LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
-            End Try
+        If g_Settings.CameraTestImageArrayVariant Then
+
+            If m_ImageReady Then 'ImageReady is incorrectly flagged so don't know what to expect!
+                Try
+                    Dim ImageArrayVariantObject As Object
+                    If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                    ImageArrayVariantObject = m_Camera.ImageArrayVariant
+                    m_ImageArrayVariant = CType(ImageArrayVariantObject, Integer(,))
+                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "No image has been taken but ImageArray has not generated an exception")
+                Catch ex As Exception
+                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
+                End Try
+            Else 'ImageReady is false so should throw an exception
+                Try
+                    If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                    m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
+                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
+                Catch ex As Exception
+                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
+                End Try
+            End If
+        Else
+            LogMsgIssue("ImageArrayVariant", "Test omitted due to Conform configuration")
         End If
 
         Try : Marshal.ReleaseComObject(m_ImageArray) : Catch : End Try
@@ -1799,11 +1804,11 @@ Friend Class CameraTester
 
                         m_ImageArray = Nothing
                         m_ImageArrayVariant = Nothing
-                        GC.Collect()
+                        GC.Collect(2, GCCollectionMode.Forced, True, True)
 
                         'Check image array variant dimensions
 
-                        If False Then
+                        If g_Settings.CameraTestImageArrayVariant Then
                             Dim imageArrayObject As Array
                             Try
                                 Status(StatusType.staAction, "Retrieving ImageArrayVariant...")
@@ -1855,7 +1860,7 @@ Friend Class CameraTester
                             imageArrayObject = Nothing
                             GC.Collect()
                         Else
-                            LogMsgIssue("ImageArrayVariant", "TESTS SKIPPED!")
+                            LogMsgInfo("ImageArrayVariant", "Test omitted due to Conform configuration")
                         End If
                     Else 'Expecting an error and didn't get one!
                         LogMsg("StartExposure", MessageLevel.msgComment, "Test: " & p_ExpectedErrorMessage)

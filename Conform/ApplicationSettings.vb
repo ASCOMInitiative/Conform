@@ -87,6 +87,8 @@ Friend Class ApplicationSettings
     'Camera device variables
     Private Const CAMERA_MAX_BIN_X As String = "Camera Max Bin X", CAMERA_MAX_BIN_X_DEFAULT As Integer = 0
     Private Const CAMERA_MAX_BIN_Y As String = "Camera Max Bin Y", CAMERA_MAX_BIN_Y_DEFAULT As Integer = 0
+    Private Const CAMERA_TEST_IMAGEARRAYVARIANT As String = "Camera Test ImageArrayVariant", CAMERA_TEST_IMAGEARRAYVARIANT_DEFAULT As Boolean = True
+
 
 #End Region
 
@@ -792,6 +794,14 @@ Friend Class ApplicationSettings
         End Get
         Set(ByVal value As Integer)
             SetName(m_SettingsKey, CAMERA_MAX_BIN_Y, value.ToString)
+        End Set
+    End Property
+    Property CameraTestImageArrayVariant() As Boolean
+        Get
+            Return GetBool(CAMERA_TEST_IMAGEARRAYVARIANT, CAMERA_TEST_IMAGEARRAYVARIANT_DEFAULT)
+        End Get
+        Set(ByVal value As Boolean)
+            SetName(m_SettingsKey, CAMERA_TEST_IMAGEARRAYVARIANT, value.ToString)
         End Set
     End Property
 
