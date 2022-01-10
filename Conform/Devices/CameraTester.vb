@@ -957,18 +957,26 @@ Friend Class CameraTester
 
                         ' Test writing a lower than minimum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
-                            m_Camera.Gain = m_GainMin - 1
-                            LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.")
+                            If m_GainMin > Int16.MinValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
+                                m_Camera.Gain = m_GainMin - 1
+                                LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Gain Write", $"Skipping test of Gain less than GainMin because GainMin is already set to Int16.MinValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMin - 1}, which is lower than the minimum value.")
                         End Try
 
-                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        ' Test writing a higher than maximum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
-                            m_Camera.Gain = m_GainMax + 1
-                            LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.")
+                            If m_GainMax < Int16.MaxValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
+                                m_Camera.Gain = m_GainMax + 1
+                                LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Gain Write", $"Skipping test of Gain greater than GainMax because GainMax is already set to Int16.MaxValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMax + 1} which is higher than the maximum value.")
                         End Try
@@ -1161,18 +1169,26 @@ Friend Class CameraTester
 
                         ' Test writing a lower than minimum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
-                            m_Camera.Offset = m_OffsetMin - 1
-                            LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.")
+                            If m_OffsetMin > Int32.MinValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
+                                m_Camera.Offset = m_OffsetMin - 1
+                                LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Offset Write", $"Skipping test of Offset less than OffsetMin because OffsetMin is already set to Int32.MinValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMin - 1}, which is lower than the minimum value.")
                         End Try
 
-                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        ' Test writing a higher than maximum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
-                            m_Camera.Offset = m_OffsetMax + 1
-                            LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.")
+                            If m_OffsetMax < Int32.MaxValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
+                                m_Camera.Offset = m_OffsetMax + 1
+                                LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Offset Write", $"Skipping test of Offset greater than OffsetMax because OffsetMax is already set to Int32.MaxValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMax + 1} which is higher than the maximum value.")
                         End Try
