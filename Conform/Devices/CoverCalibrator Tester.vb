@@ -295,6 +295,7 @@ Friend Class CoverCalibratorTester
                             LogMsg("OpenCover", MessageLevel.msgOK, $"OpenCover was successful. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds")
                         Else ' Unsuccessful outcome
                             LogMsg("OpenCover", MessageLevel.msgError, $"OpenCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Open'. The synchronous open took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds")
+                            LogMsgInfo("OpenCover", "PLEASE NOTE: The error above will also appear if your device does not set CoverState to Moving before returning from the OpenCover command.")
                         End If
                     Else ' Asynchronous behaviour
                         canAsynchronousOpen = True
@@ -343,6 +344,7 @@ Friend Class CoverCalibratorTester
                             LogMsg("CloseCover", MessageLevel.msgOK, $"CloseCover was successful. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds")
                         Else ' Unsuccessful outcome
                             LogMsg("CloseCover", MessageLevel.msgError, $"CloseCover was unsuccessful - the returned CoverState was '{coverCalibratorDevice.CoverState.ToString().Trim()}' instead of 'Closed'. The synchronous close took {DateTime.Now.Subtract(startTime).TotalSeconds.ToString("0.0")} seconds")
+                            LogMsgInfo("CloseCover", "PLEASE NOTE: The error above will also appear if your device does not set CoverState to Moving before returning from the CloseCover command.")
                         End If
                     Else ' Asynchronous behaviour
                         canAsynchronousOpen = True
@@ -544,6 +546,7 @@ Friend Class CoverCalibratorTester
                                 LogMsg("CalibratorOff", MessageLevel.msgOK, $"Brightness is set to zero when the calibrator is turned off")
                             Else ' Brightness is not set to zero when the calibrator is turned off
                                 LogMsg("CalibratorOff", MessageLevel.msgIssue, $"Brightness is not set to zero when the calibrator is turned off")
+                                LogMsgInfo("CalibratorOff", "PLEASE NOTE: The issue above will also appear if your device does not set CalibratorState to NotReady before returning from the CalibratorOff command.")
                             End If
 
                         Else ' Unsuccessful outcome
@@ -621,6 +624,7 @@ Friend Class CoverCalibratorTester
                                 LogMsg("CalibratorOn", MessageLevel.msgOK, $"The Brightness property does return the value that was set")
                             Else ' The returned Brightness is different to what was set
                                 LogMsg("CalibratorOn", MessageLevel.msgIssue, $"The Brightness property value: {returnedBrightness} does not match the value that was set: {requestedBrightness}")
+                                LogMsgInfo("CalibratorOn", "PLEASE NOTE: The issue above will also appear if your device does not set CalibratorState to NotReady before returning from the CalibratorOn command.")
                             End If
 
                         Else ' Unsuccessful outcome
@@ -668,7 +672,6 @@ Friend Class CoverCalibratorTester
             End Try
         End If
     End Sub
-
 
     Public Overrides Sub CheckPerformance()
         Status(StatusType.staTest, "Performance")

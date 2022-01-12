@@ -98,12 +98,12 @@ Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
 [Code]
 const
-   REQUIRED_PLATFORM_VERSION = 6.5;    // Set this to the minimum required ASCOM Platform version for this application
+   REQUIRED_PLATFORM_VERSION = 6.5; // Set this to the minimum required ASCOM Platform version for this application
 
 //
 // Function to return the ASCOM Platform's version number as a double.
 //
-function PlatformVersion(): Double;
+function PlatformVersion(): Extended;
 var
    PlatVerString : String;
 begin
@@ -133,8 +133,8 @@ var
    else
       if PlatformVersionNumber = 0.0 then
          MsgBox('No ASCOM Platform is installed. Please install Platform ' + Format('%3.1f', [REQUIRED_PLATFORM_VERSION]) + ' or later from http://www.ascom-standards.org', mbCriticalError, MB_OK)
-      else 
-         MsgBox('ASCOM Platform ' + Format('%3.1f', [REQUIRED_PLATFORM_VERSION]) + ' or later is required, but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed. Please install the latest Platform before continuing; you will find it at http://www.ascom-standards.org', mbCriticalError, MB_OK);
+      else  
+         MsgBox('This version of Conform requires ASCOM Platform ' + Format('%3.1f', [REQUIRED_PLATFORM_VERSION]) + ' or later, but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'Please install the latest Platform before continuing; you will find it at https://www.ascom-standards.org', mbCriticalError, MB_OK);
 end;
 
 // Code to enable the installer to uninstall previous versions of itself when a new version is installed

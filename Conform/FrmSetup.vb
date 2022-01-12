@@ -32,6 +32,7 @@ Public Class frmSetup
         chkDisplayMethodCalls.Checked = g_Settings.DisplayMethodCalls
         numMaxBinX.Value = Convert.ToInt32(g_Settings.CameraMaxBinX)
         numMaxBinY.Value = Convert.ToInt32(g_Settings.CameraMaxBinY)
+        ChkTestImageArrayVariant.Checked = g_Settings.CameraTestImageArrayVariant
         txtSwitchExtendedTestRange.Text = g_Settings.ExtendedSwitchNumberTestRange
 
         If chkSetupTestSideOfPierWrite.Checked Then ' Test SideOfpier Write is enabled
@@ -165,6 +166,7 @@ Public Class frmSetup
             'Camera
             g_Settings.CameraMaxBinX = CInt(numMaxBinX.Value)
             g_Settings.CameraMaxBinY = CInt(numMaxBinY.Value)
+            g_Settings.CameraTestImageArrayVariant = ChkTestImageArrayVariant.Checked
 
             'Special - DestinationSideOfPier
             g_Settings.FlipTestHAStart(GlobalVarsAndCode.SpecialTests.TelescopeDestinationSideOfPier, PierSide.pierWest) = CDbl(txtStartHAW.Text)

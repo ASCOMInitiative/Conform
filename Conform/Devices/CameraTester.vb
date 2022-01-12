@@ -602,24 +602,29 @@ Friend Class CameraTester
         m_ImageArrayVariant = Nothing
         GC.Collect()
 
-        If m_ImageReady Then 'ImageReady is incorrectly flagged so don't know what to expect!
-            Try
-                Dim ImageArrayVariantObject As Object
-                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                ImageArrayVariantObject = m_Camera.ImageArrayVariant
-                m_ImageArrayVariant = CType(ImageArrayVariantObject, Integer(,))
-                LogMsg("ImageArrayVariant", MessageLevel.msgError, "No image has been taken but ImageArray has not generated an exception")
-            Catch ex As Exception
-                LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
-            End Try
-        Else 'ImageReady is false so should throw an exception
-            Try
-                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
-                LogMsg("ImageArrayVariant", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
-            Catch ex As Exception
-                LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
-            End Try
+        If g_Settings.CameraTestImageArrayVariant Then
+
+            If m_ImageReady Then 'ImageReady is incorrectly flagged so don't know what to expect!
+                Try
+                    Dim ImageArrayVariantObject As Object
+                    If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                    ImageArrayVariantObject = m_Camera.ImageArrayVariant
+                    m_ImageArrayVariant = CType(ImageArrayVariantObject, Integer(,))
+                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "No image has been taken but ImageArray has not generated an exception")
+                Catch ex As Exception
+                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated before an image has been taken")
+                End Try
+            Else 'ImageReady is false so should throw an exception
+                Try
+                    If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                    m_ImageArrayVariant = CType(m_Camera.ImageArrayVariant, Integer(,))
+                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "ImageReady is false and no image has been taken but ImageArray has not generated an exception")
+                Catch ex As Exception
+                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Exception correctly generated when ImageReady is false")
+                End Try
+            End If
+        Else
+            LogMsgIssue("ImageArrayVariant", "Test omitted due to Conform configuration")
         End If
 
         Try : Marshal.ReleaseComObject(m_ImageArray) : Catch : End Try
@@ -952,18 +957,26 @@ Friend Class CameraTester
 
                         ' Test writing a lower than minimum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
-                            m_Camera.Gain = m_GainMin - 1
-                            LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.")
+                            If m_GainMin > Int16.MinValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
+                                m_Camera.Gain = m_GainMin - 1
+                                LogMsgIssue("Gain Write", $"Successfully set an gain below the minimum value ({m_GainMin - 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Gain Write", $"Skipping test of Gain less than GainMin because GainMin is already set to Int16.MinValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMin - 1}, which is lower than the minimum value.")
                         End Try
 
-                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        ' Test writing a higher than maximum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
-                            m_Camera.Gain = m_GainMax + 1
-                            LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.")
+                            If m_GainMax < Int16.MaxValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Gain")
+                                m_Camera.Gain = m_GainMax + 1
+                                LogMsgIssue("Gain Write", $"Successfully set an gain above the maximum value({m_GainMax + 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Gain Write", $"Skipping test of Gain greater than GainMax because GainMax is already set to Int16.MaxValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Gain Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for gain {m_GainMax + 1} which is higher than the maximum value.")
                         End Try
@@ -1156,18 +1169,26 @@ Friend Class CameraTester
 
                         ' Test writing a lower than minimum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
-                            m_Camera.Offset = m_OffsetMin - 1
-                            LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.")
+                            If m_OffsetMin > Int32.MinValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
+                                m_Camera.Offset = m_OffsetMin - 1
+                                LogMsgIssue("Offset Write", $"Successfully set an offset below the minimum value ({m_OffsetMin - 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Offset Write", $"Skipping test of Offset less than OffsetMin because OffsetMin is already set to Int32.MinValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMin - 1}, which is lower than the minimum value.")
                         End Try
 
-                        ' Test writing a lower than minimum value - this should result in am invalid value exception
+                        ' Test writing a higher than maximum value - this should result in am invalid value exception
                         Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
-                            m_Camera.Offset = m_OffsetMax + 1
-                            LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.")
+                            If m_OffsetMax < Int32.MaxValue Then
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to set Offset")
+                                m_Camera.Offset = m_OffsetMax + 1
+                                LogMsgIssue("Offset Write", $"Successfully set an offset above the maximum value({m_OffsetMax + 1}), this should have resulted in an InvalidValueException.")
+                            Else
+                                LogMsgInfo("Offset Write", $"Skipping test of Offset greater than OffsetMax because OffsetMax is already set to Int32.MaxValue")
+                            End If
                         Catch ex As Exception
                             HandleInvalidValueExceptionAsOK("Offset Write", MemberType.Property, Required.MustBeImplemented, ex, "an InvalidValueException is expected.", $"InvalidValueException correctly generated for offset {m_OffsetMax + 1} which is higher than the maximum value.")
                         End Try
@@ -1762,6 +1783,7 @@ Friend Class CameraTester
                         'Check image array dimensions
                         Try
                             ' Retrieve the image array
+                            Status(StatusType.staAction, "Retrieving ImageArray...")
                             If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArray")
                             sw.Restart()
                             m_ImageArray = CType(m_Camera.ImageArray, Array)
@@ -1779,7 +1801,7 @@ Friend Class CameraTester
                                             l_NumPlanes = CStr(m_ImageArray.GetUpperBound(2) + 1) & " planes"
                                         End If
                                     End If
-                                    LogMsg("ImageArray", MessageLevel.msgOK, "Successfully read 32 bit integer array (" & l_NumPlanes & ") " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1) & " pixels")
+                                    LogMsg("ImageArray", MessageLevel.msgOK, "Successfully read 32 bit integer array (" & l_NumPlanes & ") " & m_ImageArray.GetLength(0) & " x " & m_ImageArray.GetLength(1) & $" pixels in {sw.Elapsed.TotalSeconds:0.000}s")
                                 Else ' Element types DO NOT match the expected int32 type
                                     LogMsg("ImageArray", MessageLevel.msgError, "Expected 32 bit integer array, actually got: " & m_ImageArray.GetType.ToString)
                                 End If
@@ -1798,55 +1820,64 @@ Friend Class CameraTester
 
                         m_ImageArray = Nothing
                         m_ImageArrayVariant = Nothing
-                        GC.Collect()
+                        GC.Collect(2, GCCollectionMode.Forced, True, True)
 
                         'Check image array variant dimensions
-                        Dim imageArrayObject As Array
-                        Try
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
-                            sw.Restart()
-                            imageArrayObject = m_Camera.ImageArrayVariant
-                            sw.Stop()
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Get ImageArrayVariant completed in " & sw.ElapsedMilliseconds & "ms")
-                            sw.Restart()
-                            m_ImageArrayVariant = CType(imageArrayObject, Array)
-                            sw.Stop()
-                            If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Conversion to Array completed in " & sw.ElapsedMilliseconds & "ms")
-                            If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
-                                If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
-                                    If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
-                                        l_NumPlanes = "1 plane"
-                                        l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
-                                    Else 'Read the number of image planes from the maximum value of the third array index
-                                        l_NumPlanes = "1 plane"
-                                        If m_ImageArrayVariant.GetUpperBound(2) > 0 Then 'More than 1 plane
-                                            l_NumPlanes = CStr(m_ImageArrayVariant.GetUpperBound(2) + 1) & " planes"
-                                            l_VariantType = m_ImageArrayVariant(0, 0, 0).GetType.ToString()
-                                        Else 'Just one plane
-                                            l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
-                                        End If
-                                    End If
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Successfully read variant array (" & l_NumPlanes & ") with " & l_VariantType & " elements " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1) & " pixels")
-                                Else
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Expected variant array, actually got: " & m_ImageArrayVariant.GetType.ToString)
-                                End If
-                            Else
-                                If (m_ImageArrayVariant.GetLength(0) = p_NumY) And (m_ImageArrayVariant.GetLength(1) = p_NumX) Then
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image dimensions swapped, expected values: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
-                                Else
-                                    LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image does not have the expected dimensions of: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
-                                End If
-                            End If
-                        Catch ex As COMException
-                            LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_COM & "exception when reading ImageArrayVariant" & ex.ToString)
-                        Catch ex As Exception
-                            LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_NET & "exception when reading ImageArrayVariant" & ex.ToString)
-                        End Try
 
-                        ' Release large image objects from memory
-                        m_ImageArrayVariant = Nothing
-                        imageArrayObject = Nothing
-                        GC.Collect()
+                        If g_Settings.CameraTestImageArrayVariant Then
+                            Dim imageArrayObject As Array
+                            Try
+                                Status(StatusType.staAction, "Retrieving ImageArrayVariant...")
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "About to get ImageArrayVariant")
+                                sw.Restart()
+                                imageArrayObject = m_Camera.ImageArrayVariant
+                                sw.Stop()
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Get ImageArrayVariant completed in " & sw.ElapsedMilliseconds & "ms")
+
+                                Dim swa As New Stopwatch()
+                                swa.Start()
+                                m_ImageArrayVariant = CType(imageArrayObject, Array)
+                                swa.Stop()
+                                If g_Settings.DisplayMethodCalls Then LogMsg("ConformanceCheck", MessageLevel.msgComment, "Conversion to Array completed in " & swa.ElapsedMilliseconds & "ms")
+
+                                If (m_ImageArrayVariant.GetLength(0) = p_NumX) And (m_ImageArrayVariant.GetLength(1) = p_NumY) Then
+                                    If m_ImageArrayVariant.GetType.ToString = "System.Object[,]" Or m_ImageArrayVariant.GetType.ToString = "System.Object[,,]" Then
+                                        If m_ImageArrayVariant.Rank = 2 Then 'Single plane image be definition
+                                            l_NumPlanes = "1 plane"
+                                            l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
+                                        Else 'Read the number of image planes from the maximum value of the third array index
+                                            l_NumPlanes = "1 plane"
+                                            If m_ImageArrayVariant.GetUpperBound(2) > 0 Then 'More than 1 plane
+                                                l_NumPlanes = CStr(m_ImageArrayVariant.GetUpperBound(2) + 1) & " planes"
+                                                l_VariantType = m_ImageArrayVariant(0, 0, 0).GetType.ToString()
+                                            Else 'Just one plane
+                                                l_VariantType = m_ImageArrayVariant(0, 0).GetType.ToString()
+                                            End If
+                                        End If
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgOK, "Successfully read variant array (" & l_NumPlanes & ") with " & l_VariantType & " elements " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1) & $" pixels in {sw.Elapsed.TotalSeconds:0.000}s")
+                                    Else
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Expected variant array, actually got: " & m_ImageArrayVariant.GetType.ToString)
+                                    End If
+                                Else
+                                    If (m_ImageArrayVariant.GetLength(0) = p_NumY) And (m_ImageArrayVariant.GetLength(1) = p_NumX) Then
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image dimensions swapped, expected values: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
+                                    Else
+                                        LogMsg("ImageArrayVariant", MessageLevel.msgError, "Camera image does not have the expected dimensions of: " & p_NumX & " x " & p_NumY & " - actual values: " & m_ImageArrayVariant.GetLength(0) & " x " & m_ImageArrayVariant.GetLength(1))
+                                    End If
+                                End If
+                            Catch ex As COMException
+                                LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_COM & "exception when reading ImageArrayVariant" & ex.ToString)
+                            Catch ex As Exception
+                                LogMsg("ImageArrayVariant", MessageLevel.msgError, EX_NET & "exception when reading ImageArrayVariant" & ex.ToString)
+                            End Try
+
+                            ' Release large image objects from memory
+                            m_ImageArrayVariant = Nothing
+                            imageArrayObject = Nothing
+                            GC.Collect()
+                        Else
+                            LogMsgInfo("ImageArrayVariant", "Test omitted due to Conform configuration")
+                        End If
                     Else 'Expecting an error and didn't get one!
                         LogMsg("StartExposure", MessageLevel.msgComment, "Test: " & p_ExpectedErrorMessage)
                         LogMsg("StartExposure", MessageLevel.msgError, "Expected an exception and didn't get one - BinX:" & p_BinX &
