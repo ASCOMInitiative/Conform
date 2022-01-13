@@ -33,6 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
+' NOTE The assembly major and minor version numbers are now set in the Conform\Setup\BuildConform.msbuild file.
 '<Assembly: AssemblyVersion("6.5.*")>
 '<Assembly: AssemblyFileVersion("6.5.65.1")>
 

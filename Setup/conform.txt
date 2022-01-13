@@ -1,4 +1,33 @@
-6.5.7500.22515
+6.6.8048.17861
+Version 6.6.8048.17861 - January 2022
+  This version requires Platform 6.5 or later. Conform download: https://github.com/ASCOMInitiative/Conform/releases
+  Camera - New configuration switch to disable testing the ImageArrayVariant property.
+  Camera - BugFix - The Gain and Offset tests now operate correctly when values are set to the minimum and maximum values permitted by their datatypes.
+  CoverCalibrator - Improve messaging when devices do not change state variables to "operation underway" state before returning from operation initiation methods.
+  Focuser - Now more resilient when IsMoving and Temperature cannot be read correctly.
+  Rotator - Now tests for new IRotatorV3 properties
+  Switch - Bugfix - the SetSwitch tests were previously excercising SetSwitchValue instead of SetSwitch.
+  Telescope - Now more resilient if SiderealTime is not readable.
+  Telescope - Revised testing methodology for  mounts that do not allow clients to change the Tracking state.
+  Telescope - SideofPier tests will now only be conducted when tracking is enabled.
+
+Version 6.5.7831.20978 - This version requires Platform 6.5 - https://github.com/ASCOMInitiative/Conform/releases
+  All - The 32bit and 64bit executables now have the same version number.
+  All - The installer has been updated to report current support URLs.
+  Dome - Safety status changes made in the setup GUI are now reflected in the main GUI.
+  Switch - Safety status changes made in the setup GUI are now reflected in the main GUI.
+
+Version 6.5.7827.29963 - This version requires Platform 6.5 - https://github.com/ASCOMInitiative/Conform/releases
+  All - Installers and executables are now code signed
+  All - Implement "About to call" messages for all device device types.
+  Camera - Add tests for writing to Camera.Gain and Camera.Offset
+  Camera - Extend the MaxBinX and MaxBinY validity range to 16 and make the message status Information rather than Error.
+  Camera - Correct message given when Camera.CanStopExposure is false but StopExposure does not throw an exception.
+  Dome - Add warnings for tests that may fail if Conform is configured not to open the shutter
+  Dome - Replicate Dome safety check-box in the Setup dialogue
+  Switch - Replicate Switch safety check-box in the Setup dialogue
+  Telescope - Improve internal resilience of Telescope tester.
+  
 Version 6.5.7500.22515 - This version requires Platform 6.5
   All - Improved exception handling when creating drivers
   All - Fixed version check that failed because ascom-standards web site has moved to HTTPS only

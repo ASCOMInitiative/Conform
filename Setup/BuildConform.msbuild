@@ -6,7 +6,7 @@
 
         <!-- Conform major and minor version numbers -->
         <MajorVersion>6</MajorVersion>
-        <MinorVersion>5</MinorVersion>
+        <MinorVersion>6</MinorVersion>
 
         <!-- Folder variables -->
         <ConformSolutionDirectory>$(MSBuildProjectDirectory)\..</ConformSolutionDirectory>
