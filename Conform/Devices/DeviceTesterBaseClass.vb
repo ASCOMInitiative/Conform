@@ -4,6 +4,7 @@ Imports ASCOM.DeviceInterface
 Imports System.Threading
 Imports System.Runtime.InteropServices
 Imports ASCOM
+Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' Base class for device tester classes. Contains common code and placeholders for the 
@@ -185,10 +186,32 @@ Friend Class DeviceTesterBaseClass
                 If g_Settings.DisplayMethodCalls Then LogMsg("DriverVersion", MessageLevel.msgComment, "About to get property DriverVersion")
                 m_DriverVersion = Device.DriverVersion
                 Select Case m_DriverVersion
-                    Case ""
-                        LogMsg("DriverVersion", MessageLevel.msgInfo, "No DriverVersion string")
+                    Case "", Nothing
+                        LogMsg("DriverVersion", MessageLevel.msgInfo, "The device did not return a DriverVersion string")
                     Case Else
-                        LogMsg("DriverVersion", MessageLevel.msgOK, m_DriverVersion.ToString)
+                        ' Validate the required format X.Y
+                        Dim regex As Regex = New Regex("([0-9]*)(.)([0-9]*)(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+                        Dim match As Match = regex.Match(m_DriverVersion)
+                        If Not (match Is Nothing) Then
+                            For i As Integer = 1 To 4
+                                Try
+                                    LogMsgDebug("DriverVersion", $"Match group {i}: {match.Groups(i).Value}")
+                                Catch
+                                    LogMsgDebug("DriverVersion", $"Match group {i} had no value.")
+                                End Try
+                            Next
+
+                            If ((Not String.IsNullOrEmpty(match.Groups(1).Value)) And (Not String.IsNullOrEmpty(match.Groups(3).Value)) And (String.IsNullOrEmpty(match.Groups(4).Value))) Then
+                                LogMsg("DriverVersion", MessageLevel.msgOK, m_DriverVersion.ToString)
+                            Else
+                                LogMsgIssue("DriverVersion", $"The supplied version number '{m_DriverVersion}' is not in the required format: X.Y")
+                            End If
+                        Else
+                            LogMsgIssue("DriverVersion", $"Unable to parse the supplied version number '{m_DriverVersion}' because it is not in the required format: X.Y")
+                        End If
+
+
+
                 End Select
             Catch ex As COMException
                 LogMsg("DriverVersion", MessageLevel.msgError, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
@@ -263,8 +286,8 @@ Friend Class DeviceTesterBaseClass
                             Case Else ' List the action that was found
                                 LogMsg("SupportedActions", MessageLevel.msgOK, "Found action: " & ActionString)
 
-                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
+                                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
                                     If ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:") Then
                                         Try
                                             If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
