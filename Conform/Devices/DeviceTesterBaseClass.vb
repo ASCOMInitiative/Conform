@@ -1080,6 +1080,62 @@ Friend Class DeviceTesterBaseClass
         If g_Settings.DisplayMethodCalls Then LogMsg(test, MessageLevel.msgComment, memberName)
     End Sub
 
+    ''' <summary>
+    ''' Flexible routine to range a number into a given range between a lower and an higher bound.
+    ''' </summary>
+    ''' <param name="Value">Value to be ranged</param>
+    ''' <param name="LowerBound">Lowest value of the range</param>
+    ''' <param name="LowerEqual">Boolean flag indicating whether the ranged value can have the lower bound value</param>
+    ''' <param name="UpperBound">Highest value of the range</param>
+    ''' <param name="UpperEqual">Boolean flag indicating whether the ranged value can have the upper bound value</param>
+    ''' <returns>The ranged nunmber as a double</returns>
+    ''' <exception cref="ASCOM.InvalidValueException">Thrown if the lower bound is greater than the upper bound.</exception>
+    ''' <exception cref="ASCOM.InvalidValueException">Thrown if LowerEqual and UpperEqual are both false and the ranged value equals
+    ''' one of these values. This is impossible to handle as the algorithm will always violate one of the rules!</exception>
+    ''' <remarks>
+    ''' UpperEqual and LowerEqual switches control whether the ranged value can be equal to either the upper and lower bounds. So, 
+    ''' to range an hour angle into the range 0 to 23.999999.. hours, use this call: 
+    ''' <code>RangedValue = Range(InputValue, 0.0, True, 24.0, False)</code>
+    ''' <para>The input value will be returned in the range where 0.0 is an allowable value and 24.0 is not i.e. in the range 0..23.999999..</para>
+    ''' <para>It is not permissible for both LowerEqual and UpperEqual to be false because it will not be possible to return a value that is exactly equal 
+    ''' to either lower or upper bounds. An exception is thrown if this scenario is requested.</para>
+    ''' </remarks>
+    Protected Function Range(Value As Single, LowerBound As Single, LowerEqual As Boolean, UpperBound As Single, UpperEqual As Boolean) As Single
+        Dim ModuloValue As Double
+        If LowerBound >= UpperBound Then Throw New ASCOM.InvalidValueException("Range", "LowerBound is >= UpperBound", "LowerBound must be less than UpperBound")
+
+        ModuloValue = UpperBound - LowerBound
+
+        If LowerEqual Then
+            If UpperEqual Then 'Lowest >= Highest <=
+                Do
+                    If Value < LowerBound Then Value += ModuloValue
+                    If Value > UpperBound Then Value -= ModuloValue
+                Loop Until (Value >= LowerBound) And (Value <= UpperBound)
+            Else 'Lowest >= Highest <
+                Do
+                    If Value < LowerBound Then Value += ModuloValue
+                    If Value >= UpperBound Then Value -= ModuloValue
+                Loop Until (Value >= LowerBound) And (Value < UpperBound)
+            End If
+        Else
+            If UpperEqual Then 'Lowest > Highest<=
+                Do
+                    If Value <= LowerBound Then Value += ModuloValue
+                    If Value > UpperBound Then Value -= ModuloValue
+                Loop Until (Value > LowerBound) And (Value <= UpperBound)
+            Else 'Lowest > Highest <
+                If (Value = LowerBound) Then Throw New InvalidValueException("Range", "The supplied value equals the LowerBound. This can not be ranged when LowerEqual and UpperEqual are both false ", "LowerBound > Value < UpperBound")
+                If (Value = UpperBound) Then Throw New InvalidValueException("Range", "The supplied value equals the UpperBound. This can not be ranged when LowerEqual and UpperEqual are both false ", "LowerBound > Value < UpperBound")
+                Do
+                    If Value <= LowerBound Then Value += ModuloValue
+                    If Value >= UpperBound Then Value -= ModuloValue
+                Loop Until (Value > LowerBound) And (Value < UpperBound)
+            End If
+        End If
+        Return Value
+    End Function
+
 #End Region
 End Class
 
