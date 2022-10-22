@@ -465,7 +465,7 @@ Friend Class DeviceTesterBaseClass
 #If DEBUG Then
                 If g_Settings.DisplayMethodCalls Then LogMsg("CreateObject", MessageLevel.msgComment, "About to create instance using CreateObject")
                 l_DeviceObject = CreateObject(p_ProgId)
-                LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using CreateObject")
+                LogMsg("AccessChecks", MessageLevel.msgDebug, $"Successfully created driver using CreateObject. Object is nothing: {l_DeviceObject Is Nothing}")
 #Else
                 l_Type = Type.GetTypeFromProgID(p_ProgId)
                 If g_Settings.DisplayMethodCalls Then LogMsg("AccessChecks", MessageLevel.msgComment, "About to create instance using Activator.CreateInstance")
