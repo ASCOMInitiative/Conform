@@ -991,15 +991,15 @@ Friend Class DeviceTesterBaseClass
         If (IsPropertyNotImplementedException(ex) And TypeOfMember = MemberType.Property) Or (IsMethodNotImplementedException(ex) And TypeOfMember = MemberType.Method) Then
             Select Case IsRequired
                 Case Required.Mandatory
-                    LogMsg(MemberName, MessageLevel.msgIssue, "This member is mandatory but threw a " & GetExceptionName(ex) & " exception, it must function per the ASCOM specification.")
+                    LogMsg(MemberName, MessageLevel.msgIssue, $"This member is mandatory but threw a {GetExceptionName(ex, TypeOfMember)} exception, it must function per the ASCOM specification.")
                 Case Required.MustNotBeImplemented
-                    LogMsg(MemberName, MessageLevel.msgOK, UserMessage & " and a " & GetExceptionName(ex) & " exception was generated as expected")
+                    LogMsg(MemberName, MessageLevel.msgOK, $"{UserMessage} and a {GetExceptionName(ex, TypeOfMember)} exception was generated as expected")
                 Case Required.MustBeImplemented
-                    LogMsg(MemberName, MessageLevel.msgIssue, UserMessage & " and a " & GetExceptionName(ex) & " exception was thrown, this method must function per the ASCOM specification.")
+                    LogMsg(MemberName, MessageLevel.msgIssue, $"{UserMessage} and a {GetExceptionName(ex, TypeOfMember)} exception was thrown, this method must function per the ASCOM specification.")
                 Case Required.Optional
-                    LogMsg(MemberName, MessageLevel.msgOK, "Optional member threw a " & GetExceptionName(ex) & " exception.")
+                    LogMsg(MemberName, MessageLevel.msgOK, $"Optional member threw a {GetExceptionName(ex, TypeOfMember)} exception.")
                 Case Else
-                    LogMsg(MemberName, MessageLevel.msgError, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired)
+                    LogMsg(MemberName, MessageLevel.msgError, $"CONFORM ERROR! - Received unexpected member of 'Required' enum: {IsRequired}")
             End Select
 
             ' Handle wrong type of not implemented exceptions
@@ -1014,7 +1014,7 @@ Friend Class DeviceTesterBaseClass
 
             ' Handle all other types of error
         Else
-            LogMsg(MemberName, MessageLevel.msgError, "Unexpected " & GetExceptionName(ex) & ", " & UserMessage & ": " & ex.Message)
+            LogMsg(MemberName, MessageLevel.msgError, $"Unexpected {GetExceptionName(ex, TypeOfMember)}, {UserMessage}: {ex.Message}")
         End If
 
         LogMsg(MemberName, MessageLevel.msgDebug, "Exception: " & ex.ToString)
@@ -1048,26 +1048,41 @@ Friend Class DeviceTesterBaseClass
     ''' <summary>
     ''' Get an exception name (and number if a COM or Driver exception)
     ''' </summary>
-    ''' <param name="ex">Exception whose name is required</param>
+    ''' <param name="clientException">Exception whose name is required</param>
     ''' <returns>String exception name</returns>
     ''' <remarks></remarks>
-    Protected Function GetExceptionName(ex As Exception) As String
-        Dim ComEx As COMException, DriverEx As DriverException, RetVal As String
+    Protected Function GetExceptionName(clientException As Exception, memberType As MemberType) As String
+        Dim ComEx As COMException, DriverEx As DriverException, RetVal, exceptionName As String
 
         ' Treat ASCOM exceptions specially
-        If ex.GetType.FullName.ToUpper().Contains("ASCOM") Then
-            If ex.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver exception so add its number
-                DriverEx = CType(ex, DriverException)
+        If clientException.GetType.FullName.ToUpper().Contains("ASCOM") Then
+            If clientException.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver exception so add its number
+                DriverEx = CType(clientException, DriverException)
                 RetVal = "DriverException(0x" & DriverEx.Number.ToString("X8") & ")"
             Else ' Otherwise just use the ASCOM exception's name
-                RetVal = ex.GetType.Name
+                RetVal = clientException.GetType.Name
             End If
-        ElseIf (TypeOf ex Is COMException) Then ' Handle XOM exceptions with their error code
-            ComEx = CType(ex, COMException)
-            RetVal = "COMException(0x" & ComEx.ErrorCode.ToString("X8") & ")"
+
+        ElseIf (TypeOf clientException Is COMException) Then ' Handle COM exceptions with their error code
+            ComEx = CType(clientException, COMException)
+
+            Try
+                exceptionName = ErrorCodes.GetExceptionName(ComEx)
+
+                RetVal = $"{IIf(String.IsNullOrEmpty(exceptionName), ComEx.GetType().Name, exceptionName)} (COM Error: 0x{ComEx.ErrorCode:X8})"
+                If ComEx.ErrorCode = ErrorCodes.NotImplemented Then
+                    RetVal = $"{memberType}{RetVal}"
+                End If
+
+            Catch ex As Exception
+                RetVal = $"COMException(0x{ComEx.ErrorCode:X8})"
+            End Try
+            LogMsgDebug("GetExceptionName", $"COM error code: {ComEx.ErrorCode:X8}, {ComEx.Message}, Return value: {RetVal}")
+
         Else ' We got something else so report it
-            RetVal = ex.GetType().FullName & " exception"
+            RetVal = clientException.GetType().FullName & " exception"
         End If
+
         Return RetVal
     End Function
 
