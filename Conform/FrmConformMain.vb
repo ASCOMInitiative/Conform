@@ -433,6 +433,8 @@ Imports System.Reflection
 Imports System.Runtime.InteropServices
 Imports System.Globalization
 Imports Microsoft.Win32
+Imports System.Security.Principal
+
 #End Region
 
 Public Class FrmConformMain
@@ -1259,6 +1261,25 @@ Public Class FrmConformMain
             My.Computer.FileSystem.DeleteFile("C:\Documents and Settings\All Users\Start Menu\Programs\ASCOM Platform\Tools\Uninstall Conform.lnk")
         Catch ex As Exception
         End Try
+
+        Using identity As WindowsIdentity = WindowsIdentity.GetCurrent()
+            Dim principal As WindowsPrincipal = New WindowsPrincipal(identity)
+
+            If principal.IsInRole(WindowsBuiltInRole.Administrator) Then
+                LogMsg("", MessageLevel.msgAlways, " ")
+                LogMsg("", MessageLevel.msgAlways, "***** CONFORM IS RUNNING WITH ADMIN PRIVILEGE!")
+                LogMsg("", MessageLevel.msgAlways, " ")
+                LogMsg("", MessageLevel.msgAlways, "***** This increases the risk that malicious individuals will target you and cause havoc in your life.")
+                LogMsg("", MessageLevel.msgAlways, "***** There is no need to run Conform with Admin privilege, the application is fully functional in normal user mode.")
+                LogMsg("", MessageLevel.msgAlways, "***** Please close the Remote Server and re-open it in normal user mode.")
+                LogMsg("", MessageLevel.msgAlways, " ")
+                Dim choice As DialogResult = MessageBox.Show("Close Conform because it is running as administrator.", "Threat Management", MessageBoxButtons.YesNo, MessageBoxIcon.[Stop], MessageBoxDefaultButton.Button1)
+
+                If choice = DialogResult.Yes Then
+                    Close()
+                End If
+            End If
+        End Using
     End Sub
     Private Sub ConformMainForm_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
         Const l_ButtonIndent As Integer = 115
