@@ -423,7 +423,7 @@ Friend Class DeviceTesterBaseClass
         Dim lastModified As DateTime = fileInfo.LastWriteTime
 
         LogMsg("", MessageLevel.msgAlways, "") 'Blank line
-        LogMsg("ConformanceCheck", MessageLevel.msgAlways, "ASCOM Device Conformance Checker Version " & My.Application.Info.Version.ToString & ", Build time: " & lastModified.ToString())
+        LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker Version {My.Application.Info.Version} Build time: {lastModified} ({IIf(IntPtr.Size = 4, "32bit", "64bit")})")
         LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Running on: " & Prof.GetProfile("Platform", "Platform Name", "Unknown") & " " & Prof.GetProfile("Platform", "Platform Version", "Unknown"))
         Prof.Dispose()
         LogMsg("", MessageLevel.msgAlways, "") 'Blank line
@@ -740,51 +740,55 @@ Friend Class DeviceTesterBaseClass
     Public Shared Sub DisposeAndReleaseObject(driverName As String, ByRef ObjectToRelease As Object)
         Dim ObjectType As Type, RemainingObjectCount, LoopCount As Integer
 
-        LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  About to release {driverName} driver instance")
-        If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, $"About to release {driverName} driver instance")
+        If Not (ObjectToRelease Is Nothing) Then
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  About to release {driverName} driver instance")
+            If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, $"About to release {driverName} driver instance")
 
-        Try
-            ObjectType = ObjectToRelease.GetType
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  GetType Exception: " & ex1.Message)
-        End Try
+            Try
+                ObjectType = ObjectToRelease.GetType
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  GetType Exception: " & ex1.Message)
+            End Try
 
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, "About to set Connected property")
-            ObjectToRelease.Connected = False
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Connected successfully set to False")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Exception setting Connected = False: " & ex1.Message)
-        End Try
+            Try
+                If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, "About to set Connected property")
+                ObjectToRelease.Connected = False
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Connected successfully set to False")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Exception setting Connected = False: " & ex1.Message)
+            End Try
 
-        Try
-            ObjectToRelease.Dispose()
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Successfully called Dispose()")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Dispose Exception: " & ex1.Message)
-        End Try
+            Try
+                ObjectToRelease.Dispose()
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Successfully called Dispose()")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Dispose Exception: " & ex1.Message)
+            End Try
 
-        Try
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Releasing COM object")
-            LoopCount = 0
-            Do
-                LoopCount += 1
-                RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease)
-                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Remaining object count: " & RemainingObjectCount & ", LoopCount: " & LoopCount)
-            Loop Until (RemainingObjectCount <= 0) Or (LoopCount = 20)
-        Catch ex2 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  ReleaseComObject Exception: " & ex2.Message)
-        End Try
+            Try
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Releasing COM object")
+                LoopCount = 0
+                Do
+                    LoopCount += 1
+                    RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease)
+                    LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Remaining object count: " & RemainingObjectCount & ", LoopCount: " & LoopCount)
+                Loop Until (RemainingObjectCount <= 0) Or (LoopCount = 20)
+            Catch ex2 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  ReleaseComObject Exception: " & ex2.Message)
+            End Try
 
-        Try
-            ObjectToRelease = Nothing
-            GC.Collect()
-        Catch ex3 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Set to nothing Exception: " & ex3.Message)
-        End Try
+            Try
+                ObjectToRelease = Nothing
+                GC.Collect()
+            Catch ex3 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Set to nothing Exception: " & ex3.Message)
+            End Try
 
-        LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  End of ReleaseCOMObject")
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  End of ReleaseCOMObject")
+        Else
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  No object to release for {driverName}")
+        End If
     End Sub
 
     ''' <summary>
