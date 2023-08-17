@@ -39,6 +39,7 @@ OutputDir=.\Builds
 PrivilegesRequired=admin
 SetupIconFile=..\Conform\Resources\ASCOM.ico
 SetupLogging=true
+SignToolRunMinimized=yes
 ShowLanguageDialog=auto
 SolidCompression=true
 UninstallDisplayIcon={app}\Conform.exe
