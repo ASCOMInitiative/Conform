@@ -896,9 +896,9 @@ Public Class FrmConformMain
                 Case DeviceType.Telescope
                     l_NewProgID = l_Chooser.Choose(g_TelescopeProgID)
                     If l_NewProgID <> "" Then
-                        g_Settings.DeviceTelescope = l_NewProgID 'Only update settings if OK pressed
-                        g_TelescopeProgID = l_NewProgID
-                    End If
+                            g_Settings.DeviceTelescope = l_NewProgID 'Only update settings if OK pressed
+                            g_TelescopeProgID = l_NewProgID
+                        End If
                 Case DeviceType.Switch
                     l_NewProgID = l_Chooser.Choose(g_SwitchProgID)
                     If l_NewProgID <> "" Then
@@ -1635,7 +1635,7 @@ Public Class FrmConformMain
     End Sub
     Private Function FindDriverExecutable() As String
         FindDriverExecutable = FindDriverInRegistry(Registry.ClassesRoot)
-        If ASCOM.Utilities.ApplicationBits = Utilities.Bitness.Bits64 Then ' Check the 32bit registry on a 64bit system if we haven't found an executable yet
+        If Utilities.Global.ApplicationBits() = Utilities.Global.Bitness.Bits64 Then ' Check the 32bit registry on a 64bit system if we haven't found an executable yet
             If String.IsNullOrEmpty(FindDriverExecutable) Then ' We are on a 64bit OS and haven't yet found an executable
                 LogMsg("FindDriverExecutable", MessageLevel.msgDebug, "We are a 64bit application and an executable has not yet been found, looking in 32bit registry")
                 'Using Reg As ASCOM.Utilities.RegistryAccess = New ASCOM.Utilities.RegistryAccess
