@@ -79,7 +79,7 @@ Root: HKLM; Subkey: Software\Microsoft\.NETFramework\v2.0.50727\AssemblyFoldersE
 #emit "Root: HKLM; SubKey: SOFTWARE\ASCOM\Platform; ValueType: string; ValueName: ""Conform Version""; ValueData: " + MyAppVer + "; Flags: UninsDeleteValue;" 
 
 [Icons]
-Name: {group}\Conform; Filename: {app}\Conform.exe
+Name: {autostartmenu}\ASCOM Conform; Filename: {app}\Conform.exe
 Name: {commondesktop}\Conform; Filename: {app}\Conform.exe; Tasks: desktopicon
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\Conform; Filename: {app}\Conform.exe; Tasks: quicklaunchicon
 

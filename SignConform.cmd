@@ -12,19 +12,15 @@ if errorlevel 1 (
 	echo Signing compiled executables
 	echo signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Debug\Conform.exe"
 	signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Debug\Conform.exe"
-	signtool sign /a /as /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Debug\Conform.exe"
 
 	echo signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Release\Conform.exe"
 	signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Release\Conform.exe"
-	signtool sign /a /as /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\Release\Conform.exe"
 
 	echo signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Debug\Conform.exe"
 	signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Debug\Conform.exe"
-	signtool sign /a /as /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Debug\Conform.exe"
 
 	echo signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Release\Conform.exe"
 	signtool sign /a /fd SHA256 /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Release\Conform.exe"
-	signtool sign /a /as /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 "J:\Conform\Conform\bin\x86\Release\Conform.exe" 
 )
 
 echo Signing installer %1

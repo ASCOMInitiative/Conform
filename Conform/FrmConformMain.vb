@@ -1614,7 +1614,7 @@ Public Class FrmConformMain
     End Sub
     Private Function FindDriverExecutable() As String
         FindDriverExecutable = FindDriverInRegistry(Registry.ClassesRoot)
-        If ASCOM.Utilities.ApplicationBits = Utilities.Bitness.Bits64 Then ' Check the 32bit registry on a 64bit system if we haven't found an executable yet
+        If ASCOM.Utilities.Global.ApplicationBits = Utilities.Global.Bitness.Bits64 Then ' Check the 32bit registry on a 64bit system if we haven't found an executable yet
             If String.IsNullOrEmpty(FindDriverExecutable) Then ' We are on a 64bit OS and haven't yet found an executable
                 LogMsg("FindDriverExecutable", MessageLevel.msgDebug, "We are a 64bit application and an executable has not yet been found, looking in 32bit registry")
                 'Using Reg As ASCOM.Utilities.RegistryAccess = New ASCOM.Utilities.RegistryAccess
