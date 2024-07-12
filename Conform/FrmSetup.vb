@@ -1,6 +1,6 @@
 Imports ASCOM.DeviceInterface
 Imports System.Windows.Forms
-Imports ASCOM.Utilities
+Imports ASCOM.Utilities.Global
 
 Public Class frmSetup
     Private Sub BtnSetLogFileDir_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSetLogFileDir.Click
@@ -24,7 +24,7 @@ Public Class frmSetup
         txtLastUpdate.Text = g_Settings.UpdateCheckDate.ToString
         chkDebug.Checked = g_Settings.Debug
         chkRunAs32Bit.Checked = g_Settings.RunAs32Bit
-        If VersionCode.OSBits = Bitness.Bits32 Then chkRunAs32Bit.Enabled = False 'If we are on a 32bit OS doable this option
+        If Utilities.Global.OSBits = Bitness.Bits32 Then chkRunAs32Bit.Enabled = False 'If we are on a 32bit OS doable this option
         chkInferStateFromErrorMessages.Checked = g_Settings.InterpretErrorMessages
         chkUseDriverAccess.Checked = g_Settings.UseDriverAccess
         UpDownObservingConditionsRetries.Value = Convert.ToDecimal(g_Settings.ObservingConditionsMaxRetries)
@@ -109,7 +109,7 @@ Public Class frmSetup
 
     Private Sub FrmSetup_FormClosed(ByVal sender As Object, ByVal e As FormClosedEventArgs) Handles Me.FormClosed
         Dim NewBitness As String
-        If VersionCode.OSBits = Utilities.Bitness.Bits64 Then 'Only test for a bitness switch if we are on a 64bt OS
+        If Utilities.Global.OSBits() = Utilities.Global.Bitness.Bits64 Then 'Only test for a bitness switch if we are on a 64bt OS
             If Not ((g_Settings.RunAs32Bit = (IntPtr.Size = 4)) Or (Not g_Settings.RunAs32Bit = (IntPtr.Size = 8))) Then
                 If g_Settings.RunAs32Bit Then
                     NewBitness = "32bit"

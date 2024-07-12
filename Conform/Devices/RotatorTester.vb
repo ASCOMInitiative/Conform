@@ -10,6 +10,7 @@ Friend Class RotatorTester
     Const ROTATOR_OK_TOLERANCE As Double = 1.0
     Const ROTATOR_INFO_TOLERANCE As Double = 2.0
     Const ROTATOR_POSITION_TOLERANCE As Single = 0.001 ' Degrees
+    Const ROTATOR_POSITION_UNKNOWN As Single = Single.NaN ' Define a constant to represent position unknown. Used when restoring rotator position after testing.
 
     'Rotator variables
     Private m_CanReadIsMoving, canReadPosition, m_CanReadTargetPosition, m_CanReadStepSize As Boolean
@@ -18,6 +19,9 @@ Friend Class RotatorTester
     Private m_Reverse As Boolean
     Private m_LastMoveWasAsync As Boolean
     Private canReadMechanicalPosition As Boolean
+    Private initialPosiiton As Single = ROTATOR_POSITION_UNKNOWN
+    Private initialMechanicalPosiiton As Single = ROTATOR_POSITION_UNKNOWN
+    Private initialSyncOffset As Single = ROTATOR_POSITION_UNKNOWN
 
 #If DEBUG Then
     Private m_Rotator As ASCOM.DeviceInterface.IRotatorV3
@@ -41,7 +45,7 @@ Friend Class RotatorTester
 
 #Region "New and Dispose"
     Sub New()
-        MyBase.New(True, True, True, True, False, True, False) ' Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
+        MyBase.New(True, True, True, True, False, True, True) ' Set flags for this device:  HasCanProperties, HasProperties, HasMethods, PreRunCheck, PreConnectCheck, PerformanceCheck, PostRunCheck
     End Sub
 
     ' IDisposable
@@ -230,14 +234,20 @@ Friend Class RotatorTester
 
     Public Overrides Sub PreRunCheck()
         Dim l_Now As Date
-        'Get the rotator into a standard state
+
+        ' Initialise to the unknown position value
+        initialPosiiton = ROTATOR_POSITION_UNKNOWN
         g_Stop = True
-        LogCallToDriver("PreRunCheck", "About to call Halt method")
+
+        ' Get the rotator into a standard state
+        LogCallToDriver("PreRun Check", "About to call Halt method")
         Try : m_Rotator.Halt() : Catch : End Try 'Stop any movement
+
+        ' Confirm that rotator is not moving or wait for it to stop
         l_Now = Now
-        Try 'Confirm that rotator is not moving or wait for it to stop
+        Try
             Status(StatusType.staAction, "Waiting up to " & ROTATOR_WAIT_LIMIT & " seconds for rotator to stop moving")
-            LogCallToDriver("CanReverse", "About to get IsMoving property repeatedly")
+            LogCallToDriver("PreRun Check", "About to get IsMoving property repeatedly")
             Do
                 WaitFor(500)
                 Status(StatusType.staStatus, Now.Subtract(l_Now).TotalSeconds & "/" & ROTATOR_WAIT_LIMIT)
@@ -245,15 +255,101 @@ Friend Class RotatorTester
 
             If Not m_Rotator.IsMoving Then 'Rotator is stopped so OK
                 g_Stop = False 'Clear stop flag to allow other tests to run
+                LogMsg("Pre-run Check", MessageLevel.msgOK, "Rotator is stationary")
+
+                ' Try to record the current position of the rotator so that it can be restored after testing. If this fails the initial position will be set to unknown value.
+                Try
+                    LogCallToDriver("PreRun Check", "About to get Position property")
+                    initialPosiiton = m_Rotator.Position
+                    LogMsg("Pre-run Check", MessageLevel.msgOK, $"Rotator initial position: {initialPosiiton}")
+
+                    ' Attempt to get the rotator's current mechanical position. If this fails the initial mechanical position will be set to unknown value.
+                    Try
+                        LogCallToDriver("PreRun Check", "About to get MechanicalPosition property")
+                        initialMechanicalPosiiton = m_Rotator.MechanicalPosition
+                        initialSyncOffset = Range(initialPosiiton - initialMechanicalPosiiton, -180.0, True, 180.0, True)
+                        LogMsg("Pre-run Check", MessageLevel.msgOK, $"Rotator initial mechanical position: {initialMechanicalPosiiton}, Initial sync offset: {initialSyncOffset}")
+                    Catch ex As Exception
+                        'Don't report errors at this point
+                        LogMsg("Pre-run Check", MessageLevel.msgInfo, $"Rotator initial mechanical position could not be read: {ex.Message}")
+                    End Try
+                Catch ex As Exception
+                    'Don't report errors at this point
+                    LogMsg("Pre-run Check", MessageLevel.msgInfo, $"Rotator initial position could not be read: {ex.Message}")
+                End Try
+
             Else 'Report error message and don't do other tests
-                LogMsg("Pre-run Check", MessageLevel.msgError, "Rotator still moving after " & ROTATOR_WAIT_LIMIT & "seconds, IsMoving stuck on?")
+                LogMsg("Pre-run Check", MessageLevel.msgError, "Rotator still moving after " & ROTATOR_WAIT_LIMIT & "seconds, could IsMoving be stuck on?")
             End If
-            LogMsg("Pre-run Check", MessageLevel.msgOK, "Rotator is stationary")
         Catch ex As Exception
             'Don't report errors at this point
         End Try
 
     End Sub
+
+    Public Overrides Sub PostRunCheck()
+        Dim currentPosition, currentMechanicalPosition, relativeMovement, syncPosition As Single
+        Dim l_Now As Date
+
+        ' Restore the initial position of the rotator if possible
+        If initialPosiiton = ROTATOR_POSITION_UNKNOWN Then
+            ' The initial position could not be determined so log a message to this effect.
+            LogMsg("Post-run Check", MessageLevel.msgNone, "The rotator's initial position could not be determined so it is not possible to restore it's initial position.")
+        Else
+            ' We have a valid initial position so attempt to reset the rotator to this position.
+            Try
+                ' Get the current position
+                LogCallToDriver("Post-run Check", $"About to get Position property")
+                currentPosition = m_Rotator.Position
+                LogMsg("Post-run Check", MessageLevel.msgOK, $"Current position: {currentPosition}")
+
+                ' Restore the original sync offset, if possible 
+                If Not (initialMechanicalPosiiton = ROTATOR_POSITION_UNKNOWN) Then ' We have a valid starting mechanic al position
+                    ' Get the current mechanical position
+                    LogCallToDriver("Post-run Check", $"About to get MechanicalPosition property")
+                    currentMechanicalPosition = m_Rotator.MechanicalPosition
+                    LogMsg("Post-run Check", MessageLevel.msgOK, $"Current mechanical position: {currentMechanicalPosition}")
+
+                    syncPosition = Range(currentMechanicalPosition + initialSyncOffset, 0.0, True, 360.0, False)
+                    LogMsg("Post-run Check", MessageLevel.msgOK, $"New sync position: {syncPosition}")
+
+                    LogCallToDriver("Post-run Check", $"About to call Sync method. Position: {syncPosition}")
+                    m_Rotator.Sync(syncPosition)
+                    LogMsg("Post-run Check", MessageLevel.msgOK, $"Completed Sync ({initialSyncOffset} degrees) from position: {currentPosition} to {syncPosition}")
+                End If
+
+                ' Re-get the current position because the sync will have changed it
+                LogCallToDriver("Post-run Check", $"About to get Position property")
+                currentPosition = m_Rotator.Position
+                LogMsg("Post-run Check", MessageLevel.msgOK, $"New current position: {currentPosition}")
+
+                ' Calculate the smallest relative movement required to get to the initial position
+                relativeMovement = Range(initialPosiiton - currentPosition, -180.0, True, 180.0, True)
+
+                ' Move to the starting position
+                LogCallToDriver("Post-run Check", $"About to move by {relativeMovement} to {initialPosiiton}")
+                m_Rotator.Move(relativeMovement)
+
+                ' Wait for the move to complete
+                LogCallToDriver("Post-run Check", "About to get IsMoving property repeatedly")
+                l_Now = Now
+                Do
+                    WaitFor(500)
+                    Status(StatusType.staStatus, Now.Subtract(l_Now).TotalSeconds & "/" & ROTATOR_WAIT_LIMIT)
+                Loop Until (Not m_Rotator.IsMoving) Or (Now.Subtract(l_Now).TotalSeconds > ROTATOR_WAIT_LIMIT)
+
+                If Not m_Rotator.IsMoving Then 'Rotator is stopped so OK
+                    LogMsg("Post-run Check", MessageLevel.msgOK, $"Rotator starting position successfully restored to {initialPosiiton}")
+                Else 'Report error message 
+                    LogMsg("Post-run Check", MessageLevel.msgError, "Unable to restore rotator starting position, the rotator is still moving after " & ROTATOR_WAIT_LIMIT & "seconds. Could IsMoving be stuck on?")
+                End If
+            Catch ex As Exception
+                LogMsg("Post-run Check", MessageLevel.msgError, $"Exception: {ex}")
+
+            End Try
+        End If
+    End Sub
+
     Overrides Sub CheckProperties()
         'IsMoving - Optional (V1,V2), Mandatory (V3)
         Try

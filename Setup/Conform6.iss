@@ -19,7 +19,7 @@
 ; Stores Conform version in the Platform Registry Profile
 
 [Setup]
-#define MyAppVer GetFileVersion("..\Conform\bin\Release\Conform.exe") ; define variable
+#define MyAppVer GetVersionNumbersString("..\Conform\bin\Release\Conform.exe") ; define variable
 AppID={{CEDF90C4-A415-4903-94D6-9099F7AE41B5}
 AppCopyright=Copyright © 2021 Peter Simpson
 AppName=ASCOM Conform
@@ -39,6 +39,7 @@ OutputDir=.\Builds
 PrivilegesRequired=admin
 SetupIconFile=..\Conform\Resources\ASCOM.ico
 SetupLogging=true
+SignToolRunMinimized=yes
 ShowLanguageDialog=auto
 SolidCompression=true
 UninstallDisplayIcon={app}\Conform.exe

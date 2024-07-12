@@ -395,31 +395,43 @@ Friend Class TelescopeTester
     Public Overrides Sub PreRunCheck()
         'Get into a consistent state
         If g_InterfaceVersion > 1 Then
-            If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to get AtPark property")
-            If telescopeDevice.AtPark Then
-                If canUnpark Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
-                    telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been unparked for testing")
+            Try
+                If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to get AtPark property")
+                If telescopeDevice.AtPark Then
+                    If canUnpark Then
+                        Try
+                            If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
+                            telescopeDevice.Unpark()
+                            LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is parked, so it has been unparked for testing")
+                        Catch ex As Exception
+                            HandleException("Mount Safety - Unpark", MemberType.Method, Required.MustBeImplemented, ex, "CanUnpark is true")
+                        End Try
+                    Else
+                        LogMsg("Mount Safety", MessageLevel.msgError, "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope")
+                        g_Stop = True
+                    End If
                 Else
-                    LogMsg("Mount Safety", MessageLevel.msgError, "Scope reports that it is parked but CanUnPark is false - please manually unpark the scope")
-                    g_Stop = True
+                    LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is not parked, continuing testing")
                 End If
-            Else
-                LogMsg("Mount Safety", MessageLevel.msgInfo, "Scope is not parked, continuing testing")
-            End If
+            Catch ex As Exception
+                LogMsgError("Mount Safety", $"Exception when trying to access mandatory member Telescope.AtPark: {ex.Message}")
+            End Try
         Else
             LogMsg("Mount Safety", MessageLevel.msgInfo, "Skipping AtPark test as this method is not supported in interface V" & g_InterfaceVersion)
             Try
                 If canUnpark Then
-                    If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
-                    telescopeDevice.Unpark()
-                    LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been unparked for testing")
+                    Try
+                        If g_Settings.DisplayMethodCalls Then LogMsg("Mount Safety", MessageLevel.msgComment, "About to call Unpark method")
+                        telescopeDevice.Unpark()
+                        LogMsg("Mount Safety", MessageLevel.msgOK, "Scope has been unparked for testing")
+                    Catch ex As Exception
+                        LogMsgError("Mount Safety", $"Exception when trying to unpark the scope: {ex.Message}")
+                    End Try
                 Else
                     LogMsg("Mount Safety", MessageLevel.msgOK, "Scope reports that it cannot unpark, unparking skipped")
                 End If
             Catch ex As Exception
-                LogMsg("Mount Safety", MessageLevel.msgError, "Driver threw an exception while unparking: " & ex.Message)
+                HandleException("Mount Safety - AtPark", MemberType.Property, Required.Mandatory, ex, "")
             End Try
         End If
 

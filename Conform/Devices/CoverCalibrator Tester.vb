@@ -84,7 +84,7 @@ Friend Class CoverCalibratorTester
 
     Public Overrides Sub CheckAccessibility()
         Dim deviceInterface As ICoverCalibratorV1
-        Dim driverAccessDevice As CoverCalibrator
+        Dim driverAccessDevice As DriverAccess.CoverCalibrator
         Dim deviceObject As Object
 
         MyBase.CheckAccessibility(g_CoverCalibratorProgID, DeviceType.CoverCalibrator)

@@ -4,6 +4,7 @@ Imports ASCOM.DeviceInterface
 Imports System.Threading
 Imports System.Runtime.InteropServices
 Imports ASCOM
+Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' Base class for device tester classes. Contains common code and placeholders for the 
@@ -185,10 +186,32 @@ Friend Class DeviceTesterBaseClass
                 If g_Settings.DisplayMethodCalls Then LogMsg("DriverVersion", MessageLevel.msgComment, "About to get property DriverVersion")
                 m_DriverVersion = Device.DriverVersion
                 Select Case m_DriverVersion
-                    Case ""
-                        LogMsg("DriverVersion", MessageLevel.msgInfo, "No DriverVersion string")
+                    Case "", Nothing
+                        LogMsg("DriverVersion", MessageLevel.msgInfo, "The device did not return a DriverVersion string")
                     Case Else
-                        LogMsg("DriverVersion", MessageLevel.msgOK, m_DriverVersion.ToString)
+                        ' Validate the required format X.Y
+                        Dim regex As Regex = New Regex("([0-9]*)(.)([0-9]*)(.*)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+                        Dim match As Match = regex.Match(m_DriverVersion)
+                        If Not (match Is Nothing) Then
+                            For i As Integer = 1 To 4
+                                Try
+                                    LogMsgDebug("DriverVersion", $"Match group {i}: {match.Groups(i).Value}")
+                                Catch
+                                    LogMsgDebug("DriverVersion", $"Match group {i} had no value.")
+                                End Try
+                            Next
+
+                            If ((Not String.IsNullOrEmpty(match.Groups(1).Value)) And (Not String.IsNullOrEmpty(match.Groups(3).Value)) And (String.IsNullOrEmpty(match.Groups(4).Value))) Then
+                                LogMsg("DriverVersion", MessageLevel.msgOK, m_DriverVersion.ToString)
+                            Else
+                                LogMsgIssue("DriverVersion", $"The supplied version number '{m_DriverVersion}' is not in the required format: X.Y")
+                            End If
+                        Else
+                            LogMsgIssue("DriverVersion", $"Unable to parse the supplied version number '{m_DriverVersion}' because it is not in the required format: X.Y")
+                        End If
+
+
+
                 End Select
             Catch ex As COMException
                 LogMsg("DriverVersion", MessageLevel.msgError, EX_COM & ex.Message & " " & Hex(ex.ErrorCode))
@@ -263,8 +286,8 @@ Friend Class DeviceTesterBaseClass
                             Case Else ' List the action that was found
                                 LogMsg("SupportedActions", MessageLevel.msgOK, "Found action: " & ActionString)
 
-                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
-                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
+                                ' Carry out the following Action tests only when we are testing the Observing Conditions Hub and it is configured to use the Switch and OC simulators
+                                If ((p_DeviceType = DeviceType.ObservingConditions) And (g_ObservingConditionsProgID.ToUpperInvariant() = "ASCOM.OCH.OBSERVINGCONDITIONS")) Then
                                     If ActionString.ToUpperInvariant.StartsWith("//OCSIMULATOR:") Then
                                         Try
                                             If g_Settings.DisplayMethodCalls Then LogMsg("SupportedActions", MessageLevel.msgComment, "About to call method Action")
@@ -400,7 +423,7 @@ Friend Class DeviceTesterBaseClass
         Dim lastModified As DateTime = fileInfo.LastWriteTime
 
         LogMsg("", MessageLevel.msgAlways, "") 'Blank line
-        LogMsg("ConformanceCheck", MessageLevel.msgAlways, "ASCOM Device Conformance Checker Version " & My.Application.Info.Version.ToString & ", Build time: " & lastModified.ToString())
+        LogMsg("ConformanceCheck", MessageLevel.msgAlways, $"ASCOM Device Conformance Checker Version {My.Application.Info.Version} Build time: {lastModified} ({IIf(IntPtr.Size = 4, "32bit", "64bit")})")
         LogMsg("ConformanceCheck", MessageLevel.msgAlways, "Running on: " & Prof.GetProfile("Platform", "Platform Name", "Unknown") & " " & Prof.GetProfile("Platform", "Platform Version", "Unknown"))
         Prof.Dispose()
         LogMsg("", MessageLevel.msgAlways, "") 'Blank line
@@ -442,7 +465,7 @@ Friend Class DeviceTesterBaseClass
 #If DEBUG Then
                 If g_Settings.DisplayMethodCalls Then LogMsg("CreateObject", MessageLevel.msgComment, "About to create instance using CreateObject")
                 l_DeviceObject = CreateObject(p_ProgId)
-                LogMsg("AccessChecks", MessageLevel.msgDebug, "Successfully created driver using CreateObject")
+                LogMsg("AccessChecks", MessageLevel.msgDebug, $"Successfully created driver using CreateObject. Object is nothing: {l_DeviceObject Is Nothing}")
 #Else
                 l_Type = Type.GetTypeFromProgID(p_ProgId)
                 If g_Settings.DisplayMethodCalls Then LogMsg("AccessChecks", MessageLevel.msgComment, "About to create instance using Activator.CreateInstance")
@@ -717,51 +740,55 @@ Friend Class DeviceTesterBaseClass
     Public Shared Sub DisposeAndReleaseObject(driverName As String, ByRef ObjectToRelease As Object)
         Dim ObjectType As Type, RemainingObjectCount, LoopCount As Integer
 
-        LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  About to release {driverName} driver instance")
-        If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, $"About to release {driverName} driver instance")
+        If Not (ObjectToRelease Is Nothing) Then
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  About to release {driverName} driver instance")
+            If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, $"About to release {driverName} driver instance")
 
-        Try
-            ObjectType = ObjectToRelease.GetType
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  GetType Exception: " & ex1.Message)
-        End Try
+            Try
+                ObjectType = ObjectToRelease.GetType
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Unmarshalling {ObjectType.Name} -  {ObjectType.FullName}")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  GetType Exception: " & ex1.Message)
+            End Try
 
-        Try
-            If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, "About to set Connected property")
-            ObjectToRelease.Connected = False
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Connected successfully set to False")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Exception setting Connected = False: " & ex1.Message)
-        End Try
+            Try
+                If g_Settings.DisplayMethodCalls Then LogMsg("DisposeAndReleaseObject", MessageLevel.msgComment, "About to set Connected property")
+                ObjectToRelease.Connected = False
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Connected successfully set to False")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Exception setting Connected = False: " & ex1.Message)
+            End Try
 
-        Try
-            ObjectToRelease.Dispose()
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Successfully called Dispose()")
-        Catch ex1 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Dispose Exception: " & ex1.Message)
-        End Try
+            Try
+                ObjectToRelease.Dispose()
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  Successfully called Dispose()")
+            Catch ex1 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Dispose Exception: " & ex1.Message)
+            End Try
 
-        Try
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Releasing COM object")
-            LoopCount = 0
-            Do
-                LoopCount += 1
-                RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease)
-                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Remaining object count: " & RemainingObjectCount & ", LoopCount: " & LoopCount)
-            Loop Until (RemainingObjectCount <= 0) Or (LoopCount = 20)
-        Catch ex2 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  ReleaseComObject Exception: " & ex2.Message)
-        End Try
+            Try
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Releasing COM object")
+                LoopCount = 0
+                Do
+                    LoopCount += 1
+                    RemainingObjectCount = Marshal.ReleaseComObject(ObjectToRelease)
+                    LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Remaining object count: " & RemainingObjectCount & ", LoopCount: " & LoopCount)
+                Loop Until (RemainingObjectCount <= 0) Or (LoopCount = 20)
+            Catch ex2 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  ReleaseComObject Exception: " & ex2.Message)
+            End Try
 
-        Try
-            ObjectToRelease = Nothing
-            GC.Collect()
-        Catch ex3 As Exception
-            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Set to nothing Exception: " & ex3.Message)
-        End Try
+            Try
+                ObjectToRelease = Nothing
+                GC.Collect()
+            Catch ex3 As Exception
+                LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  Set to nothing Exception: " & ex3.Message)
+            End Try
 
-        LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  End of ReleaseCOMObject")
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, "  End of ReleaseCOMObject")
+        Else
+            LogMsg("DisposeAndReleaseObject", MessageLevel.msgDebug, $"  No object to release for {driverName}")
+        End If
     End Sub
 
     ''' <summary>
@@ -968,15 +995,15 @@ Friend Class DeviceTesterBaseClass
         If (IsPropertyNotImplementedException(ex) And TypeOfMember = MemberType.Property) Or (IsMethodNotImplementedException(ex) And TypeOfMember = MemberType.Method) Then
             Select Case IsRequired
                 Case Required.Mandatory
-                    LogMsg(MemberName, MessageLevel.msgIssue, "This member is mandatory but threw a " & GetExceptionName(ex) & " exception, it must function per the ASCOM specification.")
+                    LogMsg(MemberName, MessageLevel.msgIssue, $"This member is mandatory but threw a {GetExceptionName(ex, TypeOfMember)} exception, it must function per the ASCOM specification.")
                 Case Required.MustNotBeImplemented
-                    LogMsg(MemberName, MessageLevel.msgOK, UserMessage & " and a " & GetExceptionName(ex) & " exception was generated as expected")
+                    LogMsg(MemberName, MessageLevel.msgOK, $"{UserMessage} and a {GetExceptionName(ex, TypeOfMember)} exception was generated as expected")
                 Case Required.MustBeImplemented
-                    LogMsg(MemberName, MessageLevel.msgIssue, UserMessage & " and a " & GetExceptionName(ex) & " exception was thrown, this method must function per the ASCOM specification.")
+                    LogMsg(MemberName, MessageLevel.msgIssue, $"{UserMessage} and a {GetExceptionName(ex, TypeOfMember)} exception was thrown, this method must function per the ASCOM specification.")
                 Case Required.Optional
-                    LogMsg(MemberName, MessageLevel.msgOK, "Optional member threw a " & GetExceptionName(ex) & " exception.")
+                    LogMsg(MemberName, MessageLevel.msgOK, $"Optional member threw a {GetExceptionName(ex, TypeOfMember)} exception.")
                 Case Else
-                    LogMsg(MemberName, MessageLevel.msgError, "CONFORM ERROR! - Received unexpected member of 'Required' enum: " + IsRequired)
+                    LogMsg(MemberName, MessageLevel.msgError, $"CONFORM ERROR! - Received unexpected member of 'Required' enum: {IsRequired}")
             End Select
 
             ' Handle wrong type of not implemented exceptions
@@ -991,7 +1018,7 @@ Friend Class DeviceTesterBaseClass
 
             ' Handle all other types of error
         Else
-            LogMsg(MemberName, MessageLevel.msgError, "Unexpected " & GetExceptionName(ex) & ", " & UserMessage & ": " & ex.Message)
+            LogMsg(MemberName, MessageLevel.msgError, $"Unexpected {GetExceptionName(ex, TypeOfMember)}, {UserMessage}: {ex.Message}")
         End If
 
         LogMsg(MemberName, MessageLevel.msgDebug, "Exception: " & ex.ToString)
@@ -1025,26 +1052,41 @@ Friend Class DeviceTesterBaseClass
     ''' <summary>
     ''' Get an exception name (and number if a COM or Driver exception)
     ''' </summary>
-    ''' <param name="ex">Exception whose name is required</param>
+    ''' <param name="clientException">Exception whose name is required</param>
     ''' <returns>String exception name</returns>
     ''' <remarks></remarks>
-    Protected Function GetExceptionName(ex As Exception) As String
-        Dim ComEx As COMException, DriverEx As DriverException, RetVal As String
+    Protected Function GetExceptionName(clientException As Exception, memberType As MemberType) As String
+        Dim ComEx As COMException, DriverEx As DriverException, RetVal, exceptionName As String
 
         ' Treat ASCOM exceptions specially
-        If ex.GetType.FullName.ToUpper().Contains("ASCOM") Then
-            If ex.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver exception so add its number
-                DriverEx = CType(ex, DriverException)
+        If clientException.GetType.FullName.ToUpper().Contains("ASCOM") Then
+            If clientException.GetType.FullName.ToUpper().Contains("DRIVEREXCEPTION") Then ' We have a driver exception so add its number
+                DriverEx = CType(clientException, DriverException)
                 RetVal = "DriverException(0x" & DriverEx.Number.ToString("X8") & ")"
             Else ' Otherwise just use the ASCOM exception's name
-                RetVal = ex.GetType.Name
+                RetVal = clientException.GetType.Name
             End If
-        ElseIf (TypeOf ex Is COMException) Then ' Handle XOM exceptions with their error code
-            ComEx = CType(ex, COMException)
-            RetVal = "COMException(0x" & ComEx.ErrorCode.ToString("X8") & ")"
+
+        ElseIf (TypeOf clientException Is COMException) Then ' Handle COM exceptions with their error code
+            ComEx = CType(clientException, COMException)
+
+            Try
+                exceptionName = ErrorCodes.GetExceptionName(ComEx)
+
+                RetVal = $"{IIf(String.IsNullOrEmpty(exceptionName), ComEx.GetType().Name, exceptionName)} (COM Error: 0x{ComEx.ErrorCode:X8})"
+                If ComEx.ErrorCode = ErrorCodes.NotImplemented Then
+                    RetVal = $"{memberType}{RetVal}"
+                End If
+
+            Catch ex As Exception
+                RetVal = $"COMException(0x{ComEx.ErrorCode:X8})"
+            End Try
+            LogMsgDebug("GetExceptionName", $"COM error code: {ComEx.ErrorCode:X8}, {ComEx.Message}, Return value: {RetVal}")
+
         Else ' We got something else so report it
-            RetVal = ex.GetType().FullName & " exception"
+            RetVal = clientException.GetType().FullName & " exception"
         End If
+
         Return RetVal
     End Function
 
@@ -1056,6 +1098,62 @@ Friend Class DeviceTesterBaseClass
     Protected Sub LogCallToDriver(test As String, memberName As String)
         If g_Settings.DisplayMethodCalls Then LogMsg(test, MessageLevel.msgComment, memberName)
     End Sub
+
+    ''' <summary>
+    ''' Flexible routine to range a number into a given range between a lower and an higher bound.
+    ''' </summary>
+    ''' <param name="Value">Value to be ranged</param>
+    ''' <param name="LowerBound">Lowest value of the range</param>
+    ''' <param name="LowerEqual">Boolean flag indicating whether the ranged value can have the lower bound value</param>
+    ''' <param name="UpperBound">Highest value of the range</param>
+    ''' <param name="UpperEqual">Boolean flag indicating whether the ranged value can have the upper bound value</param>
+    ''' <returns>The ranged nunmber as a double</returns>
+    ''' <exception cref="ASCOM.InvalidValueException">Thrown if the lower bound is greater than the upper bound.</exception>
+    ''' <exception cref="ASCOM.InvalidValueException">Thrown if LowerEqual and UpperEqual are both false and the ranged value equals
+    ''' one of these values. This is impossible to handle as the algorithm will always violate one of the rules!</exception>
+    ''' <remarks>
+    ''' UpperEqual and LowerEqual switches control whether the ranged value can be equal to either the upper and lower bounds. So, 
+    ''' to range an hour angle into the range 0 to 23.999999.. hours, use this call: 
+    ''' <code>RangedValue = Range(InputValue, 0.0, True, 24.0, False)</code>
+    ''' <para>The input value will be returned in the range where 0.0 is an allowable value and 24.0 is not i.e. in the range 0..23.999999..</para>
+    ''' <para>It is not permissible for both LowerEqual and UpperEqual to be false because it will not be possible to return a value that is exactly equal 
+    ''' to either lower or upper bounds. An exception is thrown if this scenario is requested.</para>
+    ''' </remarks>
+    Protected Function Range(Value As Single, LowerBound As Single, LowerEqual As Boolean, UpperBound As Single, UpperEqual As Boolean) As Single
+        Dim ModuloValue As Double
+        If LowerBound >= UpperBound Then Throw New ASCOM.InvalidValueException("Range", "LowerBound is >= UpperBound", "LowerBound must be less than UpperBound")
+
+        ModuloValue = UpperBound - LowerBound
+
+        If LowerEqual Then
+            If UpperEqual Then 'Lowest >= Highest <=
+                Do
+                    If Value < LowerBound Then Value += ModuloValue
+                    If Value > UpperBound Then Value -= ModuloValue
+                Loop Until (Value >= LowerBound) And (Value <= UpperBound)
+            Else 'Lowest >= Highest <
+                Do
+                    If Value < LowerBound Then Value += ModuloValue
+                    If Value >= UpperBound Then Value -= ModuloValue
+                Loop Until (Value >= LowerBound) And (Value < UpperBound)
+            End If
+        Else
+            If UpperEqual Then 'Lowest > Highest<=
+                Do
+                    If Value <= LowerBound Then Value += ModuloValue
+                    If Value > UpperBound Then Value -= ModuloValue
+                Loop Until (Value > LowerBound) And (Value <= UpperBound)
+            Else 'Lowest > Highest <
+                If (Value = LowerBound) Then Throw New InvalidValueException("Range", "The supplied value equals the LowerBound. This can not be ranged when LowerEqual and UpperEqual are both false ", "LowerBound > Value < UpperBound")
+                If (Value = UpperBound) Then Throw New InvalidValueException("Range", "The supplied value equals the UpperBound. This can not be ranged when LowerEqual and UpperEqual are both false ", "LowerBound > Value < UpperBound")
+                Do
+                    If Value <= LowerBound Then Value += ModuloValue
+                    If Value >= UpperBound Then Value -= ModuloValue
+                Loop Until (Value > LowerBound) And (Value < UpperBound)
+            End If
+        End If
+        Return Value
+    End Function
 
 #End Region
 End Class
