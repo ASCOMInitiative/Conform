@@ -98,7 +98,8 @@ Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
 [Code]
 const
-   REQUIRED_PLATFORM_VERSION = 6.5; // Set this to the minimum required ASCOM Platform version for this application
+   MINIMUM_PLATFORM_VERSION = 6.5; // Set this to the minimum required ASCOM Platform version for this application
+   MAXIMUM_PLATFORM_VERSION = 6.6; // This must be a number that is larger than the highest release version of Platform 6
 
 //
 // Function to return the ASCOM Platform's version number as a double.
@@ -125,16 +126,20 @@ end;
 function InitializeSetup(): Boolean;
 var
    PlatformVersionNumber : double;
- begin
+begin
    Result := FALSE;  // Assume failure
    PlatformVersionNumber := PlatformVersion(); // Get the installed Platform version as a double
-   If PlatformVersionNumber >= REQUIRED_PLATFORM_VERSION then	// Check whether we have the minimum required Platform or newer
+   If (PlatformVersionNumber >= MINIMUM_PLATFORM_VERSION) and (PlatformVersionNumber <= MAXIMUM_PLATFORM_VERSION) then	// Check whether we have the minimum required Platform or newer and the maximum or older Platform
       Result := TRUE
    else
-      if PlatformVersionNumber = 0.0 then
-         MsgBox('No ASCOM Platform is installed. Please install Platform ' + Format('%3.1f', [REQUIRED_PLATFORM_VERSION]) + ' or later from http://www.ascom-standards.org', mbCriticalError, MB_OK)
-      else  
-         MsgBox('This version of Conform requires ASCOM Platform ' + Format('%3.1f', [REQUIRED_PLATFORM_VERSION]) + ' or later, but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'Please install the latest Platform before continuing; you will find it at https://www.ascom-standards.org', mbCriticalError, MB_OK);
+      If PlatformVersionNumber = 0.0 then
+         MsgBox('No ASCOM Platform is installed. Please install Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' or later from http://www.ascom-standards.org', mbCriticalError, MB_OK)
+      else begin
+        If PlatformVersionNumber < MINIMUM_PLATFORM_VERSION then
+          MsgBox('This version of Conform requires ASCOM Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' or ' + Format('%3.1f', [MAXIMUM_PLATFORM_VERSION]) + ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'Please install Platform 6.5 or 6.6 to use this Conform version (Please note that this version will not work on Platform 7).', mbCriticalError, MB_OK)
+        else
+          MsgBox('This version of Conform only runs on ASCOM Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' and ' + Format('%3.1f', [MAXIMUM_PLATFORM_VERSION]) + ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'For Platform 7, please use a later version of Conform or preferably Conform Universal, which has greater functionality.', mbCriticalError, MB_OK);
+      end;
 end;
 
 // Code to enable the installer to uninstall previous versions of itself when a new version is installed
