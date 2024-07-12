@@ -341,7 +341,7 @@ Module GlobalVarsAndCode
         'Here we check if the user actually wants to run the 32bit version of Conform on a 64bit OS and start this if required
         'If g_Settings.Debug Then MsgBox("Conform: New " & IntPtr.Size & " " & g_Settings.RunAs32Bit & " " & Application.StartupPath & "\Conform32.exe")
 
-        If Utilities.Global.OSBits = Utilities.Global.Bitness.Bits64 Then 'Only test for a bitness switch if we are on a 64bt OS
+        If VersionCode.OSBits = Utilities.Bitness.Bits64 Then 'Only test for a bitness switch if we are on a 64bt OS
             LogicString = g_Settings.RunAs32Bit.ToString & (IntPtr.Size = 4).ToString
             Select Case LogicString
                 Case "TrueFalse" 'Require 32bit but running as 64bit
