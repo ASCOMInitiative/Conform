@@ -99,8 +99,8 @@ Name: "..\BuildConform.cmd"; Flags: CmdPrompt
 
 [Code]
 const
-   MINIMUM_PLATFORM_VERSION = 6.5; // Set this to the minimum required ASCOM Platform version for this application
-   MAXIMUM_PLATFORM_VERSION = 6.6; // This must be a number that is larger than the highest release version of Platform 6
+   MINIMUM_PLATFORM_VERSION = 7.0; // Set this to the minimum required ASCOM Platform version for this application
+   MAXIMUM_PLATFORM_VERSION = 7.9; // This must be a number that is larger than the highest release version of Platform 6
 
 //
 // Function to return the ASCOM Platform's version number as a double.
