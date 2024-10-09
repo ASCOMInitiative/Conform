@@ -130,16 +130,21 @@ var
 begin
    Result := FALSE;  // Assume failure
    PlatformVersionNumber := PlatformVersion(); // Get the installed Platform version as a double
-   If (PlatformVersionNumber >= MINIMUM_PLATFORM_VERSION) and (PlatformVersionNumber <= MAXIMUM_PLATFORM_VERSION) then	// Check whether we have the minimum required Platform or newer and the maximum or older Platform
+   // Check whether we have the minimum required Platform or newer and the maximum or older Platform
+   If (PlatformVersionNumber >= MINIMUM_PLATFORM_VERSION) and (PlatformVersionNumber <= MAXIMUM_PLATFORM_VERSION) then // We are on a supported OS
       Result := TRUE
-   else
-      If PlatformVersionNumber = 0.0 then
+   else // We are not on a suypported OS
+      // Check whether a Platform is installed
+      If PlatformVersionNumber = 0.0 then // No Platform is installed
          MsgBox('No ASCOM Platform is installed. Please install Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' or later from http://www.ascom-standards.org', mbCriticalError, MB_OK)
-      else begin
-        If PlatformVersionNumber < MINIMUM_PLATFORM_VERSION then
-          MsgBox('This version of Conform requires ASCOM Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' or ' + Format('%3.1f', [MAXIMUM_PLATFORM_VERSION]) + ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'Please install Platform 6.5 or 6.6 to use this Conform version (Please note that this version will not work on Platform 7).', mbCriticalError, MB_OK)
-        else
-          MsgBox('This version of Conform only runs on ASCOM Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' and ' + Format('%3.1f', [MAXIMUM_PLATFORM_VERSION]) + ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'For Platform 7, please use a later version of Conform or preferably Conform Universal, which has greater functionality.', mbCriticalError, MB_OK);
+      else begin // An incompatible Platform is installed
+        // Check whether an earlier Platform than the minimum is installed
+        If PlatformVersionNumber < MINIMUM_PLATFORM_VERSION then // An earlier Platform is installed
+          MsgBox('This version of Conform requires ASCOM Platform ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' or later' + 
+            ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'Please install Platform 7 to use this Conform version.', mbCriticalError, MB_OK)
+        else // A later Platform is installed that is younger than the maximum supported version
+          MsgBox('This version of Conform only runs on ASCOM Platforms from ' + Format('%3.1f', [MINIMUM_PLATFORM_VERSION]) + ' to ' + Format('%3.1f', [MAXIMUM_PLATFORM_VERSION]) + 
+            ', but Platform '+ Format('%3.1f', [PlatformVersionNumber]) + ' is installed.' #13#13 'For Platform 7, please use a later version of Conform or preferably Conform Universal, which has greater functionality.', mbCriticalError, MB_OK);
       end;
 end;
 
